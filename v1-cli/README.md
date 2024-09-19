@@ -71,6 +71,12 @@ cargo install --path .
 
 Note: Always check the release notes or changelog for any important updates or breaking changes before updating.
 
+## Resetting the CLI State
+
+If you need to reset the state of the CLI, you can simply delete the data directory. This will clear all stored data and allow you to start fresh. Here's how to do it:
+
+Note: Be cautious when using this method, as it will erase all local data. Make sure you have backups of any important information before proceeding.
+
 ## How It Works
 
 1. **Setup**: You need three Ethereum addresses:
@@ -112,3 +118,6 @@ A: Earnings vary based on your contribution and overall network activity.
 
 Q: How often should I update the CLI?
 A: It's recommended to check for updates regularly, at least once a week, to ensure you have the latest features and security improvements.
+
+Q: How do I stop the CLI?
+A: To stop the CLI, simply press Ctrl+C in the terminal where it's running. This will safely terminate the process.
