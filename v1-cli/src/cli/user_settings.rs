@@ -1,5 +1,3 @@
-use std::str::FromStr;
-
 use dialoguer::{Input, Select};
 use ethers::{providers::Middleware as _, types::U256};
 use tokio::time::sleep;
