@@ -1,4 +1,7 @@
-use std::io::{Read as _, Write as _};
+use std::{
+    fs::OpenOptions,
+    io::{Read as _, Write as _},
+};
 
 use aes_gcm::{aead::Aead, NewAead as _};
 use ethers::{
@@ -105,7 +108,12 @@ pub fn load_encrypted_private_data() -> Option<Vec<u8>> {
 }
 
 pub fn write_encrypted_private_data(input: &[u8]) -> anyhow::Result<()> {
-    let mut file = std::fs::File::create(private_data_path())?;
+    let file = OpenOptions::new()
+        .write(true)
+        .create(true)
+        .truncate(true)
+        .open(&private_data_path())?;
+    let mut file = std::io::BufWriter::new(file);
     file.write_all(input)?;
     Ok(())
 }
