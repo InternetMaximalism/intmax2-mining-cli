@@ -2,7 +2,7 @@ use anyhow::{ensure, Ok};
 use intmax2_zkp::ethereum_types::{
     address::Address, bytes32::Bytes32, u32limb_trait::U32LimbTrait,
 };
-use mining_circuit::claim::claim_inner_circuit::ClaimInnerValue;
+use mining_circuit_v1::claim::claim_inner_circuit::ClaimInnerValue;
 
 use crate::{
     external_api::contracts::events::Deposited,

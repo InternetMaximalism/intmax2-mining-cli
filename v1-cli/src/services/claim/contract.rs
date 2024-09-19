@@ -7,7 +7,7 @@ use ethers::{
     types::{Address, Bytes, H256, U256},
 };
 use intmax2_zkp::ethereum_types::u32limb_trait::U32LimbTrait;
-use mining_circuit::claim::{claim_circuit::ClaimPublicInputs, mining_claim::MiningClaim};
+use mining_circuit_v1::claim::{claim_circuit::ClaimPublicInputs, mining_claim::MiningClaim};
 
 use crate::{
     cli::console::{insuffient_balance_instruction, print_status},

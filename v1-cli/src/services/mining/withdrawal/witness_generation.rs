@@ -2,7 +2,7 @@ use intmax2_zkp::{
     ethereum_types::{address::Address, u32limb_trait::U32LimbTrait as _},
     utils::leafable::Leafable as _,
 };
-use mining_circuit::withdrawal::simple_withraw_circuit::SimpleWithdrawalValue;
+use mining_circuit_v1::withdrawal::simple_withraw_circuit::SimpleWithdrawalValue;
 
 use crate::{
     external_api::contracts::events::Deposited,

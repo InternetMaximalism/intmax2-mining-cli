@@ -3,7 +3,7 @@ use ethers::{
     types::{Address, Bytes, H256, U256},
 };
 use intmax2_zkp::ethereum_types::u32limb_trait::U32LimbTrait;
-use mining_circuit::withdrawal::simple_withraw_circuit::SimpleWithdrawalPublicInputs;
+use mining_circuit_v1::withdrawal::simple_withraw_circuit::SimpleWithdrawalPublicInputs;
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 use tokio::time::sleep;
@@ -93,7 +93,7 @@ mod tests {
     #[tokio::test]
     async fn test_submit_withdrawal() {
         let pis =
-            mining_circuit::withdrawal::simple_withraw_circuit::SimpleWithdrawalPublicInputs {
+            mining_circuit_v1::withdrawal::simple_withraw_circuit::SimpleWithdrawalPublicInputs {
                 deposit_root: Bytes32::default(),
                 nullifier: Bytes32::default(),
                 recipient: Address::default(),

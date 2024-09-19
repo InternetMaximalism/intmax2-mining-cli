@@ -1,7 +1,7 @@
 use std::{fs, path::Path};
 
 use intmax2_zkp::wrapper_config::plonky2_config::PoseidonBN128GoldilocksConfig;
-use mining_circuit::claim::claim_inner_circuit::ClaimInnerValue;
+use mining_circuit_v1::claim::claim_inner_circuit::ClaimInnerValue;
 use plonky2::{field::goldilocks_field::GoldilocksField, plonk::proof::ProofWithPublicInputs};
 use serde::{Deserialize, Serialize};
 

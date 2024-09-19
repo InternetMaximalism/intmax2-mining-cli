@@ -1,7 +1,7 @@
 use std::time::UNIX_EPOCH;
 
 use anyhow::ensure;
-use mining_circuit::withdrawal::simple_withraw_circuit::SimpleWithdrawalPublicInputs;
+use mining_circuit_v1::withdrawal::simple_withraw_circuit::SimpleWithdrawalPublicInputs;
 
 use crate::{
     cli::console::print_status,
