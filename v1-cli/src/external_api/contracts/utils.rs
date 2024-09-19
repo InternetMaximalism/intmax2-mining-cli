@@ -54,14 +54,21 @@ pub async fn get_tx_receipt(
     tx_hash: H256,
 ) -> anyhow::Result<ethers::core::types::TransactionReceipt> {
     let client = get_client().await?;
-    let receipt = client
-        .get_transaction_receipt(tx_hash)
-        .await?
-        .ok_or(anyhow::anyhow!(
-            "Transaction receipt not found for tx hash: {}",
-            tx_hash
-        ))?;
-    Ok(receipt)
+    let mut loop_count = 0;
+    loop {
+        if loop_count > 10 {
+            return Err(anyhow::anyhow!(
+                "Transaction not mined for tx hash: {:?}",
+                tx_hash
+            ));
+        }
+        let receipt = client.get_transaction_receipt(tx_hash).await?;
+        if receipt.is_some() {
+            return Ok(receipt.unwrap());
+        }
+        tokio::time::sleep(std::time::Duration::from_secs(5)).await;
+        loop_count += 1;
+    }
 }
 
 pub fn u256_as_bytes_be(u256: ethers::types::U256) -> [u8; 32] {
