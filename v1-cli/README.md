@@ -41,41 +41,31 @@ mining-cli
 
 ## Updating the CLI
 
-To update the v1-mining-cli to the latest version, follow these steps:
+To update the v1-mining-cli to the latest version:
 
-1. Navigate to the repository directory:
+1. Navigate to the repository directory and pull the latest changes:
 
 ```bash
 cd path/to/intmax2-mining-cli
-```
-
-2. Pull the latest changes from the repository:
-
-```bash
 git pull origin main
 ```
 
-3. Change to the v1-cli directory:
+2. Rebuild and reinstall the CLI:
 
 ```bash
 cd v1-cli
-```
-
-4. Rebuild and reinstall the CLI:
-
-```bash
 cargo install --path .
 ```
 
-5. Restart the mining-cli if it's currently running.
+3. Restart the mining-cli if it's currently running.
 
 Note: Always check the release notes or changelog for any important updates or breaking changes before updating.
 
 ## Resetting the CLI State
 
-If you need to reset the state of the CLI, you can simply delete the data directory. This will clear all stored data and allow you to start fresh. Here's how to do it:
+To reset the CLI state, simply delete the `v1-cli/data` directory. This will clear all stored data.
 
-Note: Be cautious when using this method, as it will erase all local data. Make sure you have backups of any important information before proceeding.
+Note: Be cautious, as this will erase all local data. Ensure you have backups of any important information.
 
 ## How It Works
 
@@ -110,9 +100,6 @@ A: Your funds are safe as long as you don't lose your deposit private key.
 Q: Is this process self-custodial?
 A: Yes, but the contract is currently upgradable. The Intmax team plans to relinquish this ability soon.
 
-Q: What if I need to stop mining?
-A: Use the Shutdown mode to safely recover your funds and claim rewards.
-
 Q: How much can I earn?
 A: Earnings vary based on your contribution and overall network activity.
 
@@ -120,4 +107,4 @@ Q: How often should I update the CLI?
 A: It's recommended to check for updates regularly, at least once a week, to ensure you have the latest features and security improvements.
 
 Q: How do I stop the CLI?
-A: To stop the CLI, simply press Ctrl+C in the terminal where it's running. This will safely terminate the process.
+A: To stop the CLI, simply press Ctrl+C in the terminal where it's running. This will safely terminate the process. If there is a balance in intmax2, you can withdraw it by running in Shutdown mode.
