@@ -2,7 +2,7 @@ use std::time::UNIX_EPOCH;
 
 use anyhow::ensure;
 use contract::claim_tokens;
-use mining_circuit::claim::claim_circuit::ClaimPublicInputs;
+use mining_circuit_v1::claim::claim_circuit::ClaimPublicInputs;
 
 use crate::{
     cli::console::print_status,

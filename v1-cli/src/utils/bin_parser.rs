@@ -3,7 +3,7 @@ use intmax2_zkp::{
     constants::DEPOSIT_TREE_HEIGHT,
     ethereum_types::{bytes32::Bytes32, u256::U256, u32limb_trait::U32LimbTrait},
 };
-use mining_circuit::eligible_tree::{EligibleLeaf, ELIGIBLE_TREE_HEIGHT};
+use mining_circuit_v1::eligible_tree::{EligibleLeaf, ELIGIBLE_TREE_HEIGHT};
 use num_bigint::BigUint;
 use serde::{Deserialize, Serialize};
 

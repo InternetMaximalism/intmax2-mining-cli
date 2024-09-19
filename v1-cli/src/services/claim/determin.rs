@@ -1,5 +1,5 @@
 use intmax2_zkp::utils::leafable::Leafable as _;
-use mining_circuit::claim::claim_inner_circuit::get_deposit_nullifier;
+use mining_circuit_v1::claim::claim_inner_circuit::get_deposit_nullifier;
 
 use crate::{
     external_api::contracts::{

@@ -1,11 +1,9 @@
-use std::{
-    env,
-    fs::OpenOptions,
-    io::{BufReader, BufWriter},
-};
+use std::{env, io::BufReader, path::Path};
 
 use config::{Config, ConfigError, File};
 use serde::{Deserialize, Serialize};
+
+use crate::utils::file::create_file_with_content;
 
 fn config_name() -> &'static str {
     let network = env::var("NETWORK").unwrap_or_else(|_| "testnet".into());
@@ -16,11 +14,11 @@ fn config_name() -> &'static str {
     }
 }
 
-fn user_settings_path() -> &'static str {
+fn user_settings_path() -> &'static Path {
     let network = env::var("NETWORK").unwrap_or_else(|_| "testnet".into());
     match network.as_str() {
-        "testnet" => "data/user_settings.testnet.json",
-        "localnet" => "data/user_settings.localnet.json",
+        "testnet" => Path::new("data/user_settings.testnet.json"),
+        "localnet" => Path::new("data/user_settings.localnet.json"),
         _ => panic!("Unsupported network"),
     }
 }
@@ -57,7 +55,7 @@ pub struct Blockchain {
     pub int1_address: String,
     pub minter_address: String,
     pub single_deposit_gas_fee: String,
-    pub sinlge_claim_gas_fee: String,
+    pub single_claim_gas_fee: String,
 }
 
 #[derive(Clone, Debug, Deserialize)]
@@ -100,13 +98,8 @@ impl UserSettings {
     }
 
     pub fn save(&self) -> anyhow::Result<()> {
-        let file = OpenOptions::new()
-            .write(true)
-            .create(true)
-            .truncate(true)
-            .open(&user_settings_path())?;
-        let writer = BufWriter::new(file);
-        serde_json::to_writer_pretty(writer, self)?;
+        let input = serde_json::to_vec_pretty(self)?;
+        create_file_with_content(&user_settings_path(), &input)?;
         Ok(())
     }
 }

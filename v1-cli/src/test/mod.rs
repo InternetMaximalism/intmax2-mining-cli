@@ -1,6 +1,6 @@
 use chrono::NaiveDateTime;
 use intmax2_zkp::ethereum_types::u256::U256;
-use mining_circuit::eligible_tree::EligibleLeaf;
+use mining_circuit_v1::eligible_tree::EligibleLeaf;
 use num_bigint::BigUint;
 
 use crate::{

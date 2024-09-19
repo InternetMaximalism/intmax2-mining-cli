@@ -1,6 +1,6 @@
 use availability::check_avaliability;
-use dialoguer::Select;
 use console::print_status;
+use dialoguer::Select;
 
 use crate::{
     services::{
@@ -10,8 +10,8 @@ use crate::{
 };
 
 pub mod availability;
-pub mod private_data;
 pub mod console;
+pub mod private_data;
 pub mod user_settings;
 
 pub async fn run() -> anyhow::Result<()> {
@@ -19,6 +19,7 @@ pub async fn run() -> anyhow::Result<()> {
     let mut state = start().await?;
 
     // resume task
+    print_status("Checking for pending tasks");
     resume_withdrawal_task(&state).await?;
     resume_claim_task(&state).await?;
 

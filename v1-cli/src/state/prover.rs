@@ -1,4 +1,4 @@
-use mining_circuit::{
+use mining_circuit_v1::{
     claim::{claim_processor::ClaimProcessor, claim_wrapper_processor::ClaimWrapperProcessor},
     withdrawal::simple_withdrawal_wrapper_processor::SimpleWithdrawalWrapperProcessor,
 };

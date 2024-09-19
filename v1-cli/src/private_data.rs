@@ -1,4 +1,4 @@
-use std::io::{Read as _, Write as _};
+use std::{io::Read as _, path::Path};
 
 use aes_gcm::{aead::Aead, NewAead as _};
 use ethers::{
@@ -8,15 +8,15 @@ use ethers::{
 use serde::{Deserialize, Serialize};
 use sha3::{Digest, Keccak256};
 
-use crate::external_api::contracts::utils::get_wallet;
+use crate::{external_api::contracts::utils::get_wallet, utils::file::create_file_with_content};
 
 const NONCE: &'static str = "intmaxmining";
 
-fn private_data_path() -> &'static str {
+fn private_data_path() -> &'static Path {
     let network = std::env::var("NETWORK").unwrap_or_else(|_| "testnet".into());
     match network.as_str() {
-        "testnet" => "data/private.testnet.bin",
-        "localnet" => "data/private.localnet.bin",
+        "testnet" => Path::new("data/private.testnet.bin"),
+        "localnet" => Path::new("data/private.localnet.bin"),
         _ => panic!("Unsupported network"),
     }
 }
@@ -105,8 +105,7 @@ pub fn load_encrypted_private_data() -> Option<Vec<u8>> {
 }
 
 pub fn write_encrypted_private_data(input: &[u8]) -> anyhow::Result<()> {
-    let mut file = std::fs::File::create(private_data_path())?;
-    file.write_all(input)?;
+    create_file_with_content(&private_data_path(), input)?;
     Ok(())
 }
 
