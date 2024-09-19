@@ -11,7 +11,7 @@ chain_id = 11155111
 int1_address = "0x6EC83B7c8F78c6BA1b0994beDF8dfDeD824Ec400"
 minter_address = "0x6cc424557e836e60cE417B3C6719AAeD2FFEc226"
 single_deposit_gas_fee = 2000000000000000
-sinlge_claim_gas_fee = 2000000000000000
+single_claim_gas_fee = 2000000000000000
 
 [service]
 main_loop_cooldown_in_sec = 30

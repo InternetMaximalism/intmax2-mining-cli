@@ -1,3 +1,5 @@
+use std::str::FromStr;
+
 use dialoguer::{Input, Select};
 use ethers::{providers::Middleware as _, types::U256};
 use tokio::time::sleep;
@@ -99,8 +101,9 @@ async fn initial_balance(
     };
 
     let settings = Settings::new()?;
-    let single_deposit_gas_fee: U256 = settings.blockchain.single_deposit_gas_fee.parse()?;
-    let single_claim_gas_fee: U256 = settings.blockchain.sinlge_claim_gas_fee.parse()?;
+    let single_deposit_gas_fee: U256 =
+        U256::from_str(&settings.blockchain.single_deposit_gas_fee).unwrap();
+    let single_claim_gas_fee = U256::from_str(&settings.blockchain.single_claim_gas_fee).unwrap();
     let min_deposit = initial_deposit + single_deposit_gas_fee * num_deposits;
     let min_claim = single_claim_gas_fee * num_deposits;
 
