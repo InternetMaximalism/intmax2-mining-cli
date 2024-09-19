@@ -1,11 +1,13 @@
-use std::{fs, path::Path};
+use std::path::Path;
 
 use intmax2_zkp::wrapper_config::plonky2_config::PoseidonBN128GoldilocksConfig;
 use mining_circuit_v1::claim::claim_inner_circuit::ClaimInnerValue;
 use plonky2::{field::goldilocks_field::GoldilocksField, plonk::proof::ProofWithPublicInputs};
 use serde::{Deserialize, Serialize};
 
-const CLAIM_TEMP_PATH: &str = "temp/claim_temp.json";
+use crate::utils::file::create_file_with_content;
+
+const CLAIM_TEMP_PATH: &str = "data/temp/claim_temp.json";
 
 type F = GoldilocksField;
 type C = PoseidonBN128GoldilocksConfig;
@@ -39,12 +41,8 @@ impl ClaimStatus {
     }
 
     pub fn save(&self) -> anyhow::Result<()> {
-        let file = serde_json::to_vec_pretty(&self)?;
-        let path = Path::new(CLAIM_TEMP_PATH);
-        if let Some(parent) = path.parent() {
-            fs::create_dir_all(parent)?;
-        }
-        fs::write(path, file)?;
+        let input = serde_json::to_vec_pretty(&self)?;
+        create_file_with_content(Path::new(CLAIM_TEMP_PATH), &input)?;
         Ok(())
     }
 
