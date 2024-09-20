@@ -124,6 +124,8 @@ The CLI has two operating modes:
 1. **Normal mode**: Automatically handles deposits, withdrawals, and ITX token claims.
 2. **Shutdown mode**: Only performs withdrawals and claims currently available ITX tokens. No new deposits are made.
 
+Note: If you switch to shutdown mode immediately after depositing, you may be refunded to the deposit address. 
+
 ## Important Notes
 
 - **Privacy is crucial**: Avoid actions that link your deposit and withdrawal addresses. If you link your deposit and withdrawal addresses, you will not be eligible for ITX rewards.
