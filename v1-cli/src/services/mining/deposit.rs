@@ -40,7 +40,7 @@ pub async fn deposit_task(state: &State) -> anyhow::Result<()> {
         match result {
             Ok(tx) => {
                 let pending_tx: PendingTransaction<Http> = tx;
-                print_status(&format!("Deposit tx hash: {:?}", pending_tx.tx_hash()));
+                print_status(format!("Deposit tx hash: {:?}", pending_tx.tx_hash()));
                 let tx_receipt = pending_tx.await?.unwrap();
                 ensure!(tx_receipt.status.unwrap() == 1.into(), "Deposit tx failed");
                 break;

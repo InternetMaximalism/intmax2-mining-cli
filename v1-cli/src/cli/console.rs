@@ -9,46 +9,46 @@ use crate::external_api::contracts::utils::get_client;
 
 /// Print a colored status message to the console
 /// This will overwrite the last line
-pub fn print_status(message: &str) {
+pub fn print_status<S: ToString>(message: S) {
     let term = Term::stdout();
     term.clear_last_lines(1).unwrap();
-
     let colored_message = format!(
         "{} {}",
         style("STATUS:").green().bold(),
-        style(message).blue()
+        style(message.to_string()).blue()
     );
-
     term.write_line(&colored_message).unwrap();
-    info!("{}", message);
+    info!("{}", message.to_string());
 }
 
-pub fn print_warning(message: &str) {
+pub fn print_warning<S: ToString>(message: S) {
     let term = Term::stdout();
     term.clear_last_lines(1).unwrap();
-
     let colored_message = format!(
         "{} {}",
         style("WARNING:").yellow().bold(),
-        style(message).yellow()
+        style(message.to_string()).yellow()
     );
     term.write_line(&colored_message).unwrap();
-    warn!("{}", message);
+    warn!("{}", message.to_string());
 }
 
-pub fn print_error(message: &str) {
+pub fn print_error<S: ToString>(message: S) {
     let term = Term::stdout();
     term.clear_last_lines(1).unwrap();
-
-    let colored_message = format!("{} {}", style("ERROR:").red().bold(), style(message).red());
+    let colored_message = format!(
+        "{} {}",
+        style("ERROR:").red().bold(),
+        style(message.to_string()).red()
+    );
     term.write_line(&colored_message).unwrap();
-    error!("{}", message);
+    error!("{}", message.to_string());
 }
 
 pub async fn insuffient_balance_instruction(address: Address, name: &str) -> anyhow::Result<()> {
     let client = get_client().await?;
     let balance = client.get_balance(address, None).await?;
-    print_warning(&format!(
+    print_warning(format!(
         r"Insufficient balance of {} address {:?}. 
 Current balance: {} ETH.
 Waiting for your deposit...",

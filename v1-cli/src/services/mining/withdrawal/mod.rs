@@ -130,7 +130,7 @@ async fn from_step5(_state: &State) -> anyhow::Result<()> {
         amount: status.witness.deposit_leaf.amount,
     };
     let tx_hash = submit_withdrawal(pis, status.gnark_proof.as_ref().unwrap()).await?;
-    print_status(&format!("Withdral tx hash: {:?}", tx_hash));
+    print_status(format!("Withdral tx hash: {:?}", tx_hash));
     let tx_reciept = get_tx_receipt(tx_hash).await?;
     ensure!(
         tx_reciept.status == Some(ethers::types::U64::from(1)),

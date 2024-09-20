@@ -7,6 +7,7 @@ use crate::{
     config::{InitialDeposit, MiningAmount, Settings, UserSettings},
     external_api::contracts::utils::get_client,
     private_data::PrivateData,
+    utils::network::get_network,
 };
 
 use super::console::pretty_format_u256;
@@ -16,9 +17,8 @@ pub async fn user_settings(private_data: &PrivateData) -> anyhow::Result<()> {
         // user settings already exists
         return Ok(());
     }
-
     let rpc_url: String = Input::new()
-        .with_prompt("RPC URL")
+        .with_prompt(format!("RPC URL of {}", get_network()))
         .validate_with(|rpc_url: &String| {
             if rpc_url.starts_with("http") {
                 Ok(())

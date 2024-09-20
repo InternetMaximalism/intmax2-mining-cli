@@ -42,14 +42,24 @@ pub fn set_private_data() -> anyhow::Result<PrivateData> {
 
 fn validate_private_key(input: &str) -> Result<(), &'static str> {
     match input.parse() {
-        Ok(H256(_)) => Ok(()),
+        Ok(H256(x)) => {
+            if x == H256::zero().0 {
+                return Err("Invalid private key");
+            }
+            Ok(())
+        }
         Err(_) => return Err("Invalid private key"),
     }
 }
 
 fn validate_address(input: &str) -> Result<(), &'static str> {
     match input.parse() {
-        Ok(H160(_)) => Ok(()),
+        Ok(H160(x)) => {
+            if x == H160::zero().0 {
+                return Err("Invalid address");
+            }
+            Ok(())
+        }
         Err(_) => return Err("Invalid address"),
     }
 }

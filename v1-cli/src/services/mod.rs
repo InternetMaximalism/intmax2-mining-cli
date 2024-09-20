@@ -59,7 +59,7 @@ pub async fn main_loop(state: &mut State) -> anyhow::Result<()> {
         let next_process = determin_next_claim_process(state).await?;
         match next_process {
             ClaimProcess::Claim(events) => {
-                print_status(&format!("Claim {}", events.len()));
+                print_status(format!("Claim {}", events.len()));
                 claim_task(state, &events).await?;
                 claim_cooldown().await?;
             }

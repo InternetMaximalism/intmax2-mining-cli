@@ -1,4 +1,4 @@
-use std::{io::Read as _, path::Path};
+use std::{io::Read as _, path::PathBuf};
 
 use aes_gcm::{aead::Aead, NewAead as _};
 use ethers::{
@@ -8,17 +8,15 @@ use ethers::{
 use serde::{Deserialize, Serialize};
 use sha3::{Digest, Keccak256};
 
-use crate::{external_api::contracts::utils::get_wallet, utils::file::create_file_with_content};
+use crate::{
+    external_api::contracts::utils::get_wallet,
+    utils::{file::create_file_with_content, network::get_network},
+};
 
 const NONCE: &'static str = "intmaxmining";
 
-fn private_data_path() -> &'static Path {
-    let network = std::env::var("NETWORK").unwrap_or_else(|_| "testnet".into());
-    match network.as_str() {
-        "testnet" => Path::new("data/private.testnet.bin"),
-        "localnet" => Path::new("data/private.localnet.bin"),
-        _ => panic!("Unsupported network"),
-    }
+fn private_data_path() -> PathBuf {
+    PathBuf::from(format!("data/private.{}.bin", get_network()))
 }
 
 #[derive(Debug, Serialize, Deserialize)]

@@ -26,7 +26,7 @@ pub async fn cancel_task(state: &State, event: Deposited) -> anyhow::Result<()> 
         match result {
             Ok(tx) => {
                 let pending_tx: PendingTransaction<Http> = tx;
-                print_status(&format!("Cancel tx hash: {:?}", pending_tx.tx_hash()));
+                print_status(format!("Cancel tx hash: {:?}", pending_tx.tx_hash()));
                 let tx_receipt = pending_tx.await?.unwrap();
                 ensure!(tx_receipt.status.unwrap() == 1.into(), "Cancel tx failed");
                 return Ok(());
