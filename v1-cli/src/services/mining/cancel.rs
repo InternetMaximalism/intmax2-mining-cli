@@ -17,10 +17,10 @@ pub async fn cancel_task(state: &State, event: Deposited) -> anyhow::Result<()> 
         token_index: event.token_index,
         amount: ethers::types::U256::from_big_endian(&event.amount.to_bytes_be()),
     };
-    let deposit_address = state.private_data.to_addresses().await?.deposit_address;
+    let deposit_address = state.private_data.deposit_address;
 
     loop {
-        let int1 = get_int1_contract_with_signer(state.private_data.deposit_key).await?;
+        let int1 = get_int1_contract_with_signer(state.private_data.deposit_private_key).await?;
         let tx = int1.cancel_deposit(event.deposit_id.into(), deposit.clone());
         let result = tx.send().await;
         match result {

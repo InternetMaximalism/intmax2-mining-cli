@@ -19,14 +19,14 @@ mod tests {
 
     #[tokio::test]
     async fn test_innsufficient_balance() -> anyhow::Result<()> {
-        let state = get_dummy_state();
+        let state = get_dummy_state().await;
         let to = "0x0000000000000000000000000000000000000000"
             .parse::<Address>()
             .unwrap();
         let tx = TransactionRequest::new()
             .to(to)
             .value(U256::from(1_000_000_000_000_000_000_000_000u128)); // 1 ETH
-        let client = get_client_with_signer(state.private_data.deposit_key).await?;
+        let client = get_client_with_signer(state.private_data.deposit_private_key).await?;
 
         let pending_tx = client.send_transaction(tx, None).await;
 
@@ -36,7 +36,9 @@ mod tests {
                 let error_message = e.to_string();
                 if error_message.contains("-32000") {
                     // Insufficient funds code
-                    let address = get_wallet(state.private_data.deposit_key).await?.address();
+                    let address = get_wallet(state.private_data.deposit_private_key)
+                        .await?
+                        .address();
                     insuffient_balance_instruction(address, "deposit").await?;
                 } else {
                     println!("JSON-RPC error: {}", error_message);

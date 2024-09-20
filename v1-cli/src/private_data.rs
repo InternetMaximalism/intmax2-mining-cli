@@ -21,28 +21,30 @@ fn private_data_path() -> PathBuf {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct PrivateData {
-    pub deposit_key: H256,
-    pub claim_key: H256,
-    pub withdrawal_address: Address,
-}
-
-#[derive(Debug)]
-pub struct Addresses {
+    pub deposit_private_key: H256,
+    pub claim_private_key: H256,
     pub deposit_address: Address,
     pub claim_address: Address,
     pub withdrawal_address: Address,
 }
 
 impl PrivateData {
-    pub fn new(
-        deposit_key: &str,
-        claim_key: &str,
+    pub async fn new(
+        deposit_private_key: &str,
+        claim_private_key: &str,
         withdrawal_address: &str,
     ) -> anyhow::Result<Self> {
+        let deposit_private_key = deposit_private_key.parse()?;
+        let deposit_address = get_wallet(deposit_private_key).await?.address();
+        let claim_private_key = claim_private_key.parse()?;
+        let claim_address = get_wallet(claim_private_key).await?.address();
+        let withdrawal_address = withdrawal_address.parse()?;
         Ok(Self {
-            deposit_key: deposit_key.parse()?,
-            claim_key: claim_key.parse()?,
-            withdrawal_address: withdrawal_address.parse()?,
+            deposit_private_key,
+            claim_private_key,
+            deposit_address,
+            claim_address,
+            withdrawal_address,
         })
     }
 
@@ -68,17 +70,6 @@ impl PrivateData {
             .map_err(|_| anyhow::anyhow!("Failed to decrypt private data"))?;
         let private_data = serde_json::from_slice(&plaintext)?;
         Ok(private_data)
-    }
-
-    pub async fn to_addresses(&self) -> anyhow::Result<Addresses> {
-        let deposit_address = get_wallet(self.deposit_key).await?.address();
-        let claim_address = get_wallet(self.claim_key).await?.address();
-
-        Ok(Addresses {
-            deposit_address,
-            claim_address,
-            withdrawal_address: self.withdrawal_address,
-        })
     }
 }
 
@@ -111,29 +102,18 @@ pub fn write_encrypted_private_data(input: &[u8]) -> anyhow::Result<()> {
 mod tests {
     use super::PrivateData;
 
-    #[test]
-    fn encryption_data() {
+    #[tokio::test]
+    async fn encryption_data() {
         let password_str = "password";
         let private_data = PrivateData::new(
             "0xdf57089febbacf7ba0bc227dafbffa9fc08a93fdc68e1e42411a14efcf23656e",
             "0xdf57089febbacf7ba0bc227dafbffa9fc08a93fdc68e1e42411a14efcf23656e",
             "0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1199",
         )
+        .await
         .unwrap();
         let ciphertext = private_data.encrypt(password_str).unwrap();
         let data = PrivateData::decrypt(password_str, &ciphertext).unwrap();
-        assert_eq!(private_data.deposit_key, data.deposit_key);
-    }
-
-    #[tokio::test]
-    async fn test_to_addresses() {
-        let private_data = PrivateData::new(
-            "0xdf57089febbacf7ba0bc227dafbffa9fc08a93fdc68e1e42411a14efcf23656e",
-            "0xdf57089febbacf7ba0bc227dafbffa9fc08a93fdc68e1e42411a14efcf23656e",
-            "0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1199",
-        )
-        .unwrap();
-        let addresses = private_data.to_addresses().await.unwrap();
-        dbg!(addresses);
+        assert_eq!(private_data.deposit_private_key, data.deposit_private_key);
     }
 }

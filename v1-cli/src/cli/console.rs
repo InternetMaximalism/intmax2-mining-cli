@@ -88,4 +88,7 @@ mod tests {
         let pretty = super::pretty_format_u256(value);
         assert_eq!(pretty, "1");
     }
+
+    // #[tokio::test]
+    // async fn test_insuffient_balance_instruction() {}
 }

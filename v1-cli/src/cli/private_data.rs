@@ -3,7 +3,7 @@ use dialoguer::{Input, Password};
 use ethers::types::{H160, H256};
 
 /// Require input or load private data
-pub fn set_private_data() -> anyhow::Result<PrivateData> {
+pub async fn set_private_data() -> anyhow::Result<PrivateData> {
     match load_encrypted_private_data() {
         Some(input) => {
             let password: String = Password::new().with_prompt("Password").interact()?;
@@ -27,7 +27,8 @@ pub fn set_private_data() -> anyhow::Result<PrivateData> {
                 &deposit_private_key,
                 &claim_private_key,
                 &withdrawal_address,
-            )?;
+            )
+            .await?;
             let password = Password::new()
                 .with_prompt("Password to encrypt private key")
                 .with_confirmation("Confirm password", "Passwords do not match")

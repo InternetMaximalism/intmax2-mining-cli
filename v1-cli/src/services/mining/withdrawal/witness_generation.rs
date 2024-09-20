@@ -21,9 +21,11 @@ pub fn generate_withdrawa_witness(
         .unwrap();
     let deposit_merkle_proof = state.deposit_hash_tree.prove(deposit_index);
     let recipient = Address::from_bytes_be(state.private_data.withdrawal_address.as_bytes());
-    let pubkey = get_pubkey_from_private_key(state.private_data.deposit_key);
-    let salt =
-        get_salt_from_private_key_nonce(state.private_data.deposit_key, event.tx_nonce.unwrap());
+    let pubkey = get_pubkey_from_private_key(state.private_data.deposit_private_key);
+    let salt = get_salt_from_private_key_nonce(
+        state.private_data.deposit_private_key,
+        event.tx_nonce.unwrap(),
+    );
     let deposit_leaf = event.deposit();
     let withdrawal_value = SimpleWithdrawalValue::new(
         deposit_root,

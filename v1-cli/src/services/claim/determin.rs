@@ -20,7 +20,7 @@ pub enum ClaimProcess {
 }
 
 pub async fn determin_next_claim_process(state: &State) -> anyhow::Result<ClaimProcess> {
-    let deposit_address = state.private_data.to_addresses().await?.deposit_address;
+    let deposit_address = state.private_data.deposit_address;
     let all_senders_deposit_events =
         get_deposited_event(DepositQuery::BySender(deposit_address)).await?;
 
@@ -46,7 +46,7 @@ pub async fn determin_next_claim_process(state: &State) -> anyhow::Result<ClaimP
     }
 
     // check if there are any deposits that are not claimed.
-    let deposit_key = state.private_data.deposit_key;
+    let deposit_key = state.private_data.deposit_private_key;
     let mut not_claimed_eligible_deposits = Vec::new();
     for event in contained_eligible_tree {
         let salt = get_salt_from_private_key_nonce(deposit_key, event.tx_nonce.unwrap());

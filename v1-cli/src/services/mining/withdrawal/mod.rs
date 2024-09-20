@@ -159,7 +159,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_withdrawal() {
-        let mut state = get_dummy_state();
+        let mut state = get_dummy_state().await;
         state.sync_trees().await.unwrap();
 
         let events = get_not_withdrawn_deposit_events(&state).await.unwrap();
@@ -175,7 +175,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_resume_withdrawal() {
-        let mut state = get_dummy_state();
+        let mut state = get_dummy_state().await;
         state.sync_trees().await.unwrap();
         let prover = Prover::new();
         state.prover = Some(prover);
@@ -183,7 +183,7 @@ mod tests {
     }
 
     async fn get_not_withdrawn_deposit_events(state: &State) -> anyhow::Result<Vec<Deposited>> {
-        let deposit_address = state.private_data.to_addresses().await?.deposit_address;
+        let deposit_address = state.private_data.deposit_address;
         let all_senders_deposit_events =
             get_deposited_event(DepositQuery::BySender(deposit_address)).await?;
 
@@ -204,7 +204,7 @@ mod tests {
         }
 
         // check if there are any deposits that are not withdrawn.
-        let deposit_key = state.private_data.deposit_key;
+        let deposit_key = state.private_data.deposit_private_key;
         let mut not_withdrawn_deposit_events = Vec::new();
         for event in contained_deposit_events {
             let salt = get_salt_from_private_key_nonce(deposit_key, event.tx_nonce.unwrap());

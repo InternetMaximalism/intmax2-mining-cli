@@ -9,12 +9,13 @@ use crate::{
     utils::{deposit_hash_tree::DepositHashTree, eligible_tree_with_map::EligibleTreeWithMap},
 };
 
-pub fn get_dummy_state() -> State {
+pub async fn get_dummy_state() -> State {
     let private_data = PrivateData::new(
         "0xdf57089febbacf7ba0bc227dafbffa9fc08a93fdc68e1e42411a14efcf23656e",
         "0xdf57089febbacf7ba0bc227dafbffa9fc08a93fdc68e1e42411a14efcf23656e",
         "0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1199",
     )
+    .await
     .unwrap();
 
     let mut eligible_tree = EligibleTreeWithMap::new();
