@@ -90,6 +90,8 @@ Note: Be cautious, as this will erase all local data. Ensure you have backups of
 
 ## How It Works
 
+<img src="assets/diagram.png" width="300"alt="Mining diagram">
+
 1. **Setup**: You need three Ethereum addresses:
 
 - **Deposit address**: Where you initially deposit ETH for mining
@@ -102,13 +104,13 @@ Note: Users must create these new addresses themselves and input them into the C
 - Deposit 1 ETH, 10 ETH, or 100 ETH + gas fee to your deposit address following the instructions in the CLI.
 - Deposit gas fee to your claim address following the instructions in the CLI.
 
-1. **Mining Process**:
+2. **Mining Process**:
 
-- The CLI automatically deposits smaller amounts (0.1 or 1 ETH) into intmax2
-  - The deposit amount can be configured through the CLI
-- After a few hours, it withdraws these amounts to your withdrawal address
+- The CLI automatically deposits smaller amounts (0.1 or 1 ETH) into intmax2. The deposit amount can be configured through the CLI
+- After a few hours, it withdraws these amounts to your withdrawal address.
+- There's a limit to deposits per address; create a new deposit address if you reach the limit.
 
-1. **Rewards**:
+3. **Rewards**:
 
 - Receive ITX tokens weekly in your claim address (available every Monday)
 - Ensure your claim address has enough ETH for gas fees
@@ -122,8 +124,7 @@ The CLI has two operating modes:
 
 ## Important Notes
 
-- **Privacy is crucial**: Avoid actions that link your deposit and withdrawal addresses
-- There's a limit to deposits per address; create a new deposit address if needed
+- **Privacy is crucial**: Avoid actions that link your deposit and withdrawal addresses. If you link your deposit and withdrawal addresses, you will not be eligible for ITX rewards.
 - **Do not** directly transfer funds between your old withdrawal and new deposit addresses
 
 ## FAQs
