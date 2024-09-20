@@ -90,7 +90,9 @@ Note: Be cautious, as this will erase all local data. Ensure you have backups of
 
 ## How It Works
 
-<img src="v1-cli/assets/diagram.png" width="300" alt="Mining diagram">
+<div align="center">
+  <img src="assets/diagram.png" width="400" alt="Mining diagram">
+</div>
 
 1. **Setup**: You need three Ethereum addresses:
 
