@@ -14,6 +14,7 @@ use crate::{cli::console::print_status, config::Settings, state::state::State};
 
 pub mod claim;
 pub mod mining;
+pub mod observer;
 pub mod sync;
 
 pub async fn main_loop(state: &mut State) -> anyhow::Result<()> {
