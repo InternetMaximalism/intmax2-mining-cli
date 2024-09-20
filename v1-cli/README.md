@@ -1,6 +1,14 @@
 # v1-mining-cli
 
-A CLI tool for automatic mining of INX tokens
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃                                                                              ┃
+┃ ⚠️ IMPORTANT: This pre-release CLI tool currently operates on Sepolia testnet ┃
+┃ with ~5-minute transaction intervals, not the Ethereum mainnet described in  ┃
+┃ this documentation; expect significant changes before production release.    ┃
+┃                                                                              ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+A CLI tool for automatic mining of ITX tokens.
 
 ## Overview
 
@@ -11,24 +19,29 @@ v1-mining-cli is a tool that allows users to mine ITX tokens by participating in
 - Automated mining process (deposit and withdrawal)
 - Weekly ITX token rewards
 
+## System Requirements
+
+### Minimum Requirements
+
+- Memory: 8GB or more
+- CPU: 4 cores or more, with a clock speed of 2 GHz or higher
+
 ## Installation
 
-The following instructions are for Ubuntu 24.04, but similar steps can be followed for other platforms.
+### For Linux / Windows Subsystem for Linux (WSL)
 
-### For Ubuntu 24.04
-
-1. Install Rust and required packages:
+1. Install required packages and Rust:
 
 ```bash
+sudo apt update && sudo apt install -y git curl build-essential pkg-config libssl-dev
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-sudo apt update && sudo apt install build-essential pkg-config libssl-dev
 ```
 
 2. Clone the repository and install the CLI:
 
 ```bash
 git clone https://github.com/internetMaximalism/intmax2-mining-cli.git
-cd v1-cli
+cd intmax2-mining-cli/v1-cli
 cargo install --path .
 ```
 
@@ -38,6 +51,16 @@ cargo install --path .
 cd intmax2-mining-cli/v1-cli
 mining-cli
 ```
+
+### For Mac
+
+1. Install Rust:
+
+```bash
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+```
+
+2. Follow steps 2 and 3 from the Ubuntu instructions.
 
 ## Updating the CLI
 
@@ -75,16 +98,29 @@ Note: Be cautious, as this will erase all local data. Ensure you have backups of
 - **Withdrawal address**: Where mined ETH is withdrawn to
 - **Claim address**: Where you receive ITX token rewards
 
-2. **Mining Process**:
+Note: Users must create these new addresses themselves and input them into the CLI.
 
-- Deposit 1 ETH, 10 ETH, or 100 ETH to your deposit address
+- Start the CLI and follow the instructions to set up your addresses.
+- Deposit 1 ETH, 10 ETH, or 100 ETH + gas fee to your deposit address following the instructions in the CLI.
+- Deposit gas fee to your claim address following the instructions in the CLI.
+
+1. **Mining Process**:
+
 - The CLI automatically deposits smaller amounts (0.1 or 1 ETH) into intmax2
+  - The deposit amount can be configured through the CLI
 - After a few hours, it withdraws these amounts to your withdrawal address
 
-3. **Rewards**:
+1. **Rewards**:
 
-- Receive ITX tokens weekly in your claim address
+- Receive ITX tokens weekly in your claim address (available every Monday)
 - Ensure your claim address has enough ETH for gas fees
+
+## Operating Modes
+
+The CLI has two operating modes:
+
+1. **Normal mode**: Automatically handles deposits, withdrawals, and ITX token claims.
+2. **Shutdown mode**: Only performs withdrawals and claims currently available ITX tokens. No new deposits are made.
 
 ## Important Notes
 
