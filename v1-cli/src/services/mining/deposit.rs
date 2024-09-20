@@ -31,7 +31,6 @@ pub async fn deposit_task(state: &State) -> anyhow::Result<()> {
     };
 
     let deposit_address = state.private_data.to_addresses().await?.deposit_address;
-
     loop {
         let int1 = get_int1_contract_with_signer(state.private_data.deposit_key).await?;
         let tx = int1
@@ -44,12 +43,7 @@ pub async fn deposit_task(state: &State) -> anyhow::Result<()> {
                 print_status(&format!("Deposit tx hash: {:?}", pending_tx.tx_hash()));
                 let tx_receipt = pending_tx.await?.unwrap();
                 ensure!(tx_receipt.status.unwrap() == 1.into(), "Deposit tx failed");
-
-                // reduce remaining deposits
-                let mut user_settings = UserSettings::new()?;
-                user_settings.remaining_deposits -= 1;
-                user_settings.save()?;
-                return Ok(());
+                break;
             }
             Err(e) => {
                 let error_message = e.to_string();
@@ -62,6 +56,11 @@ pub async fn deposit_task(state: &State) -> anyhow::Result<()> {
             }
         }
     }
+    // reduce remaining deposits
+    let mut user_settings = UserSettings::new()?;
+    user_settings.remaining_deposits -= 1;
+    user_settings.save()?;
+    Ok(())
 }
 
 #[cfg(test)]
