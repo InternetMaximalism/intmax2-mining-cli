@@ -38,7 +38,7 @@ source $HOME/.cargo/env
 
 These commands should be run with sudo if necessary, depending on the execution environment.
 
-1. Clone the repository in arbitrary directory and install the CLI:
+2. Clone the repository in arbitrary directory and install the CLI:
 
 ```bash
 git clone https://github.com/internetMaximalism/intmax2-mining-cli.git
