@@ -90,7 +90,7 @@ Note: Be cautious, as this will erase all local data. Ensure you have backups of
 
 ## How It Works
 
-<img src="v1-cli/assets/diagram.png" width="300"alt="Mining diagram">
+<img src="v1-cli/assets/diagram.png" width="300" alt="Mining diagram">
 
 1. **Setup**: You need three Ethereum addresses:
 
