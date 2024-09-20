@@ -140,7 +140,7 @@ async fn from_step5(state: &State) -> anyhow::Result<()> {
         last_claim_hash,
     };
     claim_tokens(
-        state.private_data.claim_key,
+        state.private_data.claim_private_key,
         &claims,
         pis,
         &status.gnark_proof.unwrap(),
@@ -161,7 +161,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_claim_task() {
-        let mut state = get_dummy_state();
+        let mut state = get_dummy_state().await;
         state.sync_trees().await.unwrap();
         let process = determin::determin_next_claim_process(&state).await.unwrap();
         dbg!(&process);

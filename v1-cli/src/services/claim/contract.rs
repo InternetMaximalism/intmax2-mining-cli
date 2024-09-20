@@ -39,7 +39,7 @@ pub async fn claim_tokens(
     let proof = Bytes::from_str(proof).unwrap();
 
     let claim_address = get_wallet(claim_key).await?.address();
-    print_status(&format!("Claiming tokens for address: {}", claim_address));
+    print_status(format!("Claiming tokens for address: {}", claim_address));
 
     loop {
         let minter = get_minter_contract_with_signer(claim_key);
@@ -50,7 +50,7 @@ pub async fn claim_tokens(
         match result {
             Ok(tx) => {
                 let pending_tx: PendingTransaction<Http> = tx;
-                print_status(&format!("Claim tx hash: {:?}", pending_tx.tx_hash()));
+                print_status(format!("Claim tx hash: {:?}", pending_tx.tx_hash()));
                 let tx_receipt = pending_tx.await?.unwrap();
                 ensure!(tx_receipt.status.unwrap() == 1.into(), "Claim tx failed");
                 return Ok(());

@@ -28,7 +28,7 @@ pub enum MiningProcess {
 // 2. check if there are any deposits that are not withdrawn. If so, withdraw the deposit.
 // 3. deposit
 pub async fn determin_next_mining_process(state: &State) -> anyhow::Result<MiningProcess> {
-    let deposit_address = state.private_data.to_addresses().await?.deposit_address;
+    let deposit_address = state.private_data.deposit_address;
     let all_senders_deposit_events =
         get_deposited_event(DepositQuery::BySender(deposit_address)).await?;
 
@@ -79,7 +79,7 @@ pub async fn determin_next_mining_process(state: &State) -> anyhow::Result<Minin
     }
 
     // check if there are any deposits that are not withdrawn.
-    let deposit_key = state.private_data.deposit_key;
+    let deposit_key = state.private_data.deposit_private_key;
     let mut not_withdrawn_deposit_events = Vec::new();
     for event in contained_deposit_events {
         let salt = get_salt_from_private_key_nonce(deposit_key, event.tx_nonce.unwrap());
@@ -115,7 +115,7 @@ pub async fn determin_next_mining_process(state: &State) -> anyhow::Result<Minin
 mod tests {
     #[tokio::test]
     async fn test_determin_next_mining_process() {
-        let mut state = crate::test::get_dummy_state();
+        let mut state = crate::test::get_dummy_state().await;
         state.sync_trees().await.unwrap();
 
         let result = super::determin_next_mining_process(&state).await.unwrap();

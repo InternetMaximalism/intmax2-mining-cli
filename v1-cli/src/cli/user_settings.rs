@@ -7,6 +7,7 @@ use crate::{
     config::{InitialDeposit, MiningAmount, Settings, UserSettings},
     external_api::contracts::utils::get_client,
     private_data::PrivateData,
+    utils::network::get_network,
 };
 
 use super::console::pretty_format_u256;
@@ -16,9 +17,8 @@ pub async fn user_settings(private_data: &PrivateData) -> anyhow::Result<()> {
         // user settings already exists
         return Ok(());
     }
-
     let rpc_url: String = Input::new()
-        .with_prompt("RPC URL")
+        .with_prompt(format!("RPC URL of {}", get_network()))
         .validate_with(|rpc_url: &String| {
             if rpc_url.starts_with("http") {
                 Ok(())
@@ -90,7 +90,6 @@ async fn initial_balance(
     num_deposits: u64,
 ) -> anyhow::Result<()> {
     let client = get_client().await?;
-    let addresses = private_data.to_addresses().await?;
 
     let initial_deposit = match initial_deposit {
         InitialDeposit::One => ethers::utils::parse_ether("1").unwrap(),
@@ -106,11 +105,13 @@ async fn initial_balance(
     let min_deposit = initial_deposit + single_deposit_gas_fee * num_deposits;
     let min_claim = single_claim_gas_fee * num_deposits;
 
-    let deposit_balance = client.get_balance(addresses.deposit_address, None).await?;
+    let deposit_balance = client
+        .get_balance(private_data.deposit_address, None)
+        .await?;
     if deposit_balance < min_deposit {
         println!(
             "Deposit Address: {:?}  Balance: {} ETH",
-            addresses.deposit_address,
+            private_data.deposit_address,
             pretty_format_u256(deposit_balance)
         );
         println!(
@@ -118,7 +119,9 @@ async fn initial_balance(
             pretty_format_u256(min_deposit)
         );
         loop {
-            let new_deposit_balance = client.get_balance(addresses.deposit_address, None).await?;
+            let new_deposit_balance = client
+                .get_balance(private_data.deposit_address, None)
+                .await?;
             if new_deposit_balance >= min_deposit {
                 print_status("Deposit completed");
                 sleep(std::time::Duration::from_secs(5)).await;
@@ -128,11 +131,11 @@ async fn initial_balance(
         }
     }
 
-    let claim_balance = client.get_balance(addresses.claim_address, None).await?;
+    let claim_balance = client.get_balance(private_data.claim_address, None).await?;
     if claim_balance < min_claim {
         println!(
             "Claim Address: {:?} Balance: {} ETH",
-            addresses.claim_address,
+            private_data.claim_address,
             pretty_format_u256(claim_balance)
         );
         println!(
@@ -140,7 +143,7 @@ async fn initial_balance(
             pretty_format_u256(min_claim)
         );
         loop {
-            let claim_balance = client.get_balance(addresses.claim_address, None).await?;
+            let claim_balance = client.get_balance(private_data.claim_address, None).await?;
             if claim_balance >= min_claim {
                 print_status("Deposit completed");
                 sleep(std::time::Duration::from_secs(5)).await;

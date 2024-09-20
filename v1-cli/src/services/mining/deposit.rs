@@ -16,10 +16,10 @@ use crate::{
 };
 
 pub async fn deposit_task(state: &State) -> anyhow::Result<()> {
-    let deposit_address = state.private_data.to_addresses().await?.deposit_address;
+    let deposit_address = state.private_data.deposit_address;
     let nonce = get_account_nonce(deposit_address).await?;
-    let salt = get_salt_from_private_key_nonce(state.private_data.deposit_key, nonce);
-    let pubkey = get_pubkey_from_private_key(state.private_data.deposit_key);
+    let salt = get_salt_from_private_key_nonce(state.private_data.deposit_private_key, nonce);
+    let pubkey = get_pubkey_from_private_key(state.private_data.deposit_private_key);
     let pubkey_salt_hash: [u8; 32] = get_pubkey_salt_hash(pubkey, salt)
         .to_bytes_be()
         .try_into()
@@ -30,10 +30,9 @@ pub async fn deposit_task(state: &State) -> anyhow::Result<()> {
         MiningAmount::One => ethers::utils::parse_units("1", "ether").unwrap().into(),
     };
 
-    let deposit_address = state.private_data.to_addresses().await?.deposit_address;
-
+    let deposit_address = state.private_data.deposit_address;
     loop {
-        let int1 = get_int1_contract_with_signer(state.private_data.deposit_key).await?;
+        let int1 = get_int1_contract_with_signer(state.private_data.deposit_private_key).await?;
         let tx = int1
             .deposit_native_token(pubkey_salt_hash)
             .value(mining_amount);
@@ -41,15 +40,10 @@ pub async fn deposit_task(state: &State) -> anyhow::Result<()> {
         match result {
             Ok(tx) => {
                 let pending_tx: PendingTransaction<Http> = tx;
-                print_status(&format!("Deposit tx hash: {:?}", pending_tx.tx_hash()));
+                print_status(format!("Deposit tx hash: {:?}", pending_tx.tx_hash()));
                 let tx_receipt = pending_tx.await?.unwrap();
                 ensure!(tx_receipt.status.unwrap() == 1.into(), "Deposit tx failed");
-
-                // reduce remaining deposits
-                let mut user_settings = UserSettings::new()?;
-                user_settings.remaining_deposits -= 1;
-                user_settings.save()?;
-                return Ok(());
+                break;
             }
             Err(e) => {
                 let error_message = e.to_string();
@@ -62,6 +56,11 @@ pub async fn deposit_task(state: &State) -> anyhow::Result<()> {
             }
         }
     }
+    // reduce remaining deposits
+    let mut user_settings = UserSettings::new()?;
+    user_settings.remaining_deposits -= 1;
+    user_settings.save()?;
+    Ok(())
 }
 
 #[cfg(test)]
@@ -70,7 +69,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_deposit() {
-        let state = get_dummy_state();
+        let state = get_dummy_state().await;
         super::deposit_task(&state).await.unwrap();
     }
 }

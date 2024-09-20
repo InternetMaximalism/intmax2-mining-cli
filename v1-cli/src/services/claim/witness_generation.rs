@@ -22,15 +22,8 @@ pub async fn generate_claim_witness(
     );
     let deposit_tree_root = state.deposit_hash_tree.get_root();
     let eligible_tree_root: Bytes32 = state.eligible_tree.get_root().into();
-    let pubkey = get_pubkey_from_private_key(state.private_data.deposit_key);
-    let recipient = Address::from_bytes_be(
-        &state
-            .private_data
-            .to_addresses()
-            .await?
-            .claim_address
-            .as_bytes(),
-    );
+    let pubkey = get_pubkey_from_private_key(state.private_data.deposit_private_key);
+    let recipient = Address::from_bytes_be(&state.private_data.claim_address.as_bytes());
     let mut witnesses = Vec::new();
     let mut prev_claim_hash = Bytes32::default();
     for event in events {
@@ -41,7 +34,7 @@ pub async fn generate_claim_witness(
         let eligible_merkle_proof = state.eligible_tree.tree.prove(eligible_index as usize);
         let eligible_leaf = state.eligible_tree.tree.get_leaf(eligible_index as usize);
         let salt = get_salt_from_private_key_nonce(
-            state.private_data.deposit_key,
+            state.private_data.deposit_private_key,
             event.tx_nonce.unwrap(),
         );
         let value = ClaimInnerValue::new(

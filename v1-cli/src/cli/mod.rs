@@ -36,7 +36,7 @@ async fn start() -> anyhow::Result<State> {
     check_avaliability().await?;
 
     // private settings
-    let private_data = private_data::set_private_data()?;
+    let private_data = private_data::set_private_data().await?;
 
     // user settings
     user_settings::user_settings(&private_data).await?;
