@@ -1,26 +1,16 @@
-use std::{env, io::BufReader, path::Path};
+use std::{io::BufReader, path::PathBuf};
 
 use config::{Config, ConfigError, File};
 use serde::{Deserialize, Serialize};
 
-use crate::utils::file::create_file_with_content;
+use crate::utils::{file::create_file_with_content, network::get_network};
 
-fn config_name() -> &'static str {
-    let network = env::var("NETWORK").unwrap_or_else(|_| "testnet".into());
-    match network.as_str() {
-        "testnet" => "config.testnet",
-        "localnet" => "config.localnet",
-        _ => panic!("Unsupported network"),
-    }
+fn config_name() -> String {
+    format!("config.{}", get_network())
 }
 
-fn user_settings_path() -> &'static Path {
-    let network = env::var("NETWORK").unwrap_or_else(|_| "testnet".into());
-    match network.as_str() {
-        "testnet" => Path::new("data/user_settings.testnet.json"),
-        "localnet" => Path::new("data/user_settings.localnet.json"),
-        _ => panic!("Unsupported network"),
-    }
+fn user_settings_path() -> PathBuf {
+    PathBuf::from(format!("data/user_settings.{}.json", get_network()))
 }
 
 #[derive(Clone, Debug, Deserialize)]
@@ -33,7 +23,7 @@ pub struct Settings {
 impl Settings {
     pub fn new() -> Result<Self, ConfigError> {
         let s = Config::builder()
-            .add_source(File::with_name(config_name()))
+            .add_source(File::with_name(&config_name()))
             .build()?;
         s.try_deserialize()
     }
