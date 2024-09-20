@@ -91,7 +91,7 @@ Note: Be cautious, as this will erase all local data. Ensure you have backups of
 ## How It Works
 
 <div align="center">
-  <img src="assets/diagram.png" width="400" alt="Mining diagram">
+  <img src="assets/diagram.png" width="800" alt="Mining diagram">
 </div>
 
 1. **Setup**: You need three Ethereum addresses:
