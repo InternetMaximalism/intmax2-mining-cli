@@ -31,11 +31,14 @@ v1-mining-cli is a tool that allows users to mine ITX tokens by participating in
 1. Install required packages and Rust:
 
 ```bash
-sudo apt update && sudo apt install -y git curl build-essential pkg-config libssl-dev
+apt update && apt install -y git curl build-essential pkg-config libssl-dev
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+source $HOME/.cargo/env
 ```
 
-2. Clone the repository and install the CLI:
+These commands should be run with sudo if necessary, depending on the execution environment.
+
+1. Clone the repository in arbitrary directory and install the CLI:
 
 ```bash
 git clone https://github.com/internetMaximalism/intmax2-mining-cli.git
@@ -100,13 +103,15 @@ Note: Be cautious, as this will erase all local data. Ensure you have backups of
 - **Withdrawal address**: Where mined ETH is withdrawn to
 - **Claim address**: Where you receive ITX token rewards
 
+Additionally, you need a mainnet RPC URL. We strongly recommend using Alchemy's RPC (the free plan is sufficient). This is because it has a high limit for retrieving event logs.
+
 Note: Users must create these new addresses themselves and input them into the CLI.
 
 - Start the CLI and follow the instructions to set up your addresses.
 - Deposit 1 ETH, 10 ETH, or 100 ETH + gas fee to your deposit address following the instructions in the CLI.
 - Deposit gas fee to your claim address following the instructions in the CLI.
 
-2. **Mining Process**:
+1. **Mining Process**:
 
 - The CLI automatically deposits smaller amounts (0.1 or 1 ETH) into intmax2. The deposit amount can be configured through the CLI
 - After a few hours, it withdraws these amounts to your withdrawal address.
@@ -124,7 +129,7 @@ The CLI has two operating modes:
 1. **Normal mode**: Automatically handles deposits, withdrawals, and ITX token claims.
 2. **Shutdown mode**: Only performs withdrawals and claims currently available ITX tokens. No new deposits are made.
 
-Note: If you switch to shutdown mode immediately after depositing, you may be refunded to the deposit address. 
+Note: If you switch to shutdown mode immediately after depositing, you may be refunded to the deposit address.
 
 ## Important Notes
 
