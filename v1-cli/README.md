@@ -1,12 +1,10 @@
 # v1-mining-cli
 
-┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃                                                                              ┃
-┃ ⚠️ IMPORTANT: This pre-release CLI tool currently operates on Sepolia testnet ┃
-┃ with ~5-minute transaction intervals, not the Ethereum mainnet described in  ┃
-┃ this documentation; expect significant changes before production release.    ┃
-┃                                                                              ┃
-┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+<div style="background-color: #FFFDE7; border: 1px solid #FBC02D; border-radius: 4px; padding: 16px; margin-bottom: 20px;">
+  <p style="color: #F57F17; font-weight: bold; margin: 0;">
+    ⚠️ Note: This pre-release CLI tool currently operates on Sepolia testnet with ~5-minute transaction intervals, not the Ethereum mainnet described in this documentation; expect significant changes before production release.
+  </p>
+</div>
 
 A CLI tool for automatic mining of ITX tokens.
 
