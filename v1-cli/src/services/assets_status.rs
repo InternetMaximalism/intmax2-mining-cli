@@ -7,7 +7,7 @@ use mining_circuit_v1::claim::claim_inner_circuit::get_deposit_nullifier;
 
 use crate::{
     external_api::contracts::{
-        events::{get_deposited_event, DepositQuery, Deposited},
+        events::{get_deposited_event_by_sender, Deposited},
         int1::{get_deposit_data, get_withdrawal_nullifier_exists, DepositData},
         minter::get_claim_nullifier_exists,
     },
@@ -37,7 +37,7 @@ pub async fn fetch_assets_status(
     deposit_address: Address,
     deposit_private_key: H256,
 ) -> anyhow::Result<AssetsStatus> {
-    let senders_deposits = get_deposited_event(DepositQuery::BySender(deposit_address)).await?;
+    let senders_deposits = get_deposited_event_by_sender(deposit_address).await?;
 
     let mut contained_indices = Vec::new();
     let mut not_contained_indices = Vec::new();
@@ -71,7 +71,7 @@ pub async fn fetch_assets_status(
     let mut not_withdrawn_indices = Vec::new();
     for &index in contained_indices.iter() {
         let event = &senders_deposits[index];
-        let salt = get_salt_from_private_key_nonce(deposit_private_key, event.tx_nonce.unwrap());
+        let salt = get_salt_from_private_key_nonce(deposit_private_key, event.tx_nonce);
         let nullifier = get_pubkey_salt_hash(U256::default(), salt);
         let is_exists = get_withdrawal_nullifier_exists(nullifier).await?;
         if is_exists {
@@ -94,7 +94,7 @@ pub async fn fetch_assets_status(
     let mut not_claimed_indices = Vec::new();
     for &index in &eligible_indices {
         let event = &senders_deposits[index];
-        let salt = get_salt_from_private_key_nonce(deposit_private_key, event.tx_nonce.unwrap());
+        let salt = get_salt_from_private_key_nonce(deposit_private_key, event.tx_nonce);
         let nullifier = get_deposit_nullifier(&event.deposit(), salt);
         let is_exists = get_claim_nullifier_exists(nullifier).await?;
         if is_exists {

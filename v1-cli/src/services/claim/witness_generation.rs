@@ -37,10 +37,8 @@ pub async fn generate_claim_witness(
         let eligible_index = state.eligible_tree.get_leaf_index(deposit_index).unwrap();
         let eligible_merkle_proof = state.eligible_tree.tree.prove(eligible_index as usize);
         let eligible_leaf = state.eligible_tree.tree.get_leaf(eligible_index as usize);
-        let salt = get_salt_from_private_key_nonce(
-            state.private_data.deposit_private_key,
-            event.tx_nonce.unwrap(),
-        );
+        let salt =
+            get_salt_from_private_key_nonce(state.private_data.deposit_private_key, event.tx_nonce);
         let value = ClaimInnerValue::new(
             deposit_tree_root,
             deposit_index,
