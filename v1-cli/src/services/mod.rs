@@ -36,8 +36,9 @@ pub async fn main_loop(state: &mut State) -> anyhow::Result<()> {
             break;
         }
 
-        let new_deposit = (assets_status.senders_deposits.len() < max_deposits)
-            && (state.mode != RunMode::Shutdown);
+        let new_deposit = (assets_status.senders_deposits.len() < max_deposits) // deposit only if less than max deposits
+            && (assets_status.pending_indices.is_empty()) // deposit only if no pending deposits
+            && (state.mode != RunMode::Shutdown); // do not deposit in shutdown mode
         let canncel_pending_deposits = state.mode == RunMode::Shutdown;
         mining_task(state, &assets_status, new_deposit, canncel_pending_deposits).await?;
         claim_task(state, &assets_status).await?;
