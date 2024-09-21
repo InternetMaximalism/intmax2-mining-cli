@@ -17,7 +17,6 @@ pub struct Deposited {
     pub token_index: u32,
     pub amount: U256,
     pub tx_nonce: Option<u64>,
-    pub deposit_index: Option<u32>,
 }
 
 impl Deposited {
@@ -82,7 +81,6 @@ pub async fn get_deposited_event(query: DepositQuery) -> anyhow::Result<Vec<Depo
             token_index: event.token_index,
             amount: U256::from_bytes_be(&u256_as_bytes_be(event.amount)),
             tx_nonce,
-            deposit_index: None, // set later
         });
     }
 
