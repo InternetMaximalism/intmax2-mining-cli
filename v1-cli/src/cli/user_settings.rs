@@ -99,7 +99,6 @@ async fn initial_balance(
     num_deposits: usize,
 ) -> anyhow::Result<()> {
     let client = get_client_with_rpc_url(rpc_url).await?;
-
     let initial_deposit = match initial_deposit {
         InitialDeposit::One => ethers::utils::parse_ether("1").unwrap(),
         InitialDeposit::Ten => ethers::utils::parse_ether("10").unwrap(),
@@ -128,6 +127,7 @@ async fn initial_balance(
             pretty_format_u256(min_deposit)
         );
         loop {
+            let client = get_client_with_rpc_url(rpc_url).await?;
             let new_deposit_balance = client
                 .get_balance(private_data.deposit_address, None)
                 .await?;
@@ -152,6 +152,7 @@ async fn initial_balance(
             pretty_format_u256(min_claim)
         );
         loop {
+            let client = get_client_with_rpc_url(rpc_url).await?;
             let claim_balance = client.get_balance(private_data.claim_address, None).await?;
             if claim_balance >= min_claim {
                 print_status("Deposit completed");

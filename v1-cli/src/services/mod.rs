@@ -44,7 +44,17 @@ pub async fn main_loop(state: &mut State) -> anyhow::Result<()> {
 
         claim_task(state, &assets_status).await?;
 
+        // print assets status
+        let assets_status = fetch_assets_status(
+            &state.deposit_hash_tree,
+            &state.eligible_tree,
+            state.private_data.deposit_address,
+            state.private_data.deposit_private_key,
+        )
+        .await
+        .context("Failed fetch assets status")?;
         print_assets_status(&assets_status);
+
         main_loop_cooldown().await?;
     }
     println!("Mining and Claim process ended.");
