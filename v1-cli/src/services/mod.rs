@@ -4,6 +4,7 @@ use claim::claim_task;
 use mining::mining_task;
 
 use crate::{
+    cli::console::print_assets_status,
     config::{Settings, UserSettings},
     state::state::{RunMode, State},
 };
@@ -40,6 +41,8 @@ pub async fn main_loop(state: &mut State) -> anyhow::Result<()> {
         let canncel_pending_deposits = state.mode == RunMode::Shutdown;
         mining_task(state, &assets_status, new_deposit, canncel_pending_deposits).await?;
         claim_task(state, &assets_status).await?;
+
+        print_assets_status(&assets_status);
         main_loop_cooldown().await?;
     }
     println!("Mining and Claim process ended.");
