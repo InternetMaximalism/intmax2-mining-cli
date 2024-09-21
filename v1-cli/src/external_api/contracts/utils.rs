@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+use anyhow::ensure;
 use ethers::{
     core::k256::{ecdsa::SigningKey, SecretKey},
     middleware::SignerMiddleware,
@@ -8,7 +9,10 @@ use ethers::{
     types::{Address, H256, U256},
 };
 
-use crate::config::UserSettings;
+use crate::{
+    cli::console::{insuffient_balance_instruction, print_status},
+    config::UserSettings,
+};
 
 pub async fn get_provider() -> anyhow::Result<Provider<Http>> {
     let user_settings = UserSettings::new()?;
@@ -80,4 +84,49 @@ pub fn u256_as_bytes_be(u256: ethers::types::U256) -> [u8; 32] {
     let mut bytes = [0u8; 32];
     u256.to_big_endian(&mut bytes);
     bytes
+}
+
+pub async fn handle_contract_call<S: ToString>(
+    tx: ethers::contract::builders::ContractCall<
+        SignerMiddleware<Provider<Http>, Wallet<SigningKey>>,
+        (),
+    >,
+    nonce: Option<u64>,
+    from_address: Address,
+    from_name: S,
+    tx_name: S,
+) -> anyhow::Result<()> {
+    loop {
+        let mut tx_with_nonce = tx.clone();
+        if let Some(nonce) = nonce {
+            tx_with_nonce.tx.set_nonce(nonce);
+        }
+        let result = tx_with_nonce.send().await;
+        match result {
+            Ok(tx) => {
+                let pending_tx = tx;
+                print_status(format!(
+                    "{} tx hash: {:?}",
+                    tx_name.to_string(),
+                    pending_tx.tx_hash()
+                ));
+                let tx_receipt = pending_tx.await?.unwrap();
+                ensure!(
+                    tx_receipt.status.unwrap() == 1.into(),
+                    "{} tx failed",
+                    from_name.to_string()
+                );
+                return Ok(());
+            }
+            Err(e) => {
+                let error_message = e.to_string();
+                if error_message.contains("-32000") {
+                    insuffient_balance_instruction(from_address, &from_name.to_string()).await?;
+                    print_status(format!("Retrying {} transaction...", tx_name.to_string()));
+                } else {
+                    return Err(anyhow::anyhow!("Error sending transaction: {:?}", e));
+                }
+            }
+        }
+    }
 }

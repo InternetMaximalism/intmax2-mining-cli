@@ -4,7 +4,7 @@ use claim::claim_task;
 use mining::mining_task;
 
 use crate::{
-    cli::console::print_assets_status,
+    cli::console::{print_assets_status, print_status},
     config::{Settings, UserSettings},
     state::state::{RunMode, State},
 };
@@ -34,6 +34,10 @@ pub async fn main_loop(state: &mut State) -> anyhow::Result<()> {
             && assets_status.not_withdrawn_indices.is_empty()
         {
             break;
+        }
+
+        if assets_status.senders_deposits.len() > max_deposits {
+            print_status("Max deposits reached. No new deposits will be made.");
         }
 
         let new_deposit = (assets_status.senders_deposits.len() < max_deposits) // deposit only if less than max deposits
