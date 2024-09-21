@@ -56,10 +56,6 @@ pub async fn deposit_task(state: &State) -> anyhow::Result<()> {
             }
         }
     }
-    // reduce remaining deposits
-    let mut user_settings = UserSettings::new()?;
-    user_settings.remaining_deposits -= 1;
-    user_settings.save()?;
     Ok(())
 }
 

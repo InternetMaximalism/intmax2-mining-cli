@@ -4,7 +4,7 @@ use dialoguer::Select;
 
 use crate::{
     services::{
-        claim::claim_task::resume_claim_task, main_loop, mining::withdrawal::resume_withdrawal_task,
+        claim::claim::resume_claim_task, main_loop, mining::withdrawal::resume_withdrawal_task,
     },
     state::state::{RunMode, State},
 };

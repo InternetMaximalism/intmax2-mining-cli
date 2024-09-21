@@ -16,7 +16,7 @@ use crate::{
 
 use super::*;
 
-pub async fn claim_task(state: &State, events: &[Deposited]) -> anyhow::Result<()> {
+pub async fn single_claim_task(state: &State, events: &[Deposited]) -> anyhow::Result<()> {
     from_step1(state, events).await?;
     Ok(())
 }
@@ -153,9 +153,9 @@ async fn from_step5(state: &State) -> anyhow::Result<()> {
 #[cfg(test)]
 mod tests {
 
-    use determin::ClaimProcess;
-
-    use crate::{state::prover::Prover, test::get_dummy_state};
+    use crate::{
+        services::assets_status::fetch_assets_status, state::prover::Prover, test::get_dummy_state,
+    };
 
     use super::*;
 
@@ -163,16 +163,24 @@ mod tests {
     async fn test_claim_task() {
         let mut state = get_dummy_state().await;
         state.sync_trees().await.unwrap();
-        let process = determin::determin_next_claim_process(&state).await.unwrap();
-        dbg!(&process);
+
+        let assets_status = fetch_assets_status(
+            &state.deposit_hash_tree,
+            &state.eligible_tree,
+            state.private_data.deposit_address,
+            state.private_data.deposit_private_key,
+        )
+        .await
+        .unwrap();
 
         let prover = Prover::new();
         state.prover = Some(prover);
 
-        let events = match process {
-            ClaimProcess::Claim(events) => events,
-            _ => panic!("Invalid process"),
-        };
-        claim_task(&state, &events).await.unwrap();
+        let not_claimed_events = assets_status.get_not_claimed_events();
+        assert!(not_claimed_events.len() > 0);
+
+        single_claim_task(&state, &not_claimed_events)
+            .await
+            .unwrap();
     }
 }

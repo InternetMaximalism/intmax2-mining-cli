@@ -58,7 +58,7 @@ pub async fn user_settings(private_data: &PrivateData) -> anyhow::Result<()> {
         }
     };
 
-    let remaining_deposits = {
+    let max_deposits = {
         let mining_amount = match mining_amount {
             MiningAmount::OneTenth => 0.1,
             MiningAmount::One => 1.0,
@@ -68,18 +68,18 @@ pub async fn user_settings(private_data: &PrivateData) -> anyhow::Result<()> {
             InitialDeposit::Ten => 10,
             InitialDeposit::Hundred => 100,
         };
-        (initial_deposit as f64 / mining_amount) as u64
+        (initial_deposit as f64 / mining_amount) as usize
     };
 
     UserSettings {
         rpc_url,
         mining_amount,
         initial_deposit,
-        remaining_deposits,
+        max_deposits,
     }
     .save()?;
 
-    initial_balance(private_data, initial_deposit, remaining_deposits).await?;
+    initial_balance(private_data, initial_deposit, max_deposits).await?;
 
     Ok(())
 }
@@ -87,7 +87,7 @@ pub async fn user_settings(private_data: &PrivateData) -> anyhow::Result<()> {
 async fn initial_balance(
     private_data: &PrivateData,
     initial_deposit: InitialDeposit,
-    num_deposits: u64,
+    num_deposits: usize,
 ) -> anyhow::Result<()> {
     let client = get_client().await?;
 

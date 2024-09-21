@@ -6,7 +6,7 @@ use mining_circuit_v1::claim::claim_inner_circuit::ClaimInnerValue;
 
 use crate::{
     external_api::contracts::events::Deposited,
-    services::claim::determin::MAX_CLAIMS,
+    services::claim::MAX_CLAIMS,
     state::state::State,
     utils::salt::{get_pubkey_from_private_key, get_salt_from_private_key_nonce},
 };

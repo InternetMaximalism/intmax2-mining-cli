@@ -1,6 +1,7 @@
 use std::{io::BufReader, path::PathBuf};
 
-use config::{Config, ConfigError, File};
+use anyhow::Context;
+use config::{Config, File};
 use serde::{Deserialize, Serialize};
 
 use crate::utils::{file::create_file_with_content, network::get_network};
@@ -21,11 +22,12 @@ pub struct Settings {
 }
 
 impl Settings {
-    pub fn new() -> Result<Self, ConfigError> {
+    pub fn new() -> anyhow::Result<Self> {
         let s = Config::builder()
             .add_source(File::with_name(&config_name()))
-            .build()?;
-        s.try_deserialize()
+            .build()
+            .context("Failed to load config")?;
+        s.try_deserialize().context("Failed to deserialize config")
     }
 }
 
@@ -76,12 +78,13 @@ pub struct UserSettings {
     pub rpc_url: String,
     pub mining_amount: MiningAmount,
     pub initial_deposit: InitialDeposit,
-    pub remaining_deposits: u64,
+    pub max_deposits: usize,
 }
 
 impl UserSettings {
     pub fn new() -> anyhow::Result<Self> {
-        let file = std::fs::File::open(&user_settings_path())?;
+        let file =
+            std::fs::File::open(&user_settings_path()).context("Failed to open user settings")?;
         let reader = BufReader::new(file);
         let settings: UserSettings = serde_json::from_reader(reader)?;
         Ok(settings)

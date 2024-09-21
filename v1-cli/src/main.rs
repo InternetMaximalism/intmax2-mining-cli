@@ -25,7 +25,7 @@ async fn main() {
     match run().await {
         Ok(_) => {}
         Err(e) => {
-            print_error(&e.to_string());
+            print_error(format!("{:#}", e));
         }
     }
 }
