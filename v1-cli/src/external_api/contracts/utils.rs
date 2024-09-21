@@ -22,6 +22,11 @@ pub async fn get_client() -> anyhow::Result<Arc<Provider<Http>>> {
     Ok(client)
 }
 
+pub async fn get_client_with_rpc_url(rpc_url: &str) -> anyhow::Result<Arc<Provider<Http>>> {
+    let provider = Provider::<Http>::try_from(rpc_url)?;
+    Ok(Arc::new(provider))
+}
+
 pub async fn get_client_with_signer(
     private_key: H256,
 ) -> anyhow::Result<SignerMiddleware<Provider<Http>, Wallet<SigningKey>>> {

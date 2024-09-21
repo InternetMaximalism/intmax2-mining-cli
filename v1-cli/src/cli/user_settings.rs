@@ -5,29 +5,38 @@ use tokio::time::sleep;
 use crate::{
     cli::console::print_status,
     config::{InitialDeposit, MiningAmount, Settings, UserSettings},
-    external_api::contracts::utils::get_client,
+    external_api::contracts::utils::get_client_with_rpc_url,
     private_data::PrivateData,
     utils::network::get_network,
 };
 
-use super::console::pretty_format_u256;
+use super::console::{pretty_format_u256, print_warning};
 
 pub async fn user_settings(private_data: &PrivateData) -> anyhow::Result<()> {
     if !UserSettings::new().is_err() {
         // user settings already exists
         return Ok(());
     }
-    let rpc_url: String = Input::new()
-        .with_prompt(format!("RPC URL of {}", get_network()))
-        .validate_with(|rpc_url: &String| {
-            if rpc_url.starts_with("http") {
-                Ok(())
-            } else {
-                Err("Invalid RPC URL")
+
+    let rpc_url = loop {
+        let rpc_url: String = Input::new()
+            .with_prompt(format!("RPC URL of {}", get_network()))
+            .validate_with(|rpc_url: &String| {
+                if rpc_url.starts_with("http") {
+                    Ok(())
+                } else {
+                    Err("Invalid RPC URL")
+                }
+            })
+            .interact()?;
+        match check_rpc_url(&rpc_url).await {
+            Ok(_) => break rpc_url,
+            Err(e) => {
+                print_warning(format!("{}", e));
+                continue;
             }
-        })
-        .interact()?;
-    check_rpc_url(&rpc_url).await?;
+        }
+    };
 
     let mining_amount = {
         let items = vec!["0.1 ETH", "1.0 ETH"];
@@ -71,6 +80,8 @@ pub async fn user_settings(private_data: &PrivateData) -> anyhow::Result<()> {
         (initial_deposit as f64 / mining_amount) as usize
     };
 
+    initial_balance(private_data, &rpc_url, initial_deposit, max_deposits).await?;
+
     UserSettings {
         rpc_url,
         mining_amount,
@@ -78,18 +89,16 @@ pub async fn user_settings(private_data: &PrivateData) -> anyhow::Result<()> {
         max_deposits,
     }
     .save()?;
-
-    initial_balance(private_data, initial_deposit, max_deposits).await?;
-
     Ok(())
 }
 
 async fn initial_balance(
     private_data: &PrivateData,
+    rpc_url: &str,
     initial_deposit: InitialDeposit,
     num_deposits: usize,
 ) -> anyhow::Result<()> {
-    let client = get_client().await?;
+    let client = get_client_with_rpc_url(rpc_url).await?;
 
     let initial_deposit = match initial_deposit {
         InitialDeposit::One => ethers::utils::parse_ether("1").unwrap(),
