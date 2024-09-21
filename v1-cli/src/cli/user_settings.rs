@@ -7,10 +7,11 @@ use crate::{
     config::{InitialDeposit, MiningAmount, Settings, UserSettings},
     external_api::contracts::utils::get_client_with_rpc_url,
     private_data::PrivateData,
+    services::contracts::pretty_format_u256,
     utils::network::get_network,
 };
 
-use super::console::{pretty_format_u256, print_warning};
+use super::console::print_warning;
 
 pub async fn user_settings(private_data: &PrivateData) -> anyhow::Result<()> {
     if !UserSettings::new().is_err() {

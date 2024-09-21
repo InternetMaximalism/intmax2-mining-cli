@@ -4,8 +4,8 @@ use crate::{
     external_api::contracts::{
         events::Deposited,
         int1::{get_int1_contract_with_signer, int_1},
-        utils::handle_contract_call,
     },
+    services::contracts::handle_contract_call,
     state::state::State,
 };
 

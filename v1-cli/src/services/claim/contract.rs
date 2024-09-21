@@ -11,8 +11,9 @@ use crate::{
     cli::console::print_status,
     external_api::contracts::{
         minter::{get_minter_contract_with_signer, minter_v1},
-        utils::{get_wallet, handle_contract_call},
+        utils::get_wallet,
     },
+    services::contracts::handle_contract_call,
 };
 
 pub async fn claim_tokens(

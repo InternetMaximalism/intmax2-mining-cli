@@ -11,6 +11,7 @@ use crate::{
 
 pub mod assets_status;
 pub mod claim;
+pub mod contracts;
 pub mod mining;
 pub mod sync;
 

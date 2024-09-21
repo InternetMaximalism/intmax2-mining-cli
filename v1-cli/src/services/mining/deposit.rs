@@ -5,10 +5,8 @@ use intmax2_zkp::{
 
 use crate::{
     config::{MiningAmount, UserSettings},
-    external_api::contracts::{
-        int1::get_int1_contract_with_signer,
-        utils::{get_account_nonce, handle_contract_call},
-    },
+    external_api::contracts::{int1::get_int1_contract_with_signer, utils::get_account_nonce},
+    services::contracts::handle_contract_call,
     state::state::State,
     utils::salt::{get_pubkey_from_private_key, get_salt_from_private_key_nonce},
 };
