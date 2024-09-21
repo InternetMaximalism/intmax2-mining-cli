@@ -30,10 +30,12 @@ pub async fn deposit_task(state: &State) -> anyhow::Result<()> {
 
     let deposit_address = state.private_data.deposit_address;
     let int1 = get_int1_contract_with_signer(state.private_data.deposit_private_key).await?;
-    let tx = int1
+    let mut tx = int1
         .deposit_native_token(pubkey_salt_hash)
         .value(mining_amount);
-    handle_contract_call(tx, Some(nonce), deposit_address, "deposit", "deposit").await?;
+    tx.tx.set_nonce(nonce);
+
+    handle_contract_call(tx, deposit_address, "deposit", "deposit").await?;
     Ok(())
 }
 

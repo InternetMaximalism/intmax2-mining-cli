@@ -39,7 +39,7 @@ mod tests {
                     let address = get_wallet(state.private_data.deposit_private_key)
                         .await?
                         .address();
-                    insuffient_balance_instruction(address, "deposit").await?;
+                    insuffient_balance_instruction(address, 0.into(), "deposit").await?;
                 } else {
                     println!("JSON-RPC error: {}", error_message);
                 }

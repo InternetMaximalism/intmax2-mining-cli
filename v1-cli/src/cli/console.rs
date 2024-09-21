@@ -61,16 +61,21 @@ pub fn print_error<S: ToString>(message: S) {
     error!("{}", message.to_string());
 }
 
-pub async fn insuffient_balance_instruction(address: Address, name: &str) -> anyhow::Result<()> {
+pub async fn insuffient_balance_instruction(
+    address: Address,
+    required_balance: U256,
+    name: &str,
+) -> anyhow::Result<()> {
     let client = get_client().await?;
     let balance = client.get_balance(address, None).await?;
     print_warning(format!(
         r"Insufficient balance of {} address {:?}. 
-Current balance: {} ETH.
+Current balance: {} ETH. At least {} ETH is required for the transaction.
 Waiting for your deposit...",
         name,
         address,
-        pretty_format_u256(balance)
+        pretty_format_u256(balance),
+        pretty_format_u256(required_balance)
     ));
     loop {
         let new_balance = client.get_balance(address, None).await?;

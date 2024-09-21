@@ -91,17 +91,12 @@ pub async fn handle_contract_call<S: ToString>(
         SignerMiddleware<Provider<Http>, Wallet<SigningKey>>,
         (),
     >,
-    nonce: Option<u64>,
     from_address: Address,
     from_name: S,
     tx_name: S,
 ) -> anyhow::Result<()> {
     loop {
-        let mut tx_with_nonce = tx.clone();
-        if let Some(nonce) = nonce {
-            tx_with_nonce.tx.set_nonce(nonce);
-        }
-        let result = tx_with_nonce.send().await;
+        let result = tx.send().await;
         match result {
             Ok(tx) => {
                 let pending_tx = tx;
@@ -120,8 +115,18 @@ pub async fn handle_contract_call<S: ToString>(
             }
             Err(e) => {
                 let error_message = e.to_string();
+                // insufficient balance
                 if error_message.contains("-32000") {
-                    insuffient_balance_instruction(from_address, &from_name.to_string()).await?;
+                    let estimate_gas = tx.estimate_gas().await?;
+                    let gas_price = get_client().await?.get_gas_price().await?;
+                    let value = tx.tx.value().cloned().unwrap_or_default();
+                    let necessary_balance = estimate_gas * gas_price + value;
+                    insuffient_balance_instruction(
+                        from_address,
+                        necessary_balance,
+                        &from_name.to_string(),
+                    )
+                    .await?;
                     print_status(format!("Retrying {} transaction...", tx_name.to_string()));
                 } else {
                     return Err(anyhow::anyhow!("Error sending transaction: {:?}", e));

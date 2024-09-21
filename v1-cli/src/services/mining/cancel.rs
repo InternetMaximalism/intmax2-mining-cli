@@ -18,6 +18,6 @@ pub async fn cancel_task(state: &State, event: Deposited) -> anyhow::Result<()> 
     let deposit_address = state.private_data.deposit_address;
     let int1 = get_int1_contract_with_signer(state.private_data.deposit_private_key).await?;
     let tx = int1.cancel_deposit(event.deposit_id.into(), deposit.clone());
-    handle_contract_call(tx, None, deposit_address, "deposit", "cancel").await?;
+    handle_contract_call(tx, deposit_address, "deposit", "cancel").await?;
     Ok(())
 }

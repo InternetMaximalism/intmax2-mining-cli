@@ -39,6 +39,6 @@ pub async fn claim_tokens(
     print_status(format!("Claiming tokens for address: {}", claim_address));
     let minter = get_minter_contract_with_signer(claim_key).await?;
     let tx = minter.claim_tokens(mint_claims.clone(), pis.clone(), proof.clone());
-    handle_contract_call(tx, None, claim_address, "claim", "claim").await?;
+    handle_contract_call(tx, claim_address, "claim", "claim").await?;
     Ok(())
 }
