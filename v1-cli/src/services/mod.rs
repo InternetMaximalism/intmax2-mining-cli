@@ -41,6 +41,7 @@ pub async fn main_loop(state: &mut State) -> anyhow::Result<()> {
             && (state.mode != RunMode::Shutdown); // do not deposit in shutdown mode
         let canncel_pending_deposits = state.mode == RunMode::Shutdown;
         mining_task(state, &assets_status, new_deposit, canncel_pending_deposits).await?;
+
         claim_task(state, &assets_status).await?;
 
         print_assets_status(&assets_status);

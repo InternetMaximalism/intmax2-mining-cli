@@ -35,7 +35,7 @@ pub fn print_warning<S: ToString>(message: S) {
 
 pub fn print_assets_status(assets_status: &crate::services::assets_status::AssetsStatus) {
     print_status(format!(
-        "Deposits: {} Contained: {} Rejected: {} Cancelled: {} Pending: {} Withdrawn: {} Not Withdrawn: {} Eligible: {} Claimed: {} Not Claimed: {}",
+        "Deposits: {} (contained: {} rejected: {} cancelled: {} pending: {}) Withdrawn: {} Not Withdrawn: {} Eligible: {} (claimed: {} not claimed: {})",
         assets_status.senders_deposits.len(),
         assets_status.contained_indices.len(),
         assets_status.rejected_indices.len(),
