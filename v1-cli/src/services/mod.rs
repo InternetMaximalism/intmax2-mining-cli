@@ -37,7 +37,7 @@ pub async fn main_loop(state: &mut State) -> anyhow::Result<()> {
             break;
         }
 
-        if assets_status.senders_deposits.len() > max_deposits {
+        if assets_status.senders_deposits.len() >= max_deposits {
             print_status("Max deposits reached. Mining and Claim process ended.");
             break;
         }

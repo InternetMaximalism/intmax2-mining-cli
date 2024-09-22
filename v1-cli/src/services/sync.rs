@@ -1,5 +1,4 @@
 use crate::{
-    cli::console::print_status,
     external_api::{
         contracts::{events::get_deposit_leaf_inserted_event, int1::get_deposit_root},
         github::fetch_latest_tree_from_github,
@@ -26,7 +25,6 @@ pub async fn sync_trees(
             sync_to_latest_deposit_tree(deposit_hash_tree, *last_deposit_block_number).await?;
         return Ok(());
     }
-    print_status("Fetching latest trees from github...");
     match fetch_latest_tree_from_github(*last_update).await? {
         Some((bin_deposit_tree, bin_eligible_tree, new_last_update)) => {
             let deposit_tree_info: DepositTreeInfo = bin_deposit_tree.try_into()?;

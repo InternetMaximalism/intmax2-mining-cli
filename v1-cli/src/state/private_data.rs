@@ -19,7 +19,7 @@ fn private_data_path() -> PathBuf {
     PathBuf::from(format!("data/private.{}.bin", get_network()))
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PrivateData {
     pub deposit_private_key: H256,
     pub claim_private_key: H256,
