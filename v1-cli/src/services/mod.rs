@@ -38,7 +38,8 @@ pub async fn main_loop(state: &mut State) -> anyhow::Result<()> {
         }
 
         if assets_status.senders_deposits.len() > max_deposits {
-            print_status("Max deposits reached. No new deposits will be made.");
+            print_status("Max deposits reached. Mining and Claim process ended.");
+            break;
         }
 
         let new_deposit = (assets_status.senders_deposits.len() < max_deposits) // deposit only if less than max deposits
@@ -62,7 +63,6 @@ pub async fn main_loop(state: &mut State) -> anyhow::Result<()> {
 
         main_loop_cooldown().await?;
     }
-    println!("Mining and Claim process ended.");
     Ok(())
 }
 
