@@ -51,6 +51,7 @@ pub async fn main_loop(state: &mut State) -> anyhow::Result<()> {
         claim_task(state, &assets_status).await?;
 
         // print assets status
+        state.sync_trees().await?;
         let assets_status = fetch_assets_status(
             &state.deposit_hash_tree,
             &state.eligible_tree,
