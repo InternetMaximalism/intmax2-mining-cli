@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::utils::config::Settings;
+use crate::utils::{config::Settings, errors::CLIError};
 
 use super::IntmaxErrorResponse;
 
@@ -25,7 +25,8 @@ pub async fn get_availability() -> anyhow::Result<AvaliabilityServerSuccessRespo
         "{}?version={}",
         settings.api.availability_server_url, version,
     ))
-    .await?;
+    .await
+    .map_err(|e| CLIError::NetworkError(e.to_string()))?;
     let response_json: AvaliabilityServerResponse = response.json().await?;
     match response_json {
         AvaliabilityServerResponse::Success(success) => Ok(success),

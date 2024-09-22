@@ -1,5 +1,6 @@
 use std::{env, fmt::Display};
 
+#[derive(PartialEq)]
 pub enum Network {
     Localnet,
     Sepolia,

@@ -10,7 +10,11 @@ use tokio::time::sleep;
 
 use crate::{
     external_api::contracts::int1::{get_int1_contract_with_signer, int_1},
-    utils::config::Settings,
+    utils::{
+        config::Settings,
+        errors::CLIError,
+        network::{get_network, Network},
+    },
 };
 
 use super::IntmaxErrorResponse;
@@ -40,31 +44,9 @@ pub async fn submit_withdrawal(
     proof: &str,
 ) -> anyhow::Result<H256> {
     let settings = Settings::new()?;
-    let tx_hash = if settings.blockchain.chain_id == 31337 {
-        // dummy private key for localnet
-        let local_private_key =
-            H256::from_str("0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a")
-                .unwrap();
-        let int1 = get_int1_contract_with_signer(local_private_key).await?;
-        let public_inputs = int_1::WithdrawalPublicInputs {
-            deposit_root: pis.deposit_root.to_bytes_be().try_into().unwrap(),
-            nullifier: pis.nullifier.to_bytes_be().try_into().unwrap(),
-            recipient: Address::from_slice(&pis.recipient.to_bytes_be()),
-            token_index: pis.token_index,
-            amount: U256::from_big_endian(&pis.amount.to_bytes_be()),
-        };
-        let proof = Bytes::from_str(proof)?;
-        let tx = int1.withdraw(public_inputs, proof);
-        let pending_tx: PendingTransaction<Http> = match tx.send().await {
-            Ok(tx) => {
-                sleep(std::time::Duration::from_secs(5)).await;
-                tx
-            }
-            Err(e) => {
-                return Err(anyhow::anyhow!("Error sending transaction: {:?}", e));
-            }
-        };
-        pending_tx.tx_hash()
+    let tx_hash = if get_network() == Network::Localnet {
+        let tx_hash = localnet_withdrawal(pis, proof).await?;
+        tx_hash
     } else {
         let input = SubmitWithdrawalInput {
             public_inputs: pis,
@@ -74,7 +56,8 @@ pub async fn submit_withdrawal(
             .post(settings.api.withdrawal_server_url)
             .json(&input)
             .send()
-            .await?;
+            .await
+            .map_err(|e| CLIError::NetworkError(e.to_string()))?;
         let response: SumbitWithdrawalResponse = response.json().await?;
         match response {
             SumbitWithdrawalResponse::Sucess(success) => H256::from_str(&success.transaction_hash)?,
@@ -84,6 +67,36 @@ pub async fn submit_withdrawal(
         }
     };
     Ok(tx_hash)
+}
+
+async fn localnet_withdrawal(
+    pis: SimpleWithdrawalPublicInputs,
+    proof: &str,
+) -> anyhow::Result<H256> {
+    // Hardhat's default private key for withdrawal
+    let local_private_key =
+        H256::from_str("0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a")
+            .unwrap();
+    let int1 = get_int1_contract_with_signer(local_private_key).await?;
+    let public_inputs = int_1::WithdrawalPublicInputs {
+        deposit_root: pis.deposit_root.to_bytes_be().try_into().unwrap(),
+        nullifier: pis.nullifier.to_bytes_be().try_into().unwrap(),
+        recipient: Address::from_slice(&pis.recipient.to_bytes_be()),
+        token_index: pis.token_index,
+        amount: U256::from_big_endian(&pis.amount.to_bytes_be()),
+    };
+    let proof = Bytes::from_str(proof)?;
+    let tx = int1.withdraw(public_inputs, proof);
+    let pending_tx: PendingTransaction<Http> = match tx.send().await {
+        Ok(tx) => {
+            sleep(std::time::Duration::from_secs(5)).await;
+            tx
+        }
+        Err(e) => {
+            return Err(anyhow::anyhow!("Error sending transaction: {:?}", e));
+        }
+    };
+    Ok(pending_tx.tx_hash())
 }
 
 #[cfg(test)]
