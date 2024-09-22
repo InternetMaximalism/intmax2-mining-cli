@@ -139,6 +139,7 @@ async fn from_step5(state: &State) -> anyhow::Result<()> {
         eligible_tree_root: status.witness[0].eligible_tree_root,
         last_claim_hash,
     };
+    temp::ClaimStatus::delete()?;
     claim_tokens(
         state.private_data.claim_private_key,
         &claims,
@@ -146,7 +147,6 @@ async fn from_step5(state: &State) -> anyhow::Result<()> {
         &status.gnark_proof.unwrap(),
     )
     .await?;
-    temp::ClaimStatus::delete()?;
     Ok(())
 }
 
