@@ -6,7 +6,10 @@ use crate::{
     services::{
         claim::claim::resume_claim_task, main_loop, mining::withdrawal::resume_withdrawal_task,
     },
-    state::state::{RunMode, State},
+    state::{
+        prover::Prover,
+        state::{RunMode, State},
+    },
     utils::network::get_network,
 };
 
@@ -33,6 +36,7 @@ pub async fn run() -> anyhow::Result<()> {
 async fn start() -> anyhow::Result<State> {
     println!("Welcome to the INTMAX mining CLI!");
     println!("Network: {}", get_network());
+    let prover_future = tokio::spawn(async { Prover::new() });
 
     // check availability
     check_avaliability().await?;
@@ -46,9 +50,10 @@ async fn start() -> anyhow::Result<State> {
     // construct state
     let mode = select_mode();
     let mut state = State::new(private_data, mode);
+    print_status("Waiting for prover to be ready");
+    let prover = prover_future.await?;
+    state.prover = Some(prover);
 
-    print_status("Building circuit");
-    state.build_circuit()?;
     Ok(state)
 }
 

@@ -38,6 +38,23 @@ pub async fn set_private_data() -> anyhow::Result<PrivateData> {
                 &withdrawal_address,
             )
             .await?;
+
+            if private_data.deposit_address == private_data.withdrawal_address {
+                return Err(anyhow::anyhow!(
+                    "Deposit and withdrawal addresses must be different"
+                ));
+            }
+            if private_data.deposit_address == private_data.claim_address {
+                return Err(anyhow::anyhow!(
+                    "Deposit and claim addresses must be different"
+                ));
+            }
+            if private_data.claim_address == private_data.withdrawal_address {
+                return Err(anyhow::anyhow!(
+                    "Claim and withdrawal addresses must be different"
+                ));
+            }
+
             let password = Password::new()
                 .with_prompt("Password to encrypt private key")
                 .with_confirmation("Confirm password", "Passwords do not match")
