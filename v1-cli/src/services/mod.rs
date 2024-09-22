@@ -5,8 +5,8 @@ use mining::mining_task;
 
 use crate::{
     cli::console::{print_assets_status, print_status},
-    config::{Settings, UserSettings},
     state::state::{RunMode, State},
+    utils::config::{Settings, UserSettings},
 };
 
 pub mod assets_status;

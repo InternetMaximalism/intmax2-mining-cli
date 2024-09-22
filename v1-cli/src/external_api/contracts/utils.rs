@@ -8,7 +8,7 @@ use ethers::{
     types::{Address, H256, U256},
 };
 
-use crate::config::UserSettings;
+use crate::utils::config::UserSettings;
 
 pub async fn get_provider() -> anyhow::Result<Provider<Http>> {
     let user_settings = UserSettings::new()?;
@@ -37,7 +37,7 @@ pub async fn get_client_with_signer(
 }
 
 pub async fn get_wallet(private_key: H256) -> anyhow::Result<Wallet<SigningKey>> {
-    let settings = crate::config::Settings::new()?;
+    let settings = crate::utils::config::Settings::new()?;
     let key = SecretKey::from_be_bytes(private_key.as_bytes()).unwrap();
     let wallet = Wallet::from(key).with_chain_id(settings.blockchain.chain_id);
     Ok(wallet)

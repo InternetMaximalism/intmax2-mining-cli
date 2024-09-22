@@ -4,7 +4,7 @@ use deposit::deposit_task;
 use rand::Rng as _;
 use withdrawal::withdrawal_task;
 
-use crate::{cli::console::print_status, config::Settings, state::state::State};
+use crate::{cli::console::print_status, state::state::State, utils::config::Settings};
 
 use super::assets_status::AssetsStatus;
 

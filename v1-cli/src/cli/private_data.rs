@@ -1,4 +1,6 @@
-use crate::private_data::{load_encrypted_private_data, write_encrypted_private_data, PrivateData};
+use crate::state::private_data::{
+    load_encrypted_private_data, write_encrypted_private_data, PrivateData,
+};
 use dialoguer::{Input, Password};
 use ethers::types::{H160, H256};
 

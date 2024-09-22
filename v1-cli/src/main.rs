@@ -5,9 +5,7 @@ use simplelog::{Config, LevelFilter, WriteLogger};
 use utils::file::create_file_with_content;
 
 pub mod cli;
-pub mod config;
 pub mod external_api;
-pub mod private_data;
 pub mod services;
 pub mod state;
 pub mod test;
@@ -16,7 +14,7 @@ pub mod utils;
 #[tokio::main]
 async fn main() {
     // load config
-    config::Settings::new().expect("Failed to load config");
+    utils::config::Settings::new().expect("Failed to load config");
 
     // setup logging
     let log_path = PathBuf::from(format!("data/logs/{}.log", chrono::Utc::now().to_rfc3339()));

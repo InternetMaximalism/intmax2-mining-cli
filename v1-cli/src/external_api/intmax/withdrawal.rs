@@ -9,8 +9,8 @@ use std::str::FromStr;
 use tokio::time::sleep;
 
 use crate::{
-    config::Settings,
     external_api::contracts::int1::{get_int1_contract_with_signer, int_1},
+    utils::config::Settings,
 };
 
 use super::IntmaxErrorResponse;

@@ -5,7 +5,6 @@ use mining_circuit_v1::withdrawal::simple_withraw_circuit::SimpleWithdrawalPubli
 
 use crate::{
     cli::console::print_status,
-    config::Settings,
     external_api::{
         contracts::{events::Deposited, utils::get_tx_receipt},
         intmax::{
@@ -14,6 +13,7 @@ use crate::{
         },
     },
     state::state::State,
+    utils::config::Settings,
 };
 
 pub mod temp;

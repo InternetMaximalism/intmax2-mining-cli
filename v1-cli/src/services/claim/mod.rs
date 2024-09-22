@@ -2,7 +2,7 @@ use anyhow::Context;
 use claim::single_claim_task;
 use rand::Rng as _;
 
-use crate::{cli::console::print_status, config::Settings, state::state::State};
+use crate::{cli::console::print_status, state::state::State, utils::config::Settings};
 
 use super::assets_status::AssetsStatus;
 

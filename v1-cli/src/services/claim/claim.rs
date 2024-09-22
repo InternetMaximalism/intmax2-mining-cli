@@ -6,12 +6,12 @@ use mining_circuit_v1::claim::claim_circuit::ClaimPublicInputs;
 
 use crate::{
     cli::console::print_status,
-    config::Settings,
     external_api::{
         contracts::events::Deposited,
         intmax::gnark::{fetch_gnark_proof, gnark_start_prove},
     },
     state::state::State,
+    utils::config::Settings,
 };
 
 use super::*;

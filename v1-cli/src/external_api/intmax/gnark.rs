@@ -9,7 +9,7 @@ use plonky2::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::config::Settings;
+use crate::utils::config::Settings;
 
 use super::IntmaxErrorResponse;
 

@@ -4,10 +4,10 @@ use tokio::time::sleep;
 
 use crate::{
     cli::console::print_status,
-    config::{InitialDeposit, MiningAmount, Settings, UserSettings},
     external_api::contracts::utils::get_client_with_rpc_url,
-    private_data::PrivateData,
     services::contracts::pretty_format_u256,
+    state::private_data::PrivateData,
+    utils::config::{InitialDeposit, MiningAmount, Settings, UserSettings},
     utils::network::get_network,
 };
 
