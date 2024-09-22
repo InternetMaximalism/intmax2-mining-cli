@@ -42,7 +42,7 @@ pub async fn user_settings(private_data: &PrivateData) -> anyhow::Result<()> {
     let mining_amount = {
         let items = vec!["0.1 ETH", "1.0 ETH"];
         let selection = Select::new()
-            .with_prompt("Choose mining amount")
+            .with_prompt("Choose mining amount (single deposit amount)")
             .items(&items)
             .default(0)
             .interact()?;

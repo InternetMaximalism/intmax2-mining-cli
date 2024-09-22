@@ -1,5 +1,6 @@
-use crate::state::private_data::{
-    load_encrypted_private_data, write_encrypted_private_data, PrivateData,
+use crate::{
+    state::private_data::{load_encrypted_private_data, write_encrypted_private_data, PrivateData},
+    utils::network::get_network,
 };
 use dialoguer::{Input, Password};
 use ethers::types::{H160, H256};
@@ -14,15 +15,21 @@ pub async fn set_private_data() -> anyhow::Result<PrivateData> {
         }
         None => {
             let deposit_private_key: String = Password::new()
-                .with_prompt("Deposit private key")
+                .with_prompt(format!(
+                    "Private key of deposit account on {}",
+                    get_network(),
+                ))
                 .validate_with(|input: &String| validate_private_key(input))
                 .interact()?;
             let claim_private_key: String = Password::new()
-                .with_prompt("Claim private key")
+                .with_prompt(format!("Private key of claim account on {}", get_network(),))
                 .validate_with(|input: &String| validate_private_key(input))
                 .interact()?;
             let withdrawal_address: String = Input::new()
-                .with_prompt("Withdrawal address")
+                .with_prompt(format!(
+                    "Address of withdrawal account on {}",
+                    get_network(),
+                ))
                 .validate_with(|input: &String| validate_address(input))
                 .interact()?;
             let private_data = PrivateData::new(
