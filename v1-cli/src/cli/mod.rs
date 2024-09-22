@@ -7,6 +7,7 @@ use crate::{
         claim::claim::resume_claim_task, main_loop, mining::withdrawal::resume_withdrawal_task,
     },
     state::state::{RunMode, State},
+    utils::network::get_network,
 };
 
 pub mod availability;
@@ -31,6 +32,7 @@ pub async fn run() -> anyhow::Result<()> {
 
 async fn start() -> anyhow::Result<State> {
     println!("Welcome to the INTMAX mining CLI!");
+    println!("Network: {}", get_network());
 
     // check availability
     check_avaliability().await?;
