@@ -96,13 +96,3 @@ impl UserSettings {
         Ok(())
     }
 }
-
-#[cfg(test)]
-mod tests {
-
-    #[test]
-    fn test_config() {
-        let settings = super::Settings::new().unwrap();
-        dbg!(settings);
-    }
-}

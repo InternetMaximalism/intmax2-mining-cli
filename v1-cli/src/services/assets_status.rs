@@ -1,3 +1,4 @@
+use anyhow::ensure;
 use ethers::types::{Address, H256};
 use intmax2_zkp::{
     common::deposit::get_pubkey_salt_hash, ethereum_types::u256::U256,
@@ -8,7 +9,10 @@ use mining_circuit_v1::claim::claim_inner_circuit::get_deposit_nullifier;
 use crate::{
     external_api::contracts::{
         events::{get_deposited_event_by_sender, Deposited},
-        int1::{get_deposit_data, get_withdrawal_nullifier_exists, DepositData},
+        int1::{
+            get_deposit_data, get_last_processed_deposit_id, get_withdrawal_nullifier_exists,
+            DepositData,
+        },
         minter::get_claim_nullifier_exists,
     },
     utils::{
@@ -52,6 +56,7 @@ pub async fn fetch_assets_status(
         }
     }
 
+    let last_processed_deposit_id = get_last_processed_deposit_id().await?;
     let mut rejected_indices = Vec::new();
     let mut cancelled_indices = Vec::new();
     let mut pending_indices = Vec::new();
@@ -59,10 +64,18 @@ pub async fn fetch_assets_status(
         let event = &senders_deposits[index];
         let deposit_data = get_deposit_data(event.deposit_id).await?;
         if deposit_data.is_rejected {
+            ensure!(
+                event.deposit_id <= last_processed_deposit_id,
+                "Error Inconsistency: Rejected deposit ID is not processed yet"
+            );
             rejected_indices.push(index);
         } else if deposit_data == DepositData::default() {
             cancelled_indices.push(index);
         } else {
+            ensure!(
+                last_processed_deposit_id < event.deposit_id,
+                "Error Inconsistency: Pending deposit ID is processed"
+            );
             pending_indices.push(index);
         }
     }

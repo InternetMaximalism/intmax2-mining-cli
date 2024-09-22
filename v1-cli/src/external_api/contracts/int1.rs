@@ -66,3 +66,9 @@ pub async fn get_withdrawal_nullifier_exists(nullifier: Bytes32) -> anyhow::Resu
     let exists = block_number != 0.into();
     Ok(exists)
 }
+
+pub async fn get_last_processed_deposit_id() -> anyhow::Result<u64> {
+    let int1 = get_int1_contract().await?;
+    let id = int1.get_last_processed_deposit_id().call().await?;
+    Ok(id.as_u64())
+}
