@@ -68,7 +68,7 @@ pub async fn get_tx_receipt(
     let client = get_client().await?;
     let mut loop_count = 0;
     loop {
-        if loop_count > 10 {
+        if loop_count > 20 {
             return Err(anyhow::anyhow!(
                 "Transaction not mined for tx hash: {:?}",
                 tx_hash
@@ -78,7 +78,7 @@ pub async fn get_tx_receipt(
         if receipt.is_some() {
             return Ok(receipt.unwrap());
         }
-        tokio::time::sleep(std::time::Duration::from_secs(5)).await;
+        tokio::time::sleep(std::time::Duration::from_secs(10)).await;
         loop_count += 1;
     }
 }
