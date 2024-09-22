@@ -4,35 +4,45 @@ use tokio::time::sleep;
 
 use crate::{
     cli::console::print_status,
-    config::{InitialDeposit, MiningAmount, Settings, UserSettings},
-    external_api::contracts::utils::get_client,
-    private_data::PrivateData,
+    external_api::contracts::utils::get_client_with_rpc_url,
+    services::contracts::pretty_format_u256,
+    state::private_data::PrivateData,
+    utils::config::{InitialDeposit, MiningAmount, Settings, UserSettings},
     utils::network::get_network,
 };
 
-use super::console::pretty_format_u256;
+use super::console::print_warning;
 
 pub async fn user_settings(private_data: &PrivateData) -> anyhow::Result<()> {
     if !UserSettings::new().is_err() {
         // user settings already exists
         return Ok(());
     }
-    let rpc_url: String = Input::new()
-        .with_prompt(format!("RPC URL of {}", get_network()))
-        .validate_with(|rpc_url: &String| {
-            if rpc_url.starts_with("http") {
-                Ok(())
-            } else {
-                Err("Invalid RPC URL")
+
+    let rpc_url = loop {
+        let rpc_url: String = Input::new()
+            .with_prompt(format!("RPC URL of {}", get_network()))
+            .validate_with(|rpc_url: &String| {
+                if rpc_url.starts_with("http") {
+                    Ok(())
+                } else {
+                    Err("Invalid RPC URL")
+                }
+            })
+            .interact()?;
+        match check_rpc_url(&rpc_url).await {
+            Ok(_) => break rpc_url,
+            Err(e) => {
+                print_warning(format!("{}", e));
+                continue;
             }
-        })
-        .interact()?;
-    check_rpc_url(&rpc_url).await?;
+        }
+    };
 
     let mining_amount = {
         let items = vec!["0.1 ETH", "1.0 ETH"];
         let selection = Select::new()
-            .with_prompt("Choose mining amount")
+            .with_prompt("Choose mining amount (single deposit amount)")
             .items(&items)
             .default(0)
             .interact()?;
@@ -58,7 +68,7 @@ pub async fn user_settings(private_data: &PrivateData) -> anyhow::Result<()> {
         }
     };
 
-    let remaining_deposits = {
+    let max_deposits = {
         let mining_amount = match mining_amount {
             MiningAmount::OneTenth => 0.1,
             MiningAmount::One => 1.0,
@@ -68,29 +78,28 @@ pub async fn user_settings(private_data: &PrivateData) -> anyhow::Result<()> {
             InitialDeposit::Ten => 10,
             InitialDeposit::Hundred => 100,
         };
-        (initial_deposit as f64 / mining_amount) as u64
+        (initial_deposit as f64 / mining_amount) as usize
     };
+
+    initial_balance(private_data, &rpc_url, initial_deposit, max_deposits).await?;
 
     UserSettings {
         rpc_url,
         mining_amount,
         initial_deposit,
-        remaining_deposits,
+        max_deposits,
     }
     .save()?;
-
-    initial_balance(private_data, initial_deposit, remaining_deposits).await?;
-
     Ok(())
 }
 
 async fn initial_balance(
     private_data: &PrivateData,
+    rpc_url: &str,
     initial_deposit: InitialDeposit,
-    num_deposits: u64,
+    num_deposits: usize,
 ) -> anyhow::Result<()> {
-    let client = get_client().await?;
-
+    let client = get_client_with_rpc_url(rpc_url).await?;
     let initial_deposit = match initial_deposit {
         InitialDeposit::One => ethers::utils::parse_ether("1").unwrap(),
         InitialDeposit::Ten => ethers::utils::parse_ether("10").unwrap(),
@@ -119,6 +128,7 @@ async fn initial_balance(
             pretty_format_u256(min_deposit)
         );
         loop {
+            let client = get_client_with_rpc_url(rpc_url).await?;
             let new_deposit_balance = client
                 .get_balance(private_data.deposit_address, None)
                 .await?;
@@ -143,6 +153,7 @@ async fn initial_balance(
             pretty_format_u256(min_claim)
         );
         loop {
+            let client = get_client_with_rpc_url(rpc_url).await?;
             let claim_balance = client.get_balance(private_data.claim_address, None).await?;
             if claim_balance >= min_claim {
                 print_status("Deposit completed");

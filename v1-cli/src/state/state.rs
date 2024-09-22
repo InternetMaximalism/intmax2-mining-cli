@@ -2,8 +2,8 @@ use chrono::NaiveDateTime;
 
 use super::prover::Prover;
 use crate::{
-    private_data::PrivateData,
     services::sync::sync_trees,
+    state::private_data::PrivateData,
     utils::{deposit_hash_tree::DepositHashTree, eligible_tree_with_map::EligibleTreeWithMap},
 };
 

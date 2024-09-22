@@ -8,3 +8,4 @@ pub async fn check_avaliability() -> anyhow::Result<()> {
     ensure!(output.is_available, "Service is not available");
     Ok(())
 }
+

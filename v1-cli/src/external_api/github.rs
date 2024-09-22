@@ -5,8 +5,8 @@ use reqwest;
 use serde_json::Value;
 
 use crate::{
-    config::Settings,
     utils::bin_parser::{BinDepositTree, BinEligibleTree},
+    utils::config::Settings,
 };
 
 pub async fn fetch_latest_tree_from_github(

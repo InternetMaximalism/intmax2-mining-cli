@@ -5,7 +5,6 @@ use mining_circuit_v1::withdrawal::simple_withraw_circuit::SimpleWithdrawalPubli
 
 use crate::{
     cli::console::print_status,
-    config::Settings,
     external_api::{
         contracts::{events::Deposited, utils::get_tx_receipt},
         intmax::{
@@ -14,6 +13,7 @@ use crate::{
         },
     },
     state::state::State,
+    utils::config::Settings,
 };
 
 pub mod temp;
@@ -142,19 +142,8 @@ async fn from_step5(_state: &State) -> anyhow::Result<()> {
 
 #[cfg(test)]
 mod tests {
-    use intmax2_zkp::{
-        common::deposit::get_pubkey_salt_hash, ethereum_types::u256::U256,
-        utils::leafable::Leafable as _,
-    };
-
     use crate::{
-        external_api::contracts::{
-            events::{get_deposited_event, DepositQuery, Deposited},
-            int1::get_withdrawal_nullifier_exists,
-        },
-        state::{prover::Prover, state::State},
-        test::get_dummy_state,
-        utils::salt::{get_pubkey_from_private_key, get_salt_from_private_key_nonce},
+        services::assets_status::fetch_assets_status, state::prover::Prover, test::get_dummy_state,
     };
 
     #[tokio::test]
@@ -162,7 +151,15 @@ mod tests {
         let mut state = get_dummy_state().await;
         state.sync_trees().await.unwrap();
 
-        let events = get_not_withdrawn_deposit_events(&state).await.unwrap();
+        let assets_status = fetch_assets_status(
+            &state.deposit_hash_tree,
+            &state.eligible_tree,
+            state.private_data.deposit_address,
+            state.private_data.deposit_private_key,
+        )
+        .await
+        .unwrap();
+        let events = assets_status.get_not_withdrawn_events();
         assert!(events.len() > 0);
 
         let prover = Prover::new();
@@ -180,45 +177,5 @@ mod tests {
         let prover = Prover::new();
         state.prover = Some(prover);
         super::resume_withdrawal_task(&state).await.unwrap();
-    }
-
-    async fn get_not_withdrawn_deposit_events(state: &State) -> anyhow::Result<Vec<Deposited>> {
-        let deposit_address = state.private_data.deposit_address;
-        let all_senders_deposit_events =
-            get_deposited_event(DepositQuery::BySender(deposit_address)).await?;
-
-        // contained in the deposit tree
-        let mut contained_deposit_events = Vec::new();
-
-        // not contained in the deposit tree
-        let mut not_contained_deposit_events = Vec::new();
-
-        for event in all_senders_deposit_events {
-            if let Some(deposit_index) = state.deposit_hash_tree.get_index(event.deposit().hash()) {
-                let mut event = event.clone();
-                event.deposit_index = Some(deposit_index);
-                contained_deposit_events.push(event);
-            } else {
-                not_contained_deposit_events.push(event);
-            }
-        }
-
-        // check if there are any deposits that are not withdrawn.
-        let deposit_key = state.private_data.deposit_private_key;
-        let mut not_withdrawn_deposit_events = Vec::new();
-        for event in contained_deposit_events {
-            let salt = get_salt_from_private_key_nonce(deposit_key, event.tx_nonce.unwrap());
-            let nullifier = get_pubkey_salt_hash(U256::default(), salt);
-            {
-                let pubkey = get_pubkey_from_private_key(deposit_key);
-                let pubkey_salt_hash = get_pubkey_salt_hash(pubkey, salt);
-                assert_eq!(pubkey_salt_hash, event.recipient_salt_hash);
-            }
-            let is_exists = get_withdrawal_nullifier_exists(nullifier).await?;
-            if !is_exists {
-                not_withdrawn_deposit_events.push(event);
-            }
-        }
-        Ok(not_withdrawn_deposit_events)
     }
 }

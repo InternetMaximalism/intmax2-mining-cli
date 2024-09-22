@@ -1,12 +1,13 @@
 use anyhow::{ensure, Ok};
-use intmax2_zkp::ethereum_types::{
-    address::Address, bytes32::Bytes32, u32limb_trait::U32LimbTrait,
+use intmax2_zkp::{
+    ethereum_types::{address::Address, bytes32::Bytes32, u32limb_trait::U32LimbTrait},
+    utils::leafable::Leafable,
 };
 use mining_circuit_v1::claim::claim_inner_circuit::ClaimInnerValue;
 
 use crate::{
     external_api::contracts::events::Deposited,
-    services::claim::determin::MAX_CLAIMS,
+    services::claim::MAX_CLAIMS,
     state::state::State,
     utils::salt::{get_pubkey_from_private_key, get_salt_from_private_key_nonce},
 };
@@ -27,16 +28,17 @@ pub async fn generate_claim_witness(
     let mut witnesses = Vec::new();
     let mut prev_claim_hash = Bytes32::default();
     for event in events {
-        let deposit_index = event.deposit_index.unwrap();
+        let deposit_index = state
+            .deposit_hash_tree
+            .get_index(event.deposit().hash())
+            .unwrap();
         let deposit_merkle_proof = state.deposit_hash_tree.prove(deposit_index);
         let deposit = event.deposit();
         let eligible_index = state.eligible_tree.get_leaf_index(deposit_index).unwrap();
         let eligible_merkle_proof = state.eligible_tree.tree.prove(eligible_index as usize);
         let eligible_leaf = state.eligible_tree.tree.get_leaf(eligible_index as usize);
-        let salt = get_salt_from_private_key_nonce(
-            state.private_data.deposit_private_key,
-            event.tx_nonce.unwrap(),
-        );
+        let salt =
+            get_salt_from_private_key_nonce(state.private_data.deposit_private_key, event.tx_nonce);
         let value = ClaimInnerValue::new(
             deposit_tree_root,
             deposit_index,

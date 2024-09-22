@@ -1,19 +1,39 @@
 use serde::{Deserialize, Serialize};
 
-use crate::config::Settings;
+use crate::utils::{config::Settings, errors::CLIError};
+
+use super::IntmaxErrorResponse;
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct AvaliabilityServerResponse {
+pub struct AvaliabilityServerSuccessResponse {
     pub is_available: bool,
     pub message: String,
 }
 
-pub async fn get_availability() -> anyhow::Result<AvaliabilityServerResponse> {
+#[derive(Serialize, Deserialize)]
+#[serde(untagged)]
+enum AvaliabilityServerResponse {
+    Success(AvaliabilityServerSuccessResponse),
+    Error(IntmaxErrorResponse),
+}
+
+pub async fn get_availability() -> anyhow::Result<AvaliabilityServerSuccessResponse> {
+    let version = env!("CARGO_PKG_VERSION");
     let settings = Settings::new()?;
-    let response = reqwest::get(settings.api.availability_server_url).await?;
+    let response = reqwest::get(format!(
+        "{}?version={}",
+        settings.api.availability_server_url, version,
+    ))
+    .await
+    .map_err(|e| CLIError::NetworkError(e.to_string()))?;
     let response_json: AvaliabilityServerResponse = response.json().await?;
-    Ok(response_json)
+    match response_json {
+        AvaliabilityServerResponse::Success(success) => Ok(success),
+        AvaliabilityServerResponse::Error(error) => {
+            anyhow::bail!("Availability server error: {:?}", error)
+        }
+    }
 }
 
 #[cfg(test)]

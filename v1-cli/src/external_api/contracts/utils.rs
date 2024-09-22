@@ -8,7 +8,7 @@ use ethers::{
     types::{Address, H256, U256},
 };
 
-use crate::config::UserSettings;
+use crate::utils::{config::UserSettings, errors::CLIError};
 
 pub async fn get_provider() -> anyhow::Result<Provider<Http>> {
     let user_settings = UserSettings::new()?;
@@ -22,6 +22,12 @@ pub async fn get_client() -> anyhow::Result<Arc<Provider<Http>>> {
     Ok(client)
 }
 
+pub async fn get_client_with_rpc_url(rpc_url: &str) -> anyhow::Result<Arc<Provider<Http>>> {
+    let provider =
+        Provider::<Http>::try_from(rpc_url).map_err(|e| CLIError::NetworkError(e.to_string()))?;
+    Ok(Arc::new(provider))
+}
+
 pub async fn get_client_with_signer(
     private_key: H256,
 ) -> anyhow::Result<SignerMiddleware<Provider<Http>, Wallet<SigningKey>>> {
@@ -32,7 +38,7 @@ pub async fn get_client_with_signer(
 }
 
 pub async fn get_wallet(private_key: H256) -> anyhow::Result<Wallet<SigningKey>> {
-    let settings = crate::config::Settings::new()?;
+    let settings = crate::utils::config::Settings::new()?;
     let key = SecretKey::from_be_bytes(private_key.as_bytes()).unwrap();
     let wallet = Wallet::from(key).with_chain_id(settings.blockchain.chain_id);
     Ok(wallet)
@@ -40,13 +46,19 @@ pub async fn get_wallet(private_key: H256) -> anyhow::Result<Wallet<SigningKey>>
 
 pub async fn get_account_nonce(address: Address) -> anyhow::Result<u64> {
     let client = get_client().await?;
-    let nonce = client.get_transaction_count(address, None).await?;
+    let nonce = client
+        .get_transaction_count(address, None)
+        .await
+        .map_err(|e| CLIError::NetworkError(e.to_string()))?;
     Ok(nonce.as_u64())
 }
 
 pub async fn get_balance(address: Address) -> anyhow::Result<U256> {
     let client = get_client().await?;
-    let balance = client.get_balance(address, None).await?;
+    let balance = client
+        .get_balance(address, None)
+        .await
+        .map_err(|e| CLIError::NetworkError(e.to_string()))?;
     Ok(balance)
 }
 

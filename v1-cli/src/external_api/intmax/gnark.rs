@@ -9,7 +9,7 @@ use plonky2::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::config::Settings;
+use crate::utils::{config::Settings, errors::CLIError};
 
 use super::IntmaxErrorResponse;
 
@@ -81,7 +81,8 @@ pub async fn gnark_start_prove(
         .post(format!("{}/start-proof", base_url))
         .json(&input)
         .send()
-        .await?;
+        .await
+        .map_err(|e| CLIError::NetworkError(e.to_string()))?;
     let output: GnarkStartProofResponse = response.json().await.unwrap();
     match output {
         GnarkStartProofResponse::Success(success) => Ok(success),
@@ -96,7 +97,8 @@ pub async fn gnark_get_proof(
     let response = reqwest::Client::new()
         .get(format!("{}/get-proof?jobId={}", base_url, job_id))
         .send()
-        .await?;
+        .await
+        .map_err(|e| CLIError::NetworkError(e.to_string()))?;
     let output: GnarkGetProofResponse = response.json().await?;
     match output {
         GnarkGetProofResponse::Success(success) => Ok(success),

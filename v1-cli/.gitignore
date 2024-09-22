@@ -1,5 +1,3 @@
 target/
-data/*.json
-data/*.bin
+data/
 temp/
-*.log

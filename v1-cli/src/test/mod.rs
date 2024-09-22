@@ -4,7 +4,7 @@ use mining_circuit_v1::eligible_tree::EligibleLeaf;
 use num_bigint::BigUint;
 
 use crate::{
-    private_data::PrivateData,
+    state::private_data::PrivateData,
     state::state::{RunMode, State},
     utils::{deposit_hash_tree::DepositHashTree, eligible_tree_with_map::EligibleTreeWithMap},
 };
