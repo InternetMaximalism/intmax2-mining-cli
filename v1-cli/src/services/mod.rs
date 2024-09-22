@@ -29,26 +29,36 @@ pub async fn main_loop(state: &mut State) -> anyhow::Result<()> {
         .await
         .context("Failed fetch assets status")?;
 
-        if state.mode == RunMode::Shutdown
+        if state.mode == RunMode::Exit
             && assets_status.pending_indices.is_empty()
             && assets_status.rejected_indices.is_empty()
             && assets_status.not_withdrawn_indices.is_empty()
         {
+            print_status("All deposits are withdrawn. Exiting.");
             break;
         }
 
-        if assets_status.senders_deposits.len() >= max_deposits {
+        if state.mode == RunMode::Mining && assets_status.senders_deposits.len() >= max_deposits {
             print_status("Max deposits reached. Mining and Claim process ended.");
             break;
         }
 
-        let new_deposit = (assets_status.senders_deposits.len() < max_deposits) // deposit only if less than max deposits
-            && (assets_status.pending_indices.is_empty()) // deposit only if no pending deposits
-            && (state.mode != RunMode::Shutdown); // do not deposit in shutdown mode
-        let canncel_pending_deposits = state.mode == RunMode::Shutdown;
-        mining_task(state, &assets_status, new_deposit, canncel_pending_deposits).await?;
+        if state.mode == RunMode::Claim && assets_status.not_claimed_indices.is_empty() {
+            print_status("All eligible deposits are claimed. Claim process ended.");
+            break;
+        }
 
-        claim_task(state, &assets_status).await?;
+        if state.mode == RunMode::Mining || state.mode == RunMode::Exit {
+            let new_deposit = (assets_status.senders_deposits.len() < max_deposits) // deposit only if less than max deposits
+            && (assets_status.pending_indices.is_empty()) // deposit only if no pending deposits
+            && (state.mode != RunMode::Exit); // do not deposit in shutdown mode
+            let canncel_pending_deposits = state.mode == RunMode::Exit;
+            mining_task(state, &assets_status, new_deposit, canncel_pending_deposits).await?;
+        }
+
+        if state.mode == RunMode::Claim || state.mode == RunMode::WaitForClaim {
+            claim_task(state, &assets_status).await?;
+        }
 
         // print assets status
         state.sync_trees().await?;

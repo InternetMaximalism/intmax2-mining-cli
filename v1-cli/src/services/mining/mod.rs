@@ -28,7 +28,7 @@ pub async fn mining_task(
         }
     }
 
-    // cancel rejected deposit_private_key
+    // cancel rejected deposits
     if !assets_status.rejected_indices.is_empty() {
         for &index in assets_status.rejected_indices.iter() {
             let event = assets_status.senders_deposits[index].clone();

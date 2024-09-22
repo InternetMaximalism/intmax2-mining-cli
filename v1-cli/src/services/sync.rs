@@ -50,6 +50,7 @@ async fn sync_to_latest_deposit_tree(
     from_block: u64,
 ) -> anyhow::Result<u64> {
     let events = get_deposit_leaf_inserted_event(from_block).await?;
+
     let next_deposit_index = deposit_hash_tree.tree.len();
     let mut to_append = events
         .iter()

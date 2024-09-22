@@ -66,7 +66,7 @@ async fn start() -> anyhow::Result<State> {
 }
 
 fn select_mode() -> RunMode {
-    let items = vec!["Normal", "Shutdown"];
+    let items = vec!["Mining", "Claim", "Exit", "Wait for Claim"];
     let selection = Select::new()
         .with_prompt("Choose mode")
         .items(&items)
@@ -74,8 +74,10 @@ fn select_mode() -> RunMode {
         .interact()
         .unwrap();
     match selection {
-        0 => RunMode::Normal,
-        1 => RunMode::Shutdown,
+        0 => RunMode::Mining,
+        1 => RunMode::Claim,
+        2 => RunMode::Exit,
+        3 => RunMode::WaitForClaim,
         _ => unreachable!(),
     }
 }

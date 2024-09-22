@@ -32,7 +32,7 @@ pub async fn get_dummy_state() -> State {
         eligible_tree,
         last_tree_feched_at: NaiveDateTime::default(),
         last_deposit_synced_block: 0,
-        mode: RunMode::Normal,
+        mode: RunMode::Mining,
         prover: None,
     };
     state

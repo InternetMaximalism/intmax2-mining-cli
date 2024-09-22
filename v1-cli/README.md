@@ -111,7 +111,7 @@ Note: Users must create these new addresses themselves and input them into the C
 - Deposit 1 ETH, 10 ETH, or 100 ETH + gas fee to your deposit address following the instructions in the CLI.
 - Deposit gas fee to your claim address following the instructions in the CLI.
 
-1. **Mining Process**:
+2. **Mining Process**:
 
 - The CLI automatically deposits smaller amounts (0.1 or 1 ETH) into intmax2. The deposit amount can be configured through the CLI
 - After a few hours, it withdraws these amounts to your withdrawal address.
@@ -124,12 +124,14 @@ Note: Users must create these new addresses themselves and input them into the C
 
 ## Operating Modes
 
-The CLI has two operating modes:
+The CLI has four operating modes:
 
-1. **Normal mode**: Automatically handles deposits, withdrawals, and ITX token claims.
-2. **Shutdown mode**: Only performs withdrawals and claims currently available ITX tokens. No new deposits are made.
+1. **Mining mode**: Automatically handles deposits, withdrawals. Stops when the deposit limit is reached.
+2. **Claim mode**: Only claims ITX tokens. Stops when there are no more ITX tokens to claim.
+3. **Exit mode**: Only performs withdrawals and cancels pending deposits. No new deposits are made.
+4. **Wait for Claim**: Claims currently available ITX tokens, and waits for the next claim period to claim ITX tokens.
 
-Note: If you switch to shutdown mode immediately after depositing, you may be refunded to the deposit address.
+Note: If you switch to the exit mode immediately after depositing, you may be refunded to the deposit address.
 
 ## Important Notes
 
