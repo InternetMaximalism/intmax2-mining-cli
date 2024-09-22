@@ -142,7 +142,7 @@ Q: Can I lose my mining funds?
 A: Your funds are safe as long as you don't lose your deposit private key.
 
 Q: Is this process self-custodial?
-A: Yes, but the contract is currently upgradable. The Intmax team plans to relinquish this ability soon.
+A: Yes, but the contract is currently upgradable. The intmax team plans to relinquish this ability soon.
 
 Q: How much can I earn?
 A: Earnings vary based on your contribution and overall network activity.
@@ -152,3 +152,6 @@ A: It's recommended to check for updates regularly, at least once a week, to ens
 
 Q: How do I stop the CLI?
 A: To stop the CLI, simply press Ctrl+C in the terminal where it's running. This will safely terminate the process. If there is a balance in intmax2, you can withdraw it by running in Shutdown mode.
+
+Q: What happens if I deposit more than the initial deposit amount?
+A: It's not a problem if you deposit more than the initial deposit amount.
