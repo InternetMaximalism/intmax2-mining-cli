@@ -17,8 +17,7 @@ fn get_rpc_url() -> anyhow::Result<String> {
     Ok(rpc_url)
 }
 
-pub async fn get_provider() -> anyhow::Result<Provider<Http>> {
-    info!("Getting provider");
+async fn get_provider() -> anyhow::Result<Provider<Http>> {
     let rpc_url = get_rpc_url()?;
     let provider = Provider::<Http>::try_from(rpc_url)?;
     Ok(provider)
