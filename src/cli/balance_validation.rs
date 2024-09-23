@@ -7,8 +7,5 @@ pub async fn validate_deposit_address(
     deposit_private_key: H256,
     deposit_address: Address,
 ) -> anyhow::Result<()> {
-    
-
-
     Ok(())
 }

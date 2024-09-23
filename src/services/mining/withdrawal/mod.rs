@@ -118,7 +118,7 @@ async fn from_step4(state: &State, key: &Key) -> anyhow::Result<()> {
 }
 
 // Call contract
-async fn from_step5(state: &State, key: &Key) -> anyhow::Result<()> {
+async fn from_step5(_state: &State, _key: &Key) -> anyhow::Result<()> {
     print_status("Withdrawal: calling contract");
     let status = temp::WithdrawalStatus::new()?;
     ensure!(status.next_step == temp::WithdrawalStep::ContractCall);

@@ -8,7 +8,6 @@ use crate::{
     cli::console::{print_assets_status, print_status},
     state::{
         keys::{ClaimKeys, MiningKeys},
-        mode::RunMode,
         state::State,
     },
     utils::config::Settings,
@@ -24,7 +23,7 @@ pub async fn mining_loop(
     state: &mut State,
     mining_keys: &MiningKeys,
     mining_uinit: U256,
-    max_deposits: usize,
+    mining_times: usize,
 ) -> anyhow::Result<()> {
     for key in mining_keys.to_keys().iter() {
         loop {
@@ -34,12 +33,12 @@ pub async fn mining_loop(
                     .await
                     .context("Failed fetch assets status")?;
 
-            if assets_status.senders_deposits.len() >= max_deposits {
+            if assets_status.senders_deposits.len() >= mining_times {
                 print_status("Max deposits reached. Exiting.");
                 break;
             }
 
-            let new_deposit = (assets_status.senders_deposits.len() < max_deposits) // deposit only if less than max deposits
+            let new_deposit = (assets_status.senders_deposits.len() < mining_times) // deposit only if less than max deposits
             && (assets_status.pending_indices.is_empty()); // deposit only if no pending deposits
             mining_task(state, key, &assets_status, new_deposit, false, mining_uinit).await?;
 

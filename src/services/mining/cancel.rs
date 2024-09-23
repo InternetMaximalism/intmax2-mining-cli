@@ -9,7 +9,7 @@ use crate::{
     state::{keys::Key, state::State},
 };
 
-pub async fn cancel_task(state: &State, key: &Key, event: Deposited) -> anyhow::Result<()> {
+pub async fn cancel_task(_state: &State, key: &Key, event: Deposited) -> anyhow::Result<()> {
     let deposit = int_1::Deposit {
         recipient_salt_hash: event.recipient_salt_hash.to_bytes_be().try_into().unwrap(),
         token_index: event.token_index,

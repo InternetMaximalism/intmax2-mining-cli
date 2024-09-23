@@ -16,10 +16,7 @@ use crate::{
         minter::get_claim_nullifier_exists,
     },
     state::state::State,
-    utils::{
-        deposit_hash_tree::DepositHashTree, eligible_tree_with_map::EligibleTreeWithMap,
-        salt::get_salt_from_private_key_nonce,
-    },
+    utils::salt::get_salt_from_private_key_nonce,
 };
 
 #[derive(Debug, Clone)]

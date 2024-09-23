@@ -10,7 +10,7 @@ use crate::{
     utils::salt::{get_pubkey_from_private_key, get_salt_from_private_key_nonce},
 };
 
-pub async fn deposit_task(state: &State, key: &Key, mining_unit: U256) -> anyhow::Result<()> {
+pub async fn deposit_task(_state: &State, key: &Key, mining_unit: U256) -> anyhow::Result<()> {
     let deposit_address = key.deposit_address;
     let nonce = get_account_nonce(deposit_address).await?;
     let salt = get_salt_from_private_key_nonce(key.deposit_private_key, nonce);

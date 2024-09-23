@@ -11,11 +11,6 @@ pub struct Key {
     pub withdrawal_address: Option<Address>,
 }
 
-pub enum Keys {
-    Mining(MiningKeys),
-    Claim(ClaimKeys),
-}
-
 #[derive(Debug, Clone)]
 pub struct MiningKeys {
     pub deposit_private_keys: Vec<H256>,
