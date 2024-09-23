@@ -42,14 +42,14 @@ These commands should be run with sudo if necessary, depending on the execution 
 
 ```bash
 git clone https://github.com/internetMaximalism/intmax2-mining-cli.git
-cd intmax2-mining-cli/v1-cli
+cd intmax2-mining-cli
 cargo install --path .
 ```
 
 3. Run the CLI:
 
 ```bash
-cd intmax2-mining-cli/v1-cli
+cd intmax2-mining-cli
 mining-cli --help
 ```
 
@@ -77,7 +77,6 @@ git pull origin main
 2. Rebuild and reinstall the CLI:
 
 ```bash
-cd v1-cli
 cargo install --path .
 ```
 
