@@ -1,25 +1,23 @@
-use anyhow::Context as _;
 use availability::check_avaliability;
 use console::print_status;
 use dialoguer::Select;
+use status::print_cli_status;
 
 use crate::{
-    external_api::contracts::utils::get_balance,
     services::{
-        assets_status::fetch_assets_status, claim::claim::resume_claim_task,
-        contracts::pretty_format_u256, main_loop, mining::withdrawal::resume_withdrawal_task,
+        claim::claim::resume_claim_task, main_loop, mining::withdrawal::resume_withdrawal_task,
     },
     state::{
-        private_data::PrivateData,
         prover::Prover,
         state::{RunMode, State},
     },
-    utils::{config::UserSettings, network::get_network},
+    utils::network::get_network,
 };
 
 pub mod availability;
 pub mod console;
 pub mod private_data;
+pub mod status;
 pub mod user_settings;
 
 pub async fn run() -> anyhow::Result<()> {
@@ -80,35 +78,4 @@ fn select_mode() -> RunMode {
         3 => RunMode::WaitForClaim,
         _ => unreachable!(),
     }
-}
-
-pub async fn print_cli_status(state: &mut State, private_data: &PrivateData) -> anyhow::Result<()> {
-    let deposit_balance = get_balance(private_data.deposit_address).await?;
-    let claim_balance = get_balance(private_data.claim_address).await?;
-
-    println!(
-        "Deposit address: {:?} {} ETH\nClaim address: {:?} {} ETH\nWithdrawal address: {:?}",
-        private_data.deposit_address,
-        pretty_format_u256(deposit_balance),
-        private_data.claim_address,
-        pretty_format_u256(claim_balance),
-        private_data.withdrawal_address,
-    );
-    let max_deposits = UserSettings::new()?.max_deposits;
-    state.sync_trees().await?;
-    let assets_status = fetch_assets_status(
-        &state.deposit_hash_tree,
-        &state.eligible_tree,
-        state.private_data.deposit_address,
-        state.private_data.deposit_private_key,
-    )
-    .await
-    .context("Failed fetch assets status")?;
-    println!(
-        "Current deposits / Max deposits: {} / {}",
-        assets_status.senders_deposits.len(),
-        max_deposits
-    );
-    println!();
-    Ok(())
 }

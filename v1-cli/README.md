@@ -153,7 +153,7 @@ Q: How often should I update the CLI?
 A: It's recommended to check for updates regularly, at least once a week, to ensure you have the latest features and security improvements.
 
 Q: How do I stop the CLI?
-A: To stop the CLI, simply press Ctrl+C in the terminal where it's running. This will safely terminate the process. If there is a balance in intmax2, you can withdraw it by running in Shutdown mode.
+A: To stop the CLI, simply press Ctrl+C in the terminal where it's running. This will safely terminate the process. If there is a balance in intmax2, you can withdraw it by running in the exit mode.
 
 Q: What happens if I deposit more than the initial deposit amount?
 A: It's not a problem if you deposit more than the initial deposit amount.
