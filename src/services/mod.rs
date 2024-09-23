@@ -26,6 +26,7 @@ pub async fn mining_loop(
     mining_times: usize,
 ) -> anyhow::Result<()> {
     for key in mining_keys.to_keys().iter() {
+        print_status(format!("Mining loop for {:?}", key.deposit_address));
         loop {
             state.sync_trees().await?;
             let assets_status =
@@ -34,7 +35,10 @@ pub async fn mining_loop(
                     .context("Failed fetch assets status")?;
 
             if assets_status.senders_deposits.len() >= mining_times {
-                print_status("Max deposits reached. Exiting.");
+                print_status(format!(
+                    "Max deposits reached for {:?}. Exiting.",
+                    key.deposit_address
+                ));
                 break;
             }
 
@@ -59,6 +63,7 @@ pub async fn mining_loop(
 
 pub async fn exit_loop(state: &mut State, mining_keys: &MiningKeys) -> anyhow::Result<()> {
     for key in mining_keys.to_keys().iter() {
+        print_status(format!("Exit loop for {:?}", key.deposit_address));
         loop {
             state.sync_trees().await?;
             let assets_status =
@@ -70,21 +75,14 @@ pub async fn exit_loop(state: &mut State, mining_keys: &MiningKeys) -> anyhow::R
                 && assets_status.rejected_indices.is_empty()
                 && assets_status.not_withdrawn_indices.is_empty()
             {
-                print_status("All deposits are withdrawn. Exiting.");
+                print_status(format!(
+                    "All deposits are withdrawn for {:?}. Exiting.",
+                    key.deposit_address,
+                ));
                 break;
             }
 
             mining_task(state, key, &assets_status, false, true, 0.into()).await?;
-
-            // print assets status
-            state.sync_trees().await?;
-            let assets_status =
-                fetch_assets_status(&state, key.deposit_address, key.deposit_private_key)
-                    .await
-                    .context("Failed fetch assets status")?;
-            print_assets_status(&assets_status);
-
-            main_loop_cooldown().await?;
         }
     }
 
@@ -93,6 +91,7 @@ pub async fn exit_loop(state: &mut State, mining_keys: &MiningKeys) -> anyhow::R
 
 pub async fn claim_loop(state: &mut State, claim_keys: ClaimKeys) -> anyhow::Result<()> {
     for key in claim_keys.to_keys().iter() {
+        print_status(format!("Claim loop for {:?}", key.deposit_address));
         loop {
             state.sync_trees().await?;
             let assets_status =
@@ -101,7 +100,10 @@ pub async fn claim_loop(state: &mut State, claim_keys: ClaimKeys) -> anyhow::Res
                     .context("Failed fetch assets status")?;
 
             if assets_status.not_claimed_indices.is_empty() {
-                print_status("All eligible deposits are claimed. Claim process ended.");
+                print_status(format!(
+                    "All eligible deposits are claimed for {:?}. Claim process ended.",
+                    key.deposit_address
+                ));
                 break;
             }
 
