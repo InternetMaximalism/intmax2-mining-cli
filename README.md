@@ -5,7 +5,7 @@
 > This CLI tool currently operates on Sepolia testnet only. Key differences from future Mainnet:
 >
 > - Mining: Every few minutes (Mainnet: hours)
-> - Claims: Daily with 1-day delay (Mainnet: weekly, 1-week delay)
+> - Claims: Daily at 00:00 UTC, with a 1-day delay (Mainnet: weekly on Mondays at 00:00 UTC, with a 1-week delay)
 > - Tokens: Test tokens (Mainnet: ITX tokens)
 >
 > "Mainnet" references below refer to Sepolia testnet in this version.
@@ -109,7 +109,7 @@ Additionally, you need a mainnet RPC URL. We strongly recommend using Alchemy's 
 
 3. **Rewards**:
 
-- Receive ITX tokens weekly in your claim address (available every Monday. Rewards are delayed by one week. For example, mining done on a Sunday can be claimed not on the following Monday, but on the Monday 8 days later)
+- Receive ITX tokens weekly in your claim address (available every Monday at 0:00 UTC. Rewards are delayed by one week. For example, mining done on a Sunday can be claimed not on the following Monday, but on the Monday 8 days later)
 - Ensure your claim address has enough ETH for gas fees
 
 ## Operating Commands
@@ -127,7 +127,7 @@ The mining-cli has three main commands. Before running any command, ensure that 
 | `WITHDRAWAL_ADDRESS`   | Address of the account for withdrawals. Balance can be 0 as gas fees are deducted from withdrawn ETH.                         | `"0x789..."`                                          |
 | `CLAIM_PRIVATE_KEY`    | Private key of the account used for claiming. Must contain enough ETH for gas fees.                                           | `"0xabc..."`                                          |
 
-All required environment variables must be set before running any command. You can set them in your shell or use a `.env` file. For example:
+You can set them in your shell. For example:
 
 ```bash
 export RPC_URL="https://eth-mainnet.alchemyapi.io/v2/your-api-key"
