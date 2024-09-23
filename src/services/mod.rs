@@ -56,7 +56,7 @@ pub async fn main_loop(state: &mut State) -> anyhow::Result<()> {
             mining_task(state, &assets_status, new_deposit, canncel_pending_deposits).await?;
         }
 
-        if state.mode == RunMode::Claim || state.mode == RunMode::WaitForClaim {
+        if state.mode == RunMode::Claim {
             claim_task(state, &assets_status).await?;
         }
 

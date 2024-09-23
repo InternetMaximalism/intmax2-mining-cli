@@ -1,7 +1,9 @@
 use std::{fs::File, path::PathBuf};
 
+use clap::{arg, command, Parser};
 use cli::{console::print_error, run};
 use simplelog::{Config, LevelFilter, WriteLogger};
+use state::mode::RunMode;
 use utils::file::create_file_with_content;
 
 pub mod cli;
@@ -11,8 +13,19 @@ pub mod state;
 pub mod test;
 pub mod utils;
 
+#[derive(Parser, Debug)]
+#[command(author, version, about, long_about = None)]
+struct Args {
+    /// The mode to run the program in
+    #[arg(value_enum)]
+    mode: RunMode,
+}
+
 #[tokio::main]
 async fn main() {
+    // parse args
+    let args = Args::parse();
+
     // load config
     utils::config::Settings::new().expect("Failed to load config");
 
@@ -23,7 +36,7 @@ async fn main() {
     WriteLogger::init(LevelFilter::Info, Config::default(), log_file).unwrap();
 
     // run the CLI
-    match run().await {
+    match run(args.mode).await {
         Ok(_) => {}
         Err(e) => {
             print_error(format!("{:#}", e));

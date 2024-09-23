@@ -1,6 +1,5 @@
 use availability::check_avaliability;
 use console::print_status;
-use dialoguer::Select;
 use status::print_cli_status;
 
 use crate::{
@@ -17,9 +16,9 @@ pub mod private_data;
 pub mod status;
 pub mod user_settings;
 
-pub async fn run() -> anyhow::Result<()> {
+pub async fn run(mode: RunMode) -> anyhow::Result<()> {
     // start up
-    let mut state = start().await?;
+    let mut state = start(mode).await?;
 
     // resume task
     print_status("Checking for pending tasks");
@@ -32,7 +31,7 @@ pub async fn run() -> anyhow::Result<()> {
     Ok(())
 }
 
-async fn start() -> anyhow::Result<State> {
+async fn start(mode: RunMode) -> anyhow::Result<State> {
     println!("Welcome to the INTMAX mining CLI!");
     println!("Network: {}", get_network());
     let prover_future = tokio::spawn(async { Prover::new() });
@@ -44,7 +43,6 @@ async fn start() -> anyhow::Result<State> {
     let private_data = private_data::set_private_data().await?;
 
     // construct state
-    let mode = select_mode();
     let mut state = State::new(private_data.clone(), mode);
 
     // user settings
@@ -58,21 +56,4 @@ async fn start() -> anyhow::Result<State> {
     state.prover = Some(prover);
 
     Ok(state)
-}
-
-fn select_mode() -> RunMode {
-    let items = vec!["Mining", "Claim", "Exit", "Wait for Claim"];
-    let selection = Select::new()
-        .with_prompt("Choose mode")
-        .items(&items)
-        .default(0)
-        .interact()
-        .unwrap();
-    match selection {
-        0 => RunMode::Mining,
-        1 => RunMode::Claim,
-        2 => RunMode::Exit,
-        3 => RunMode::WaitForClaim,
-        _ => unreachable!(),
-    }
 }
