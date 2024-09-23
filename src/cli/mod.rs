@@ -1,3 +1,4 @@
+use availability::check_avaliability;
 use console::print_status;
 use load_env::{load_env, Config};
 
@@ -13,17 +14,22 @@ pub mod console;
 pub mod load_env;
 
 pub async fn run(mode: RunMode) -> anyhow::Result<()> {
-    let config: Config = load_env(mode).await?;
+    println!(
+        "Welcome to the INTMAX mining CLI!. Network: {}, Mode: {:?}",
+        get_network(),
+        mode
+    );
+    check_avaliability().await?;
 
+    let config: Config = load_env(mode).await?;
     let mut state = State::new();
-    println!("Welcome to the INTMAX mining CLI!");
-    println!("Network: {}", get_network());
     let prover_future = tokio::spawn(async { Prover::new() });
 
     // valance validation
     balance_validation::balance_validation(&mut state, config.clone()).await?;
 
     // wait for prover to be ready
+    println!(); // newline because print_status clears the last line
     print_status("Waiting for prover to be ready");
     let prover = prover_future.await?;
     state.prover = Some(prover);

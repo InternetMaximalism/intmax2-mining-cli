@@ -1,7 +1,7 @@
 use ethers::types::{Address, U256};
 
 use crate::{
-    external_api::contracts::utils::get_balance,
+    external_api::contracts::{token::get_token_balance, utils::get_balance},
     services::{
         assets_status::{fetch_assets_status, AssetsStatus},
         contracts::pretty_format_u256,
@@ -79,6 +79,13 @@ pub async fn validate_deposit_address_balance(
         ))
         .into());
     }
+    println!(
+        "Deposit address: {:?} Deposits: {}/{} Balance {} ETH",
+        deposit_address,
+        num_deposits,
+        mining_times,
+        pretty_format_u256(balance)
+    );
     Ok(())
 }
 
@@ -101,5 +108,15 @@ pub async fn validate_claim_address_balance(
         ))
         .into());
     }
+
+    let balance = get_balance(claim_address).await?;
+    let token_balance = get_token_balance(claim_address).await?;
+    println!(
+        "Claim address: {:?} Unclaimed: {} Balance: {} ETH {} ITX",
+        claim_address,
+        assets_status.not_claimed_indices.len(),
+        pretty_format_u256(balance),
+        pretty_format_u256(token_balance)
+    );
     Ok(())
 }
