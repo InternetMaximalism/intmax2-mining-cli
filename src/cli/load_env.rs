@@ -70,8 +70,7 @@ fn load_mining_unit() -> anyhow::Result<U256> {
     let mining_unit = env::var("MINING_UNIT").map_err(|_| {
         CLIError::EnvError("MINING_UNIT environment variable is not set".to_string())
     })?;
-    if mining_unit != "1" || mining_unit != "0.1" {
-        // return CLIError
+    if mining_unit != "1".to_string() && mining_unit != "0.1".to_string() {
         return Err(CLIError::EnvError(
             "MINING_UNIT environment variable must be either '1' or '0.1'".to_string(),
         )
@@ -88,7 +87,7 @@ fn load_mining_times() -> anyhow::Result<usize> {
     let mining_times = mining_times
         .parse::<usize>()
         .map_err(|_| CLIError::EnvError("Invalid MINING_TIMES environment variable".to_string()))?;
-    if mining_times != 10 || mining_times != 100 {
+    if mining_times != 10 && mining_times != 100 {
         // return CLIError
         return Err(CLIError::EnvError(
             "MINING_TIMES environment variable must be either '10' or '100'".to_string(),

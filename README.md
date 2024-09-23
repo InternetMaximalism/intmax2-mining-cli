@@ -50,7 +50,7 @@ cargo install --path .
 
 ```bash
 cd intmax2-mining-cli/v1-cli
-mining-cli
+mining-cli --help
 ```
 
 ### For Mac
@@ -122,14 +122,13 @@ Note: Users must create these new addresses themselves and input them into the C
 - Receive ITX tokens weekly in your claim address (available every Monday)
 - Ensure your claim address has enough ETH for gas fees
 
-## Operating Modes
+## Operating commands
 
 The CLI has four operating modes:
 
 1. **Mining mode**: Automatically handles deposits, withdrawals. Stops when the deposit limit is reached.
 2. **Claim mode**: Only claims ITX tokens. Stops when there are no more ITX tokens to claim.
 3. **Exit mode**: Only performs withdrawals and cancels pending deposits. No new deposits are made.
-4. **Wait for Claim**: Claims currently available ITX tokens, and waits for the next claim period to claim ITX tokens.
 
 Note: If you switch to the exit mode immediately after depositing, you may be refunded to the deposit address.
 

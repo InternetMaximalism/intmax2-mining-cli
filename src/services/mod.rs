@@ -106,20 +106,6 @@ pub async fn claim_loop(state: &mut State, claim_keys: ClaimKeys) -> anyhow::Res
             }
 
             claim_task(state, key, &assets_status).await?;
-
-            // // print assets status
-            // state.sync_trees().await?;
-            // let assets_status = fetch_assets_status(
-            //     &state.deposit_hash_tree,
-            //     &state.eligible_tree,
-            //     key.deposit_address,
-            //     key.deposit_private_key,
-            // )
-            // .await
-            // .context("Failed fetch assets status")?;
-            // print_assets_status(&assets_status);
-
-            // main_loop_cooldown().await?;
         }
     }
 

@@ -49,8 +49,7 @@ pub async fn balance_validation(state: &mut State, config: Config) -> anyhow::Re
             validate_claim_address_balance(&assets_status, claim_config.keys.claim_address).await?;
         }
     }
-
-    todo!()
+    Ok(())
 }
 
 pub async fn validate_deposit_address_balance(
