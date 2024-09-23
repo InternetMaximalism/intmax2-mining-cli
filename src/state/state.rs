@@ -1,6 +1,6 @@
 use chrono::NaiveDateTime;
 
-use super::prover::Prover;
+use super::{mode::RunMode, prover::Prover};
 use crate::{
     services::sync::sync_trees,
     state::private_data::PrivateData,
@@ -45,12 +45,4 @@ impl State {
         .await?;
         Ok(())
     }
-}
-
-#[derive(Debug, Clone, PartialEq)]
-pub enum RunMode {
-    Mining,       // only mining
-    Claim,        // only claim
-    Exit,         // only withdraw or cancel pending deposits
-    WaitForClaim, // wait for claim
 }

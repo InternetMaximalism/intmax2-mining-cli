@@ -7,10 +7,7 @@ use crate::{
     services::{
         claim::claim::resume_claim_task, main_loop, mining::withdrawal::resume_withdrawal_task,
     },
-    state::{
-        prover::Prover,
-        state::{RunMode, State},
-    },
+    state::{mode::RunMode, prover::Prover, state::State},
     utils::network::get_network,
 };
 
