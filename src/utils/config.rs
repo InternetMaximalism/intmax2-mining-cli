@@ -58,42 +58,42 @@ pub struct Service {
     pub main_loop_cooldown_in_sec: u64,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub enum MiningAmount {
-    OneTenth,
-    One,
-}
+// #[derive(Clone, Debug, Serialize, Deserialize)]
+// #[serde(rename_all = "camelCase")]
+// pub enum MiningAmount {
+//     OneTenth,
+//     One,
+// }
 
-#[derive(Clone, Copy, Debug, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub enum InitialDeposit {
-    One,
-    Ten,
-    Hundred,
-}
+// #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
+// #[serde(rename_all = "camelCase")]
+// pub enum InitialDeposit {
+//     One,
+//     Ten,
+//     Hundred,
+// }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct UserSettings {
-    pub rpc_url: String,
-    pub mining_amount: MiningAmount,
-    pub initial_deposit: InitialDeposit,
-    pub max_deposits: usize,
-}
+// #[derive(Clone, Debug, Serialize, Deserialize)]
+// #[serde(rename_all = "camelCase")]
+// pub struct UserSettings {
+//     pub rpc_url: String,
+//     pub mining_amount: MiningAmount,
+//     pub initial_deposit: InitialDeposit,
+//     pub max_deposits: usize,
+// }
 
-impl UserSettings {
-    pub fn new() -> anyhow::Result<Self> {
-        let file =
-            std::fs::File::open(&user_settings_path()).context("Failed to open user settings")?;
-        let reader = BufReader::new(file);
-        let settings: UserSettings = serde_json::from_reader(reader)?;
-        Ok(settings)
-    }
+// impl UserSettings {
+//     pub fn new() -> anyhow::Result<Self> {
+//         let file =
+//             std::fs::File::open(&user_settings_path()).context("Failed to open user settings")?;
+//         let reader = BufReader::new(file);
+//         let settings: UserSettings = serde_json::from_reader(reader)?;
+//         Ok(settings)
+//     }
 
-    pub fn save(&self) -> anyhow::Result<()> {
-        let input = serde_json::to_vec_pretty(self)?;
-        create_file_with_content(&user_settings_path(), &input)?;
-        Ok(())
-    }
-}
+//     pub fn save(&self) -> anyhow::Result<()> {
+//         let input = serde_json::to_vec_pretty(self)?;
+//         create_file_with_content(&user_settings_path(), &input)?;
+//         Ok(())
+//     }
+// }

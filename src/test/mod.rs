@@ -34,15 +34,6 @@ pub async fn get_dummy_keys() -> Key {
 }
 
 pub async fn get_dummy_state() -> State {
-    let deposit_key: H256 = "0xdf57089febbacf7ba0bc227dafbffa9fc08a93fdc68e1e42411a14efcf23656e"
-        .parse()
-        .unwrap();
-    let withdrawal_address: Address = "0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1199"
-        .parse()
-        .unwrap();
-
-    let mining_keys = MiningKeys::new(vec![deposit_key], withdrawal_address).await;
-
     let mut eligible_tree = EligibleTreeWithMap::new();
     for i in 0..100 {
         eligible_tree.push(EligibleLeaf {
@@ -56,7 +47,6 @@ pub async fn get_dummy_state() -> State {
         eligible_tree,
         last_tree_feched_at: NaiveDateTime::default(),
         last_deposit_synced_block: 0,
-        mode: RunMode::Mining,
         prover: None,
     };
     state

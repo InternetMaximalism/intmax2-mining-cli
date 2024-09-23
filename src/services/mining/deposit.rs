@@ -7,13 +7,10 @@ use crate::{
     external_api::contracts::{int1::get_int1_contract_with_signer, utils::get_account_nonce},
     services::contracts::handle_contract_call,
     state::{keys::Key, state::State},
-    utils::{
-        config::{MiningAmount, UserSettings},
-        salt::{get_pubkey_from_private_key, get_salt_from_private_key_nonce},
-    },
+    utils::salt::{get_pubkey_from_private_key, get_salt_from_private_key_nonce},
 };
 
-pub async fn deposit_task(state: &State, key: &Key) -> anyhow::Result<()> {
+pub async fn deposit_task(state: &State, key: &Key, mining_unit: U256) -> anyhow::Result<()> {
     let deposit_address = key.deposit_address;
     let nonce = get_account_nonce(deposit_address).await?;
     let salt = get_salt_from_private_key_nonce(key.deposit_private_key, nonce);
@@ -23,16 +20,11 @@ pub async fn deposit_task(state: &State, key: &Key) -> anyhow::Result<()> {
         .try_into()
         .unwrap();
 
-    let mining_amount: U256 = match UserSettings::new()?.mining_amount {
-        MiningAmount::OneTenth => ethers::utils::parse_units("0.1", "ether").unwrap().into(),
-        MiningAmount::One => ethers::utils::parse_units("1", "ether").unwrap().into(),
-    };
-
     let deposit_address = key.deposit_address;
     let int1 = get_int1_contract_with_signer(key.deposit_private_key).await?;
     let mut tx = int1
         .deposit_native_token(pubkey_salt_hash)
-        .value(mining_amount);
+        .value(mining_unit);
     tx.tx.set_nonce(nonce);
 
     handle_contract_call(tx, deposit_address, "deposit", "deposit").await?;
@@ -47,6 +39,10 @@ mod tests {
     async fn test_deposit() {
         let state = get_dummy_state().await;
         let dummy_key = get_dummy_keys().await;
-        super::deposit_task(&state, &dummy_key).await.unwrap();
+
+        let mining_uint = 100_000_000_000_000_000u128.into();
+        super::deposit_task(&state, &dummy_key, mining_uint)
+            .await
+            .unwrap();
     }
 }

@@ -15,6 +15,7 @@ use crate::{
         },
         minter::get_claim_nullifier_exists,
     },
+    state::state::State,
     utils::{
         deposit_hash_tree::DepositHashTree, eligible_tree_with_map::EligibleTreeWithMap,
         salt::get_salt_from_private_key_nonce,
@@ -36,8 +37,7 @@ pub struct AssetsStatus {
 }
 
 pub async fn fetch_assets_status(
-    deposit_hash_tree: &DepositHashTree,
-    eligible_tree: &EligibleTreeWithMap,
+    state: &State,
     deposit_address: Address,
     deposit_private_key: H256,
 ) -> anyhow::Result<AssetsStatus> {
@@ -46,7 +46,8 @@ pub async fn fetch_assets_status(
     let mut contained_indices = Vec::new();
     let mut not_contained_indices = Vec::new();
     for (index, event) in senders_deposits.iter().enumerate() {
-        if deposit_hash_tree
+        if state
+            .deposit_hash_tree
             .get_index(event.deposit().hash())
             .is_some()
         {
@@ -97,8 +98,11 @@ pub async fn fetch_assets_status(
     let mut eligible_indices = Vec::new();
     for &index in &contained_indices {
         let event = &senders_deposits[index];
-        let deposit_index = deposit_hash_tree.get_index(event.deposit().hash()).unwrap();
-        if eligible_tree.get_leaf_index(deposit_index).is_some() {
+        let deposit_index = state
+            .deposit_hash_tree
+            .get_index(event.deposit().hash())
+            .unwrap();
+        if state.eligible_tree.get_leaf_index(deposit_index).is_some() {
             eligible_indices.push(index);
         }
     }

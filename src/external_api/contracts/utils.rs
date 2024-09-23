@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::{env, sync::Arc};
 
 use ethers::{
     core::k256::{ecdsa::SigningKey, SecretKey},
@@ -8,11 +8,17 @@ use ethers::{
     types::{Address, H256, U256},
 };
 
-use crate::utils::{config::UserSettings, errors::CLIError};
+use crate::utils::errors::CLIError;
+
+fn get_rpc_url() -> anyhow::Result<String> {
+    let rpc_url = env::var("RPC_URL")
+        .map_err(|_| CLIError::EnvError("RPC_URL environment variable is not set".to_string()))?;
+    Ok(rpc_url)
+}
 
 pub async fn get_provider() -> anyhow::Result<Provider<Http>> {
-    let user_settings = UserSettings::new()?;
-    let provider = Provider::<Http>::try_from(user_settings.rpc_url)?;
+    let rpc_url = get_rpc_url()?;
+    let provider = Provider::<Http>::try_from(rpc_url)?;
     Ok(provider)
 }
 

@@ -1,6 +1,7 @@
 use anyhow::Context;
 use cancel::cancel_task;
 use deposit::deposit_task;
+use ethers::types::U256;
 use rand::Rng as _;
 use withdrawal::withdrawal_task;
 
@@ -22,6 +23,7 @@ pub async fn mining_task(
     assets_status: &AssetsStatus,
     new_deposit: bool,
     cancel_pending_deposits: bool,
+    mining_unit: U256,
 ) -> anyhow::Result<()> {
     // cancel pending deposits
     if !assets_status.pending_indices.is_empty() && cancel_pending_deposits {
@@ -57,7 +59,7 @@ pub async fn mining_task(
 
     // deposit
     if new_deposit {
-        deposit_task(state, key)
+        deposit_task(state, key, mining_unit)
             .await
             .context("Failed deposit task")?;
         mining_cooldown().await?;

@@ -167,13 +167,12 @@ mod tests {
 
     #[tokio::test]
     async fn test_claim_task() {
-        let mut state = get_dummy_state().await;
-        state.sync_trees().await.unwrap();
         let dummy_key = get_dummy_keys().await;
 
+        let mut state = get_dummy_state().await;
+        state.sync_trees().await.unwrap();
         let assets_status = fetch_assets_status(
-            &state.deposit_hash_tree,
-            &state.eligible_tree,
+            &state,
             dummy_key.deposit_address,
             dummy_key.deposit_private_key,
         )

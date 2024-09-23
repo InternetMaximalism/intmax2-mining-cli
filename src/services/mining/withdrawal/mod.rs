@@ -158,8 +158,7 @@ mod tests {
         let dummy_key = get_dummy_keys().await;
 
         let assets_status = fetch_assets_status(
-            &state.deposit_hash_tree,
-            &state.eligible_tree,
+            &state,
             dummy_key.deposit_address,
             dummy_key.deposit_private_key,
         )

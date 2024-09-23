@@ -11,6 +11,11 @@ pub struct Key {
     pub withdrawal_address: Option<Address>,
 }
 
+pub enum Keys {
+    Mining(MiningKeys),
+    Claim(ClaimKeys),
+}
+
 #[derive(Debug, Clone)]
 pub struct MiningKeys {
     pub deposit_private_keys: Vec<H256>,
@@ -30,6 +35,24 @@ impl MiningKeys {
             deposit_addresses,
             withdrawal_address,
         }
+    }
+
+    pub fn to_keys(&self) -> Vec<Key> {
+        let mut keys = Vec::new();
+        for (deposit_private_key, deposit_address) in self
+            .deposit_private_keys
+            .iter()
+            .zip(self.deposit_addresses.iter())
+        {
+            keys.push(Key {
+                deposit_private_key: *deposit_private_key,
+                deposit_address: *deposit_address,
+                claim_private_key: None,
+                claim_address: None,
+                withdrawal_address: Some(self.withdrawal_address),
+            });
+        }
+        keys
     }
 }
 
@@ -55,5 +78,23 @@ impl ClaimKeys {
             claim_private_key,
             claim_address,
         }
+    }
+
+    pub fn to_keys(&self) -> Vec<Key> {
+        let mut keys = Vec::new();
+        for (deposit_private_key, deposit_address) in self
+            .deposit_private_keys
+            .iter()
+            .zip(self.deposit_addresses.iter())
+        {
+            keys.push(Key {
+                deposit_private_key: *deposit_private_key,
+                deposit_address: *deposit_address,
+                claim_private_key: Some(self.claim_private_key),
+                claim_address: Some(self.claim_address),
+                withdrawal_address: None,
+            });
+        }
+        keys
     }
 }

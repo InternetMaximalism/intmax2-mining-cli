@@ -166,16 +166,3 @@ async fn initial_balance(
     Ok(())
 }
 
-async fn check_rpc_url(rpc_url: &str) -> anyhow::Result<()> {
-    let client = ethers::providers::Provider::<ethers::providers::Http>::try_from(rpc_url)?;
-    let chain_id = client.get_chainid().await?;
-    let setting = Settings::new()?;
-    if chain_id != setting.blockchain.chain_id.into() {
-        return Err(anyhow::anyhow!(
-            "RPC URL chain id {} does not match the expected chain id {}",
-            chain_id.as_u64(),
-            setting.blockchain.chain_id,
-        ));
-    }
-    Ok(())
-}
