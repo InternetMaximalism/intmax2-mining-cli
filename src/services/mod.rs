@@ -3,6 +3,7 @@ use assets_status::fetch_assets_status;
 use claim::claim_task;
 use ethers::types::U256;
 use mining::mining_task;
+use rand::Rng as _;
 
 use crate::{
     cli::console::{print_assets_status, print_status},
@@ -44,7 +45,8 @@ pub async fn mining_loop(
 
             let new_deposit = (assets_status.senders_deposits.len() < mining_times) // deposit only if less than max deposits
             && (assets_status.pending_indices.is_empty()); // deposit only if no pending deposits
-            mining_task(state, key, &assets_status, new_deposit, false, mining_uinit).await?;
+            let cooldown =
+                mining_task(state, key, &assets_status, new_deposit, false, mining_uinit).await?;
 
             // print assets status
             state.sync_trees().await?;
@@ -54,7 +56,9 @@ pub async fn mining_loop(
                     .context("Failed fetch assets status")?;
             print_assets_status(&assets_status);
 
-            main_loop_cooldown().await?;
+            if cooldown {
+                mining_cooldown().await?;
+            }
         }
     }
 
@@ -114,13 +118,10 @@ pub async fn claim_loop(state: &mut State, claim_keys: ClaimKeys) -> anyhow::Res
     Ok(())
 }
 
-/// Cooldown for main loop. `main_loop_cooldown_in_sec` seconds.
-/// To avoid spamming RPC calls.
-async fn main_loop_cooldown() -> anyhow::Result<()> {
+/// Cooldown for mining. Random time between 0 and `mining_max_cooldown_in_sec` to improve privacy.
+async fn mining_cooldown() -> anyhow::Result<()> {
     let settings = Settings::new()?;
-    tokio::time::sleep(std::time::Duration::from_secs(
-        settings.service.main_loop_cooldown_in_sec,
-    ))
-    .await;
+    let cooldown = rand::thread_rng().gen_range(0..settings.service.mining_max_cooldown_in_sec);
+    tokio::time::sleep(std::time::Duration::from_secs(cooldown)).await;
     Ok(())
 }

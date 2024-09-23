@@ -1,12 +1,7 @@
 use anyhow::Context;
 use claim::single_claim_task;
-use rand::Rng as _;
 
-use crate::{
-    cli::console::print_status,
-    state::{keys::Key, state::State},
-    utils::config::Settings,
-};
+use crate::state::{keys::Key, state::State};
 
 use super::assets_status::AssetsStatus;
 
@@ -28,16 +23,6 @@ pub async fn claim_task(
                 .await
                 .context("Failed claim task")?;
         }
-        claim_cooldown().await?;
     }
-    Ok(())
-}
-
-/// Cooldown for claim. Random time between 0 and `claim_max_cooldown_in_sec` to improve privacy.
-async fn claim_cooldown() -> anyhow::Result<()> {
-    print_status("Claim cooldown...");
-    let settings = Settings::new()?;
-    let cooldown = rand::thread_rng().gen_range(0..settings.service.claim_max_cooldown_in_sec);
-    tokio::time::sleep(std::time::Duration::from_secs(cooldown)).await;
     Ok(())
 }

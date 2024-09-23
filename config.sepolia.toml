@@ -15,6 +15,5 @@ single_deposit_gas_fee = "2000000000000000"
 single_claim_gas_fee = "2000000000000000"
 
 [service]
-main_loop_cooldown_in_sec = 30
 mining_max_cooldown_in_sec = 20
-claim_max_cooldown_in_sec = 20
+

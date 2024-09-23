@@ -48,6 +48,4 @@ pub struct Blockchain {
 #[derive(Clone, Debug, Deserialize)]
 pub struct Service {
     pub mining_max_cooldown_in_sec: u64,
-    pub claim_max_cooldown_in_sec: u64,
-    pub main_loop_cooldown_in_sec: u64,
 }
