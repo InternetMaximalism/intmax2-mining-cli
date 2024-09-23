@@ -201,3 +201,6 @@ A: It's recommended to check for updates regularly, at least once a week, to ens
 
 Q: How do I stop the CLI?
 A: To stop the CLI, simply press Ctrl+C in the terminal where it's running. This will safely terminate the process. If there is a balance in intmax2, you can withdraw it by running in the exit mode.
+
+Q: An error occurred during execution. What should I do?
+A: Feel free to run it again. It's designed to be safe for re-execution.
