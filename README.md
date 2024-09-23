@@ -1,13 +1,14 @@
 # v1-mining-cli
 
-<div style="background-color: #FFFDE7; border: 1px solid #FBC02D; border-radius: 4px; padding: 16px; margin-bottom: 20px;">
-  <p style="color: #F57F17; font-weight: bold; margin: 0;">
-  ⚠️ Note: This pre-release CLI tool currently operates on the Sepolia testnet. All references to "Mainnet" in the following README actually refer to the Sepolia testnet. This CLI tool only works on the Sepolia testnet, and there are the following differences compared to the future Mainnet release version:
-  - Mining intervals occur every few minutes on Sepolia, whereas on Mainnet they will occur every few hours.
-  - Claim intervals are daily with a one-day delay on Sepolia, whereas on Mainnet they will be weekly with a one-week delay.
-  - On Sepolia, you receive test tokens instead of the ITX tokens that will be distributed on Mainnet.
-  </p>
-</div>
+> **⚠️ Pre-release Sepolia Testnet Version**
+>
+> This CLI tool currently operates on Sepolia testnet only. Key differences from future Mainnet:
+>
+> - Mining: Every few minutes (Mainnet: hours)
+> - Claims: Daily with 1-day delay (Mainnet: weekly, 1-week delay)
+> - Tokens: Test tokens (Mainnet: ITX tokens)
+>
+> "Mainnet" references below refer to Sepolia testnet in this version.
 
 A CLI tool for automatic mining of ITX tokens.
 
