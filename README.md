@@ -217,7 +217,3 @@ A: To stop the CLI, simply press Ctrl+C in the terminal where it's running. This
 
 Q: What happens if I deposit more than the initial deposit amount?
 A: It's not a problem if you deposit more than the initial deposit amount.
-
-```
-
-```
