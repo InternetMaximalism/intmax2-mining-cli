@@ -1,3 +1,4 @@
+use log::info;
 use serde::{Deserialize, Serialize};
 
 use crate::utils::{config::Settings, errors::CLIError};
@@ -19,6 +20,7 @@ enum AvaliabilityServerResponse {
 }
 
 pub async fn get_availability() -> anyhow::Result<AvaliabilityServerSuccessResponse> {
+    info!("Getting availability");
     let version = env!("CARGO_PKG_VERSION");
     let settings = Settings::new()?;
     let response = reqwest::get(format!(

@@ -3,6 +3,7 @@ use intmax2_zkp::{
     ethereum_types::{address::Address, bytes32::Bytes32, u32limb_trait::U32LimbTrait},
     utils::leafable::Leafable,
 };
+use log::info;
 use mining_circuit_v1::claim::claim_inner_circuit::ClaimInnerValue;
 
 use crate::{
@@ -17,6 +18,7 @@ pub async fn generate_claim_witness(
     key: &Key,
     events: &[Deposited],
 ) -> anyhow::Result<Vec<ClaimInnerValue>> {
+    info!("Generating claim witness for {:?}", events);
     ensure!(events.len() > 0, "No event to generate witness");
     ensure!(
         events.len() <= MAX_CLAIMS,

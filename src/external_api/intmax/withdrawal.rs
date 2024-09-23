@@ -3,6 +3,7 @@ use ethers::{
     types::{Address, Bytes, H256, U256},
 };
 use intmax2_zkp::ethereum_types::u32limb_trait::U32LimbTrait;
+use log::info;
 use mining_circuit_v1::withdrawal::simple_withraw_circuit::SimpleWithdrawalPublicInputs;
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
@@ -43,6 +44,7 @@ pub async fn submit_withdrawal(
     pis: SimpleWithdrawalPublicInputs,
     proof: &str,
 ) -> anyhow::Result<H256> {
+    info!("Submitting withdrawal {:?}", pis);
     let settings = Settings::new()?;
     let tx_hash = if get_network() == Network::Localnet {
         let tx_hash = localnet_withdrawal(pis, proof).await?;

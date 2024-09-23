@@ -3,6 +3,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use ethers::types::Address;
 use intmax2_zkp::wrapper_config::plonky2_config::PoseidonBN128GoldilocksConfig;
 
+use log::info;
 use plonky2::{
     field::goldilocks_field::GoldilocksField,
     plonk::proof::{Proof, ProofWithPublicInputs},
@@ -76,6 +77,10 @@ pub async fn gnark_start_prove(
     address: Address,
     plonky2_proof: ProofWithPublicInputs<F, C, D>,
 ) -> anyhow::Result<GnarkStartProofSucessResponse> {
+    info!(
+        "Starting gnark proof for address: {}, pis: {:?}",
+        address, plonky2_proof.public_inputs
+    );
     let input = GnarkStartProofInput::new(address, plonky2_proof);
     let response = reqwest::Client::new()
         .post(format!("{}/start-proof", base_url))
@@ -94,6 +99,7 @@ pub async fn gnark_get_proof(
     base_url: &str,
     job_id: &str,
 ) -> anyhow::Result<GnarkGetProofSucessResponse> {
+    info!("Getting gnark proof for job_id: {}", job_id);
     let response = reqwest::Client::new()
         .get(format!("{}/get-proof?jobId={}", base_url, job_id))
         .send()
@@ -111,6 +117,7 @@ pub async fn fetch_gnark_proof(
     job_id: &str,
     start_query_time: u64,
 ) -> anyhow::Result<GnarkProof> {
+    info!("Fetching gnark proof for job_id: {}", job_id);
     let cooldown = Settings::new()?.api.gnark_get_proof_cooldown_in_sec;
     sleep_until(start_query_time).await;
 

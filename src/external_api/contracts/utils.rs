@@ -7,6 +7,7 @@ use ethers::{
     signers::{Signer, Wallet},
     types::{Address, H256, U256},
 };
+use log::info;
 
 use crate::utils::errors::CLIError;
 
@@ -17,18 +18,21 @@ fn get_rpc_url() -> anyhow::Result<String> {
 }
 
 pub async fn get_provider() -> anyhow::Result<Provider<Http>> {
+    info!("Getting provider");
     let rpc_url = get_rpc_url()?;
     let provider = Provider::<Http>::try_from(rpc_url)?;
     Ok(provider)
 }
 
 pub async fn get_client() -> anyhow::Result<Arc<Provider<Http>>> {
+    info!("Getting client");
     let provider = get_provider().await?;
     let client = Arc::new(provider);
     Ok(client)
 }
 
 pub async fn get_client_with_rpc_url(rpc_url: &str) -> anyhow::Result<Arc<Provider<Http>>> {
+    info!("Getting client with rpc url: {}", rpc_url);
     let provider =
         Provider::<Http>::try_from(rpc_url).map_err(|e| CLIError::NetworkError(e.to_string()))?;
     Ok(Arc::new(provider))
@@ -37,6 +41,7 @@ pub async fn get_client_with_rpc_url(rpc_url: &str) -> anyhow::Result<Arc<Provid
 pub async fn get_client_with_signer(
     private_key: H256,
 ) -> anyhow::Result<SignerMiddleware<Provider<Http>, Wallet<SigningKey>>> {
+    info!("Getting client with signer");
     let provider = get_provider().await?;
     let wallet = get_wallet(private_key).await?;
     let client = SignerMiddleware::new(provider, wallet);
@@ -44,6 +49,7 @@ pub async fn get_client_with_signer(
 }
 
 pub async fn get_wallet(private_key: H256) -> anyhow::Result<Wallet<SigningKey>> {
+    info!("Getting wallet");
     let settings = crate::utils::config::Settings::new()?;
     let key = SecretKey::from_be_bytes(private_key.as_bytes()).unwrap();
     let wallet = Wallet::from(key).with_chain_id(settings.blockchain.chain_id);
@@ -51,11 +57,13 @@ pub async fn get_wallet(private_key: H256) -> anyhow::Result<Wallet<SigningKey>>
 }
 
 pub async fn get_address(private_key: H256) -> Address {
+    info!("Getting address");
     let wallet = get_wallet(private_key).await.unwrap();
     wallet.address()
 }
 
 pub async fn get_account_nonce(address: Address) -> anyhow::Result<u64> {
+    info!("Getting account nonce");
     let client = get_client().await?;
     let nonce = client
         .get_transaction_count(address, None)
@@ -65,6 +73,7 @@ pub async fn get_account_nonce(address: Address) -> anyhow::Result<u64> {
 }
 
 pub async fn get_balance(address: Address) -> anyhow::Result<U256> {
+    info!("Getting balance");
     let client = get_client().await?;
     let balance = client
         .get_balance(address, None)
@@ -76,6 +85,7 @@ pub async fn get_balance(address: Address) -> anyhow::Result<U256> {
 pub async fn get_tx_receipt(
     tx_hash: H256,
 ) -> anyhow::Result<ethers::core::types::TransactionReceipt> {
+    info!("Getting tx receipt");
     let client = get_client().await?;
     let mut loop_count = 0;
     loop {

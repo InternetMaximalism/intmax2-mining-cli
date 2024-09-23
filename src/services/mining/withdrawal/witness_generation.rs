@@ -2,6 +2,7 @@ use intmax2_zkp::{
     ethereum_types::{address::Address, u32limb_trait::U32LimbTrait as _},
     utils::leafable::Leafable as _,
 };
+use log::info;
 use mining_circuit_v1::withdrawal::simple_withraw_circuit::SimpleWithdrawalValue;
 
 use crate::{
@@ -15,6 +16,7 @@ pub fn generate_withdrawa_witness(
     key: &Key,
     event: Deposited,
 ) -> anyhow::Result<SimpleWithdrawalValue> {
+    info!("Generating withdrawal witness for {:?}", event);
     let deposit_root = state.deposit_hash_tree.get_root();
     let deposit_index = state
         .deposit_hash_tree
