@@ -2,7 +2,11 @@ use anyhow::Context;
 use claim::single_claim_task;
 use rand::Rng as _;
 
-use crate::{cli::console::print_status, state::state::State, utils::config::Settings};
+use crate::{
+    cli::console::print_status,
+    state::{keys::Key, state::State},
+    utils::config::Settings,
+};
 
 use super::assets_status::AssetsStatus;
 
@@ -13,10 +17,14 @@ pub mod witness_generation;
 
 pub const MAX_CLAIMS: usize = 10;
 
-pub async fn claim_task(state: &State, assets_status: &AssetsStatus) -> anyhow::Result<()> {
+pub async fn claim_task(
+    state: &State,
+    key: &Key,
+    assets_status: &AssetsStatus,
+) -> anyhow::Result<()> {
     if !assets_status.not_claimed_indices.is_empty() {
         for events in assets_status.get_not_claimed_events().chunks(MAX_CLAIMS) {
-            single_claim_task(state, &events)
+            single_claim_task(state, key, &events)
                 .await
                 .context("Failed claim task")?;
         }

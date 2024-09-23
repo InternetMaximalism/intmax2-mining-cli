@@ -4,7 +4,11 @@ use deposit::deposit_task;
 use rand::Rng as _;
 use withdrawal::withdrawal_task;
 
-use crate::{cli::console::print_status, state::state::State, utils::config::Settings};
+use crate::{
+    cli::console::print_status,
+    state::{keys::Key, state::State},
+    utils::config::Settings,
+};
 
 use super::assets_status::AssetsStatus;
 
@@ -14,6 +18,7 @@ pub mod withdrawal;
 
 pub async fn mining_task(
     state: &State,
+    key: &Key,
     assets_status: &AssetsStatus,
     new_deposit: bool,
     cancel_pending_deposits: bool,
@@ -22,7 +27,7 @@ pub async fn mining_task(
     if !assets_status.pending_indices.is_empty() && cancel_pending_deposits {
         for &index in assets_status.pending_indices.iter() {
             let event = assets_status.senders_deposits[index].clone();
-            cancel_task(state, event)
+            cancel_task(state, key, event)
                 .await
                 .context("Failed to cancel pending deposits")?;
         }
@@ -32,7 +37,7 @@ pub async fn mining_task(
     if !assets_status.rejected_indices.is_empty() {
         for &index in assets_status.rejected_indices.iter() {
             let event = assets_status.senders_deposits[index].clone();
-            cancel_task(state, event)
+            cancel_task(state, key, event)
                 .await
                 .context("Failed to cancel rejected deposit")?;
         }
@@ -42,7 +47,7 @@ pub async fn mining_task(
     if !assets_status.not_withdrawn_indices.is_empty() {
         for &index in assets_status.not_withdrawn_indices.iter() {
             let event = assets_status.senders_deposits[index].clone();
-            withdrawal_task(state, event)
+            withdrawal_task(state, key, event)
                 .await
                 .context("Failed withdrawal task")?;
         }
@@ -52,7 +57,9 @@ pub async fn mining_task(
 
     // deposit
     if new_deposit {
-        deposit_task(state).await.context("Failed deposit task")?;
+        deposit_task(state, key)
+            .await
+            .context("Failed deposit task")?;
         mining_cooldown().await?;
     }
 

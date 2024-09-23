@@ -10,35 +10,39 @@ use crate::{
         contracts::events::Deposited,
         intmax::gnark::{fetch_gnark_proof, gnark_start_prove},
     },
-    state::state::State,
+    state::{keys::Key, state::State},
     utils::config::Settings,
 };
 
 use super::*;
 
-pub async fn single_claim_task(state: &State, events: &[Deposited]) -> anyhow::Result<()> {
-    from_step1(state, events).await?;
+pub async fn single_claim_task(
+    state: &State,
+    key: &Key,
+    events: &[Deposited],
+) -> anyhow::Result<()> {
+    from_step1(state, key, events).await?;
     Ok(())
 }
 
-pub async fn resume_claim_task(state: &State) -> anyhow::Result<()> {
+pub async fn resume_claim_task(state: &State, key: &Key) -> anyhow::Result<()> {
     let status = match temp::ClaimStatus::new() {
         Ok(status) => status,
         Err(_) => return Ok(()),
     };
     match status.next_step {
-        temp::ClaimStep::Plonky2Prove => from_step2(state).await?,
-        temp::ClaimStep::GnarkStart => from_step3(state).await?,
-        temp::ClaimStep::GnarkGetProof => from_step4(state).await?,
-        temp::ClaimStep::ContractCall => from_step5(state).await?,
+        temp::ClaimStep::Plonky2Prove => from_step2(state, key).await?,
+        temp::ClaimStep::GnarkStart => from_step3(state, key).await?,
+        temp::ClaimStep::GnarkGetProof => from_step4(state, key).await?,
+        temp::ClaimStep::ContractCall => from_step5(state, key).await?,
     }
     Ok(())
 }
 
 // Generate witness
-async fn from_step1(state: &State, events: &[Deposited]) -> anyhow::Result<()> {
+async fn from_step1(state: &State, key: &Key, events: &[Deposited]) -> anyhow::Result<()> {
     print_status("Claim: generating claim witness");
-    let witness = witness_generation::generate_claim_witness(state, events).await?;
+    let witness = witness_generation::generate_claim_witness(state, key, events).await?;
     let status = temp::ClaimStatus {
         next_step: temp::ClaimStep::Plonky2Prove,
         witness: witness.clone(),
@@ -48,12 +52,12 @@ async fn from_step1(state: &State, events: &[Deposited]) -> anyhow::Result<()> {
         gnark_proof: None,
     };
     status.save()?;
-    from_step2(state).await?;
+    from_step2(state, key).await?;
     Ok(())
 }
 
 // Prove with Plonky2
-async fn from_step2(state: &State) -> anyhow::Result<()> {
+async fn from_step2(state: &State, key: &Key) -> anyhow::Result<()> {
     print_status("Claim: proving with plonky2");
     let mut status = temp::ClaimStatus::new()?;
     ensure!(status.next_step == temp::ClaimStep::Plonky2Prove);
@@ -77,21 +81,21 @@ async fn from_step2(state: &State) -> anyhow::Result<()> {
     status.plonlky2_proof = Some(plonky2_proof.clone());
     status.next_step = temp::ClaimStep::GnarkStart;
     status.save()?;
-    from_step3(state).await?;
+    from_step3(state, key).await?;
     Ok(())
 }
 
 // Start Gnark
-async fn from_step3(state: &State) -> anyhow::Result<()> {
+async fn from_step3(state: &State, key: &Key) -> anyhow::Result<()> {
     print_status("Claim: starting gnark prover");
     let mut status = temp::ClaimStatus::new()?;
     ensure!(status.next_step == temp::ClaimStep::GnarkStart);
     let settings = Settings::new()?;
-    let withdrawal_address = state.private_data.withdrawal_address.clone();
+    let claim_address = key.claim_address.unwrap();
 
     let prover_url = settings.api.claim_gnark_prover_url.clone();
     let plonky2_proof = status.plonlky2_proof.clone().unwrap();
-    let output = gnark_start_prove(&prover_url, withdrawal_address, plonky2_proof).await?;
+    let output = gnark_start_prove(&prover_url, claim_address, plonky2_proof).await?;
     status.job_id = Some(output.job_id.clone());
     let now: u64 = std::time::SystemTime::now()
         .duration_since(UNIX_EPOCH)
@@ -100,12 +104,12 @@ async fn from_step3(state: &State) -> anyhow::Result<()> {
     status.start_query_time = Some(output.estimated_time.unwrap_or(0) / 1000 + now);
     status.next_step = temp::ClaimStep::GnarkGetProof;
     status.save()?;
-    from_step4(state).await?;
+    from_step4(state, key).await?;
     Ok(())
 }
 
 // Get Gnark proof
-async fn from_step4(_state: &State) -> anyhow::Result<()> {
+async fn from_step4(state: &State, key: &Key) -> anyhow::Result<()> {
     print_status("Claim: getting gnark proof");
     let mut status = temp::ClaimStatus::new()?;
     ensure!(status.next_step == temp::ClaimStep::GnarkGetProof);
@@ -120,12 +124,12 @@ async fn from_step4(_state: &State) -> anyhow::Result<()> {
     status.gnark_proof = Some(output.proof.clone());
     status.next_step = temp::ClaimStep::ContractCall;
     status.save()?;
-    from_step5(_state).await?;
+    from_step5(state, key).await?;
     Ok(())
 }
 
 // Call contract
-async fn from_step5(state: &State) -> anyhow::Result<()> {
+async fn from_step5(state: &State, key: &Key) -> anyhow::Result<()> {
     print_status("Claim: calling contract");
     let status = temp::ClaimStatus::new()?;
     ensure!(status.next_step == temp::ClaimStep::ContractCall);
@@ -141,7 +145,7 @@ async fn from_step5(state: &State) -> anyhow::Result<()> {
     };
     temp::ClaimStatus::delete()?;
     claim_tokens(
-        state.private_data.claim_private_key,
+        key.claim_private_key.unwrap(),
         &claims,
         pis,
         &status.gnark_proof.unwrap(),
@@ -154,7 +158,9 @@ async fn from_step5(state: &State) -> anyhow::Result<()> {
 mod tests {
 
     use crate::{
-        services::assets_status::fetch_assets_status, state::prover::Prover, test::get_dummy_state,
+        services::assets_status::fetch_assets_status,
+        state::prover::Prover,
+        test::{get_dummy_keys, get_dummy_state},
     };
 
     use super::*;
@@ -163,12 +169,13 @@ mod tests {
     async fn test_claim_task() {
         let mut state = get_dummy_state().await;
         state.sync_trees().await.unwrap();
+        let dummy_key = get_dummy_keys().await;
 
         let assets_status = fetch_assets_status(
             &state.deposit_hash_tree,
             &state.eligible_tree,
-            state.private_data.deposit_address,
-            state.private_data.deposit_private_key,
+            dummy_key.deposit_address,
+            dummy_key.deposit_private_key,
         )
         .await
         .unwrap();
@@ -179,7 +186,7 @@ mod tests {
         let not_claimed_events = assets_status.get_not_claimed_events();
         assert!(not_claimed_events.len() > 0);
 
-        single_claim_task(&state, &not_claimed_events)
+        single_claim_task(&state, &dummy_key, &not_claimed_events)
             .await
             .unwrap();
     }

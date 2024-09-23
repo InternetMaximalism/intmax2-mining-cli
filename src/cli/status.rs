@@ -28,8 +28,8 @@ pub async fn print_cli_status(state: &mut State, private_data: &PrivateData) -> 
     let assets_status = fetch_assets_status(
         &state.deposit_hash_tree,
         &state.eligible_tree,
-        state.private_data.deposit_address,
-        state.private_data.deposit_private_key,
+        key.deposit_address,
+        key.deposit_private_key,
     )
     .await
     .context("Failed fetch assets status")?;

@@ -1,14 +1,16 @@
 use chrono::NaiveDateTime;
 
-use super::{mode::RunMode, prover::Prover};
+use super::{
+    keys::{ClaimKeys, MiningKeys},
+    mode::RunMode,
+    prover::Prover,
+};
 use crate::{
     services::sync::sync_trees,
-    state::private_data::PrivateData,
     utils::{deposit_hash_tree::DepositHashTree, eligible_tree_with_map::EligibleTreeWithMap},
 };
 
 pub struct State {
-    pub private_data: PrivateData,
     pub deposit_hash_tree: DepositHashTree,
     pub eligible_tree: EligibleTreeWithMap,
     pub last_tree_feched_at: NaiveDateTime,
@@ -18,9 +20,8 @@ pub struct State {
 }
 
 impl State {
-    pub fn new(private_data: PrivateData, mode: RunMode) -> Self {
+    pub fn new(mode: RunMode) -> Self {
         Self {
-            private_data,
             deposit_hash_tree: DepositHashTree::new(),
             eligible_tree: EligibleTreeWithMap::new(),
             last_tree_feched_at: NaiveDateTime::default(),

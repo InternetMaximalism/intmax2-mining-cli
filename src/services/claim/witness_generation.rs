@@ -8,12 +8,13 @@ use mining_circuit_v1::claim::claim_inner_circuit::ClaimInnerValue;
 use crate::{
     external_api::contracts::events::Deposited,
     services::claim::MAX_CLAIMS,
-    state::state::State,
+    state::{keys::Key, state::State},
     utils::salt::{get_pubkey_from_private_key, get_salt_from_private_key_nonce},
 };
 
 pub async fn generate_claim_witness(
     state: &State,
+    key: &Key,
     events: &[Deposited],
 ) -> anyhow::Result<Vec<ClaimInnerValue>> {
     ensure!(events.len() > 0, "No event to generate witness");
@@ -23,8 +24,8 @@ pub async fn generate_claim_witness(
     );
     let deposit_tree_root = state.deposit_hash_tree.get_root();
     let eligible_tree_root: Bytes32 = state.eligible_tree.get_root().into();
-    let pubkey = get_pubkey_from_private_key(state.private_data.deposit_private_key);
-    let recipient = Address::from_bytes_be(&state.private_data.claim_address.as_bytes());
+    let pubkey = get_pubkey_from_private_key(key.deposit_private_key);
+    let recipient = Address::from_bytes_be(&key.claim_address.unwrap().as_bytes());
     let mut witnesses = Vec::new();
     let mut prev_claim_hash = Bytes32::default();
     for event in events {
@@ -37,8 +38,7 @@ pub async fn generate_claim_witness(
         let eligible_index = state.eligible_tree.get_leaf_index(deposit_index).unwrap();
         let eligible_merkle_proof = state.eligible_tree.tree.prove(eligible_index as usize);
         let eligible_leaf = state.eligible_tree.tree.get_leaf(eligible_index as usize);
-        let salt =
-            get_salt_from_private_key_nonce(state.private_data.deposit_private_key, event.tx_nonce);
+        let salt = get_salt_from_private_key_nonce(key.deposit_private_key, event.tx_nonce);
         let value = ClaimInnerValue::new(
             deposit_tree_root,
             deposit_index,

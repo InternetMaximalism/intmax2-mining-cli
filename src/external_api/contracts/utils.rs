@@ -44,6 +44,11 @@ pub async fn get_wallet(private_key: H256) -> anyhow::Result<Wallet<SigningKey>>
     Ok(wallet)
 }
 
+pub async fn get_address(private_key: H256) -> Address {
+    let wallet = get_wallet(private_key).await.unwrap();
+    wallet.address()
+}
+
 pub async fn get_account_nonce(address: Address) -> anyhow::Result<u64> {
     let client = get_client().await?;
     let nonce = client
