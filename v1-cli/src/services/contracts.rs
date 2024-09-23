@@ -79,6 +79,7 @@ Waiting for your deposit...",
         pretty_format_u256(required_balance)
     ));
     loop {
+        let client = get_client().await?;
         let new_balance = client.get_balance(address, None).await?;
         if new_balance > balance {
             print_status("Balance updated");
