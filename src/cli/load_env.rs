@@ -8,22 +8,26 @@ use crate::state::mode::RunMode;
 use crate::utils::config::Settings;
 use crate::utils::errors::CLIError;
 
+#[derive(Debug, Clone, PartialEq)]
 pub enum Config {
     Mining(MiningConfig),
     Claim(ClaimConfig),
     Exit(ExitConfig),
 }
 
+#[derive(Debug, Clone, PartialEq)]
 pub struct MiningConfig {
     pub keys: MiningKeys,
     pub mining_unit: U256,
     pub mining_times: usize,
 }
 
+#[derive(Debug, Clone, PartialEq)]
 pub struct ClaimConfig {
     pub keys: ClaimKeys,
 }
 
+#[derive(Debug, Clone, PartialEq)]
 pub struct ExitConfig {
     pub keys: MiningKeys,
 }

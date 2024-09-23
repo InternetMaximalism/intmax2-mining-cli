@@ -11,7 +11,7 @@ pub struct Key {
     pub withdrawal_address: Option<Address>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct MiningKeys {
     pub deposit_private_keys: Vec<H256>,
     pub deposit_addresses: Vec<Address>,
@@ -51,7 +51,7 @@ impl MiningKeys {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct ClaimKeys {
     pub deposit_private_keys: Vec<H256>,
     pub deposit_addresses: Vec<Address>,
