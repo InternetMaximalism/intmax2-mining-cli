@@ -114,7 +114,22 @@ Additionally, you need a mainnet RPC URL. We strongly recommend using Alchemy's 
 
 ## Operating Commands
 
-The mining-cli has three main commands:
+The mining-cli has three main commands. Before running any command, ensure that all required environment variables are set. You can set these variables in your shell or use a `.env` file in the same directory as the CLI.
+
+### Setting Environment Variables
+
+All required environment variables must be set before running any command. You can set them in your shell or use a `.env` file. For example:
+
+```bash
+export RPC_URL="https://eth-mainnet.alchemyapi.io/v2/your-api-key"
+export MINING_UNIT="0.1"
+export MINING_TIMES="10"
+export DEPOSIT_PRIVATE_KEYS='["0x123...", "0x456..."]'
+export WITHDRAWAL_ADDRESS="0x789..."
+export CLAIM_PRIVATE_KEY="0xabc..."
+```
+
+Please refer .env.example for a sample .env file.
 
 ### 1. `mining-cli mining`
 
@@ -122,11 +137,13 @@ This command performs mining by repeatedly executing deposits and withdrawals.
 
 Required environment variables:
 
-- RPC_URL: Blockchain RPC URL. Alchemy's RPC is strongly recommended.
-- MINING_UNIT: Amount of ETH per mining operation. Set to "0.1" or "1".
-- MINING_TIMES: Number of mining operations (sets of deposit and withdrawal). Can be set to 10 or 100.
-- DEPOSIT_PRIVATE_KEYS: Array of private keys for deposit accounts. Set in the format '["0xa...", "0xb..."]'. Each address must contain ETH equal to MINING_UNIT \* MINING_TIMES plus gas fees.
-- WITHDRAWAL_ADDRESS: Address of the account for withdrawals. Balance can be 0 as gas fees are deducted from withdrawn ETH.
+| Variable               | Description                                                                                                                                                             |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `RPC_URL`              | Blockchain RPC URL. Alchemy's RPC is strongly recommended.                                                                                                              |
+| `MINING_UNIT`          | Amount of ETH per mining operation. Set to "0.1" or "1".                                                                                                                |
+| `MINING_TIMES`         | Number of mining operations (sets of deposit and withdrawal). Can be set to "10" or "100".                                                                              |
+| `DEPOSIT_PRIVATE_KEYS` | Array of private keys for deposit accounts. Set in the format '["0xa...", "0xb..."]'. Each address must contain ETH equal to MINING_UNIT \* MINING_TIMES plus gas fees. |
+| `WITHDRAWAL_ADDRESS`   | Address of the account for withdrawals. Balance can be 0 as gas fees are deducted from withdrawn ETH.                                                                   |
 
 ### 2. `mining-cli claim`
 
@@ -134,9 +151,11 @@ This command claims available ITX tokens.
 
 Required environment variables:
 
-- RPC_URL: Blockchain RPC URL. Alchemy's RPC is strongly recommended.
-- DEPOSIT_PRIVATE_KEYS: Array of private keys used for deposits. Set in the format '["0xa...", "0xb..."]'. Balance can be 0.
-- CLAIM_PRIVATE_KEY: Private key of the account used for claiming. Must contain enough ETH for gas fees.
+| Variable               | Description                                                                                          |
+| ---------------------- | ---------------------------------------------------------------------------------------------------- |
+| `RPC_URL`              | Blockchain RPC URL. Alchemy's RPC is strongly recommended.                                           |
+| `DEPOSIT_PRIVATE_KEYS` | Array of private keys used for deposits. Set in the format '["0xa...", "0xb..."]'. Balance can be 0. |
+| `CLAIM_PRIVATE_KEY`    | Private key of the account used for claiming. Must contain enough ETH for gas fees.                  |
 
 ### 3. `mining-cli exit`
 
@@ -144,9 +163,11 @@ This command withdraws all balances currently in the simplified intmax2 and canc
 
 Required environment variables:
 
-- RPC_URL: Blockchain RPC URL. Alchemy's RPC is strongly recommended.
-- DEPOSIT_PRIVATE_KEYS: Array of private keys used for deposits. Set in the format '["0xa...", "0xb..."]'.
-- WITHDRAWAL_ADDRESS: Address of the account for withdrawals. Balance can be 0 as gas fees are deducted from withdrawn ETH.
+| Variable               | Description                                                                                           |
+| ---------------------- | ----------------------------------------------------------------------------------------------------- |
+| `RPC_URL`              | Blockchain RPC URL. Alchemy's RPC is strongly recommended.                                            |
+| `DEPOSIT_PRIVATE_KEYS` | Array of private keys used for deposits. Set in the format '["0xa...", "0xb..."]'.                    |
+| `WITHDRAWAL_ADDRESS`   | Address of the account for withdrawals. Balance can be 0 as gas fees are deducted from withdrawn ETH. |
 
 ## About Pending Deposits
 
@@ -157,7 +178,9 @@ ETH enters a pending state immediately after deposit. The admin evaluates it acc
 During mining, a status message like the following will be displayed. This indicates the state of the deposit account:
 
 ```
+
 Deposits: 3 (success: 2 pending: 1 rejected: 0 cancelled: 0) Withdrawn: 2 Eligible: 0 (claimed: 0)
+
 ```
 
 The status message components are:
@@ -194,3 +217,7 @@ A: To stop the CLI, simply press Ctrl+C in the terminal where it's running. This
 
 Q: What happens if I deposit more than the initial deposit amount?
 A: It's not a problem if you deposit more than the initial deposit amount.
+
+```
+
+```

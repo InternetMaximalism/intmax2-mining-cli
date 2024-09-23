@@ -1,9 +1,9 @@
-use std::{fs::File, path::PathBuf};
-
 use clap::{arg, command, Parser};
 use cli::{console::print_error, run};
+use dotenv::dotenv;
 use simplelog::{Config, LevelFilter, WriteLogger};
 use state::mode::RunMode;
+use std::{fs::File, path::PathBuf};
 use utils::file::create_file_with_content;
 
 pub mod cli;
@@ -23,6 +23,8 @@ struct Args {
 
 #[tokio::main]
 async fn main() {
+    dotenv().ok();
+
     // parse args
     let args = Args::parse();
 

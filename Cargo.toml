@@ -31,4 +31,5 @@ regex = "1.10.6"
 dir = "0.1.2"
 dirs = "5.0.1"
 clap = { version = "4.5.18", features = ["derive"] }
+dotenv = "0.15.0"
 
