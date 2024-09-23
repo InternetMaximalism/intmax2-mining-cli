@@ -172,6 +172,7 @@ Deposits: 3 (success: 2 pending: 1 rejected: 0 cancelled: 0) Withdrawn: 2 Eligib
 
 The status message components are:
 
+- Deposits: Total number of deposits
 - Success: Number of successful deposits
 - Pending: Number of deposits awaiting AML analysis
 - Rejected: Number of deposits rejected by AML analysis
