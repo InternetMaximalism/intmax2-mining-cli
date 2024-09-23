@@ -12,6 +12,7 @@ use crate::{
 
 pub mod availability;
 pub mod console;
+pub mod load_env;
 pub mod private_data;
 pub mod status;
 pub mod user_settings;
