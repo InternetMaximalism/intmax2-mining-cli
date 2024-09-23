@@ -85,52 +85,87 @@ cargo install --path .
 
 Note: Always check the release notes or changelog for any important updates or breaking changes before updating.
 
-## Resetting the CLI State
-
-To reset the CLI state, simply delete the `v1-cli/data` directory. This will clear all stored data.
-
-Note: Be cautious, as this will erase all local data. Ensure you have backups of any important information.
-
-## How It Works
+## Mining flow
 
 <div align="center">
   <img src="assets/diagram.png" width="800" alt="Mining diagram">
 </div>
 
-1. **Setup**: You need three Ethereum addresses:
+1. **Preparation**: You need three types of Ethereum addresses:
 
 - **Deposit address**: Where you initially deposit ETH for mining
 - **Withdrawal address**: Where mined ETH is withdrawn to
 - **Claim address**: Where you receive ITX token rewards
 
-Additionally, you need a mainnet RPC URL. We strongly recommend using Alchemy's RPC (the free plan is sufficient). This is because it has a high limit for retrieving event logs.
-
-Note: Users must create these new addresses themselves and input them into the CLI.
-
-- Start the CLI and follow the instructions to set up your addresses.
-- Deposit 1 ETH, 10 ETH, or 100 ETH + gas fee to your deposit address following the instructions in the CLI.
-- Deposit gas fee to your claim address following the instructions in the CLI.
+Additionally, you need a mainnet RPC URL. We strongly recommend using Alchemy's RPC (the free plan is sufficient). This is because it has a high limit for retrieving event logs. You can set these through environment variables. Please refer to the Operating Commands section below for more details.
 
 2. **Mining Process**:
 
-- The CLI automatically deposits smaller amounts (0.1 or 1 ETH) into intmax2. The deposit amount can be configured through the CLI
+- The CLI automatically deposits smaller amounts (0.1 or 1 ETH) into intmax2. The deposit amount can be configured through environment variables.
 - After a few hours, it withdraws these amounts to your withdrawal address.
-- There's a limit to deposits per address; create a new deposit address if you reach the limit.
 
 3. **Rewards**:
 
-- Receive ITX tokens weekly in your claim address (available every Monday)
+- Receive ITX tokens weekly in your claim address (available every Monday. Rewards are delayed by one week. For example, mining done on a Sunday can be claimed not on the following Monday, but on the Monday 8 days later)
 - Ensure your claim address has enough ETH for gas fees
 
-## Operating commands
+## Operating Commands
 
-The CLI has four operating modes:
+The mining-cli has three main commands:
 
-1. **Mining mode**: Automatically handles deposits, withdrawals. Stops when the deposit limit is reached.
-2. **Claim mode**: Only claims ITX tokens. Stops when there are no more ITX tokens to claim.
-3. **Exit mode**: Only performs withdrawals and cancels pending deposits. No new deposits are made.
+### 1. `mining-cli mining`
 
-Note: If you switch to the exit mode immediately after depositing, you may be refunded to the deposit address.
+This command performs mining by repeatedly executing deposits and withdrawals.
+
+Required environment variables:
+
+- RPC_URL: Blockchain RPC URL. Alchemy's RPC is strongly recommended.
+- MINING_UNIT: Amount of ETH per mining operation. Set to "0.1" or "1".
+- MINING_TIMES: Number of mining operations (sets of deposit and withdrawal). Can be set to 10 or 100.
+- DEPOSIT_PRIVATE_KEYS: Array of private keys for deposit accounts. Set in the format '["0xa...", "0xb..."]'. Each address must contain ETH equal to MINING_UNIT \* MINING_TIMES plus gas fees.
+- WITHDRAWAL_ADDRESS: Address of the account for withdrawals. Balance can be 0 as gas fees are deducted from withdrawn ETH.
+
+### 2. `mining-cli claim`
+
+This command claims available ITX tokens.
+
+Required environment variables:
+
+- RPC_URL: Blockchain RPC URL. Alchemy's RPC is strongly recommended.
+- DEPOSIT_PRIVATE_KEYS: Array of private keys used for deposits. Set in the format '["0xa...", "0xb..."]'. Balance can be 0.
+- CLAIM_PRIVATE_KEY: Private key of the account used for claiming. Must contain enough ETH for gas fees.
+
+### 3. `mining-cli exit`
+
+This command withdraws all balances currently in the simplified intmax2 and cancels pending deposits.
+
+Required environment variables:
+
+- RPC_URL: Blockchain RPC URL. Alchemy's RPC is strongly recommended.
+- DEPOSIT_PRIVATE_KEYS: Array of private keys used for deposits. Set in the format '["0xa...", "0xb..."]'.
+- WITHDRAWAL_ADDRESS: Address of the account for withdrawals. Balance can be 0 as gas fees are deducted from withdrawn ETH.
+
+## About Pending Deposits
+
+ETH enters a pending state immediately after deposit. The admin evaluates it according to AML criteria, and if there are no issues, it is deposited into the simplified intmax2. Deposits rejected by AML criteria are automatically refunded to the deposit address during mining. Pending deposits can be cancelled by running in exit mode.
+
+## Status
+
+During mining, a status message like the following will be displayed. This indicates the state of the deposit account:
+
+```
+Deposits: 3 (success: 2 pending: 1 rejected: 0 cancelled: 0) Withdrawn: 2 Eligible: 0 (claimed: 0)
+```
+
+The status message components are:
+
+- Success: Number of successful deposits
+- Pending: Number of deposits awaiting AML analysis
+- Rejected: Number of deposits rejected by AML analysis
+- Cancelled: Number of cancelled deposits
+- Withdrawn: Number of withdrawals
+- Eligible: Number of deposits eligible for ITX rewards
+- Claimed: Number of deposits for which rewards have been claimed
 
 ## Important Notes
 
@@ -146,7 +181,7 @@ Q: Is this process self-custodial?
 A: Yes, but the contract is currently upgradable. The intmax team plans to relinquish this ability soon.
 
 Q: How much can I earn?
-A: Earnings vary based on your contribution and overall network activity.
+A: The amount of ITX tokens you can earn proportionally depends on the amount of ETH you deposit.
 
 Q: How often should I update the CLI?
 A: It's recommended to check for updates regularly, at least once a week, to ensure you have the latest features and security improvements.
