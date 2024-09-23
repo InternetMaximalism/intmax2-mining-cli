@@ -11,6 +11,7 @@ use crate::{
 };
 use anyhow::ensure;
 use chrono::{Duration, NaiveDateTime, Utc};
+use log::info;
 
 pub async fn sync_trees(
     last_deposit_block_number: &mut u64,
@@ -23,6 +24,10 @@ pub async fn sync_trees(
         // sync deposit tree only
         *last_deposit_block_number =
             sync_to_latest_deposit_tree(deposit_hash_tree, *last_deposit_block_number).await?;
+        info!(
+            "No need to fetch latest trees from GitHub, last update: {}, deposit_len: {}, eligible_len: {}, last deposit block number: {}",
+            last_update, deposit_hash_tree.tree.len(), eligible_tree.tree.len(), last_deposit_block_number
+        );
         return Ok(());
     }
     match fetch_latest_tree_from_github(*last_update).await? {
@@ -35,11 +40,19 @@ pub async fn sync_trees(
             *last_deposit_block_number =
                 sync_to_latest_deposit_tree(deposit_hash_tree, deposit_tree_info.block_number)
                     .await?;
+            info!(
+                "Fetched latest trees from GitHub, last update: {}, deposit_len: {}, eligible_len: {}, last deposit block number: {}",
+                last_update, deposit_hash_tree.tree.len(), eligible_tree.tree.len(), last_deposit_block_number
+            );
         }
         None => {
             *last_deposit_block_number =
                 sync_to_latest_deposit_tree(deposit_hash_tree, *last_deposit_block_number).await?;
             *last_update = now; // update last_update to now
+            info!(
+                "No new trees found on GitHub, last update: {}, deposit_len: {}, eligible_len: {}, last deposit block number: {}",
+                last_update, deposit_hash_tree.tree.len(), eligible_tree.tree.len(), last_deposit_block_number
+            );
         }
     }
     Ok(())
@@ -50,6 +63,12 @@ async fn sync_to_latest_deposit_tree(
     from_block: u64,
 ) -> anyhow::Result<u64> {
     let events = get_deposit_leaf_inserted_event(from_block).await?;
+    info!(
+        "Syncing deposit tree from block {}, got {} events. Latest deposit_index={}",
+        from_block,
+        events.len(),
+        events.last().map(|event| event.deposit_index).unwrap_or(0)
+    );
 
     let next_deposit_index = deposit_hash_tree.tree.len();
     let mut to_append = events

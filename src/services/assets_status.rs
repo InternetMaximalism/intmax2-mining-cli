@@ -135,21 +135,22 @@ impl AssetsStatus {
     }
 }
 
-// #[cfg(test)]
-// mod tests {
-//     #[tokio::test]
-//     async fn test_assets_status() {
-//         let mut state = crate::test::get_dummy_state().await;
-//         state.sync_trees().await.unwrap();
+#[cfg(test)]
+mod tests {
+    #[tokio::test]
+    async fn test_assets_status() {
+        let mut state = crate::test::get_dummy_state().await;
+        state.sync_trees().await.unwrap();
 
-//         let result = super::fetch_assets_status(
-//             &state.deposit_hash_tree,
-//             &state.eligible_tree,
-//             key.deposit_address,
-//             key.deposit_private_key,
-//         )
-//         .await
-//         .unwrap();
-//         dbg!(result);
-//     }
-// }
+        let dummy_key = crate::test::get_dummy_keys().await;
+
+        let result = super::fetch_assets_status(
+            &state,
+            dummy_key.deposit_address,
+            dummy_key.deposit_private_key,
+        )
+        .await
+        .unwrap();
+        dbg!(result);
+    }
+}

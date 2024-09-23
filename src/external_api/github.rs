@@ -1,5 +1,6 @@
 use anyhow::Context;
 use chrono::{NaiveDate, NaiveDateTime};
+use log::info;
 use regex::Regex;
 use reqwest;
 use serde_json::Value;
@@ -12,6 +13,10 @@ use crate::{
 pub async fn fetch_latest_tree_from_github(
     last_update: NaiveDateTime,
 ) -> anyhow::Result<Option<(BinDepositTree, BinEligibleTree, NaiveDateTime)>> {
+    info!(
+        "Fetching latest deposit and eligible trees from GitHub, last update: {}",
+        last_update
+    );
     let settings = Settings::new()?;
     let client = reqwest::Client::new();
     let url = format!(
