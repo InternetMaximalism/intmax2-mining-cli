@@ -2,7 +2,10 @@
 
 <div style="background-color: #FFFDE7; border: 1px solid #FBC02D; border-radius: 4px; padding: 16px; margin-bottom: 20px;">
   <p style="color: #F57F17; font-weight: bold; margin: 0;">
-    ⚠️ Note: This pre-release CLI tool currently operates on Sepolia testnet with ~5-minute transaction intervals, not the Ethereum mainnet described in this documentation; expect significant changes before production release.
+  ⚠️ Note: This pre-release CLI tool currently operates on the Sepolia testnet. All references to "Mainnet" in the following README actually refer to the Sepolia testnet. This CLI tool only works on the Sepolia testnet, and there are the following differences compared to the future Mainnet release version:
+  - Mining intervals occur every few minutes on Sepolia, whereas on Mainnet they will occur every few hours.
+  - Claim intervals are daily with a one-day delay on Sepolia, whereas on Mainnet they will be weekly with a one-week delay.
+  - On Sepolia, you receive test tokens instead of the ITX tokens that will be distributed on Mainnet.
   </p>
 </div>
 
@@ -50,7 +53,7 @@ cargo install --path .
 
 ```bash
 cd intmax2-mining-cli
-mining-cli --help
+mining-cli --version
 ```
 
 ### For Mac
