@@ -116,7 +116,16 @@ Additionally, you need a mainnet RPC URL. We strongly recommend using Alchemy's 
 
 The mining-cli has three main commands. Before running any command, ensure that all required environment variables are set. You can set these variables in your shell or use a `.env` file in the same directory as the CLI.
 
-### Setting Environment Variables
+### Environment Variables
+
+| Variable Name          | Details                                                                                                                       | Example                                               |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| `RPC_URL`              | Blockchain RPC URL. Alchemy's RPC is strongly recommended.                                                                    | `"https://eth-mainnet.alchemyapi.io/v2/your-api-key"` |
+| `MINING_UNIT`          | Amount of ETH per mining operation. Set to "0.1" or "1".                                                                      | `"0.1"`                                               |
+| `MINING_TIMES`         | Number of mining operations (sets of deposit and withdrawal). Can be set to "10" or "100".                                    | `"10"`                                                |
+| `DEPOSIT_PRIVATE_KEYS` | Array of private keys for deposit accounts. Each address must contain ETH equal to MINING_UNIT \* MINING_TIMES plus gas fees. | `'["0x123...", "0x456..."]'`                          |
+| `WITHDRAWAL_ADDRESS`   | Address of the account for withdrawals. Balance can be 0 as gas fees are deducted from withdrawn ETH.                         | `"0x789..."`                                          |
+| `CLAIM_PRIVATE_KEY`    | Private key of the account used for claiming. Must contain enough ETH for gas fees.                                           | `"0xabc..."`                                          |
 
 All required environment variables must be set before running any command. You can set them in your shell or use a `.env` file. For example:
 
@@ -129,45 +138,23 @@ export WITHDRAWAL_ADDRESS="0x789..."
 export CLAIM_PRIVATE_KEY="0xabc..."
 ```
 
-Please refer .env.example for a sample .env file.
+Or you can create a `.env` file in the same directory. Please refer to the `.env.example` file for the format.
 
-### 1. `mining-cli mining`
+### Commands
 
-This command performs mining by repeatedly executing deposits and withdrawals.
+1. `mining-cli mining`
 
-Required environment variables:
+   - Performs mining by repeatedly executing deposits and withdrawals.
+   - Required variables: `RPC_URL`, `MINING_UNIT`, `MINING_TIMES`, `DEPOSIT_PRIVATE_KEYS`, `WITHDRAWAL_ADDRESS`
 
-| Variable               | Description                                                                                                                                                             |
-| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `RPC_URL`              | Blockchain RPC URL. Alchemy's RPC is strongly recommended.                                                                                                              |
-| `MINING_UNIT`          | Amount of ETH per mining operation. Set to "0.1" or "1".                                                                                                                |
-| `MINING_TIMES`         | Number of mining operations (sets of deposit and withdrawal). Can be set to "10" or "100".                                                                              |
-| `DEPOSIT_PRIVATE_KEYS` | Array of private keys for deposit accounts. Set in the format '["0xa...", "0xb..."]'. Each address must contain ETH equal to MINING_UNIT \* MINING_TIMES plus gas fees. |
-| `WITHDRAWAL_ADDRESS`   | Address of the account for withdrawals. Balance can be 0 as gas fees are deducted from withdrawn ETH.                                                                   |
+2. `mining-cli claim`
 
-### 2. `mining-cli claim`
+   - Claims available ITX tokens.
+   - Required variables: `RPC_URL`, `DEPOSIT_PRIVATE_KEYS`, `CLAIM_PRIVATE_KEY`
 
-This command claims available ITX tokens.
-
-Required environment variables:
-
-| Variable               | Description                                                                                          |
-| ---------------------- | ---------------------------------------------------------------------------------------------------- |
-| `RPC_URL`              | Blockchain RPC URL. Alchemy's RPC is strongly recommended.                                           |
-| `DEPOSIT_PRIVATE_KEYS` | Array of private keys used for deposits. Set in the format '["0xa...", "0xb..."]'. Balance can be 0. |
-| `CLAIM_PRIVATE_KEY`    | Private key of the account used for claiming. Must contain enough ETH for gas fees.                  |
-
-### 3. `mining-cli exit`
-
-This command withdraws all balances currently in the simplified intmax2 and cancels pending deposits.
-
-Required environment variables:
-
-| Variable               | Description                                                                                           |
-| ---------------------- | ----------------------------------------------------------------------------------------------------- |
-| `RPC_URL`              | Blockchain RPC URL. Alchemy's RPC is strongly recommended.                                            |
-| `DEPOSIT_PRIVATE_KEYS` | Array of private keys used for deposits. Set in the format '["0xa...", "0xb..."]'.                    |
-| `WITHDRAWAL_ADDRESS`   | Address of the account for withdrawals. Balance can be 0 as gas fees are deducted from withdrawn ETH. |
+3. `mining-cli exit`
+   - Withdraws all balances currently in the simplified intmax2 and cancels pending deposits.
+   - Required variables: `RPC_URL`, `DEPOSIT_PRIVATE_KEYS`, `WITHDRAWAL_ADDRESS`
 
 ## About Pending Deposits
 
