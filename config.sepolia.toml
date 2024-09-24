@@ -11,8 +11,8 @@ chain_id = 11155111
 int1_address = "0xe190199F43e81E0E12fBFdD3B0c86F7387617677"
 minter_address = "0xE4e61209814d933050f4F5de5d7e9aF6125F70D4"
 token_address = "0x15A839Bed67eD75B681ef8A187bf4C857Dd1De6F"
-single_deposit_gas_fee = "2000000000000000"
-single_claim_gas_fee = "2000000000000000"
+single_deposit_gas = 88000
+single_claim_gas = 500000 # todo more accurate value
 
 [service]
 mining_max_cooldown_in_sec = 20

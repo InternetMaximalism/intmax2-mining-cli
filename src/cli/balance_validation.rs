@@ -1,7 +1,10 @@
 use ethers::types::{Address, U256};
 
 use crate::{
-    external_api::contracts::{token::get_token_balance, utils::get_balance},
+    external_api::contracts::{
+        token::get_token_balance,
+        utils::{get_balance, get_gas_price},
+    },
     services::{
         assets_status::{fetch_assets_status, AssetsStatus},
         contracts::pretty_format_u256,
@@ -66,9 +69,10 @@ pub async fn validate_deposit_address_balance(
     };
 
     let settings = Settings::new()?;
-    let single_deposit_gas_fee: U256 =
-        U256::from_str_radix(&settings.blockchain.single_deposit_gas_fee, 10).unwrap();
-    let min_balance = (mining_unit + single_deposit_gas_fee) * U256::from(remaining_deposits);
+    let gas_price = get_gas_price().await?;
+    let single_deposit_gas: U256 = settings.blockchain.single_deposit_gas.into();
+    let min_balance =
+        (mining_unit + gas_price * single_deposit_gas) * U256::from(remaining_deposits);
     let balance = get_balance(deposit_address).await?;
     if balance < min_balance {
         return Err(CLIError::BalanceError(format!(
@@ -95,9 +99,9 @@ pub async fn validate_claim_address_balance(
 ) -> anyhow::Result<()> {
     let remaining_claims = assets_status.not_claimed_indices.len();
     let settings = Settings::new()?;
-    let single_claim_gas_fee: U256 =
-        U256::from_str_radix(&settings.blockchain.single_claim_gas_fee, 10).unwrap();
-    let min_balance = single_claim_gas_fee * U256::from(remaining_claims);
+    let gas_price = get_gas_price().await?;
+    let single_claim_gas: U256 = settings.blockchain.single_claim_gas.into();
+    let min_balance = single_claim_gas * gas_price * U256::from(remaining_claims);
     let balance = get_balance(claim_address).await?;
     if balance < min_balance {
         return Err(CLIError::BalanceError(format!(

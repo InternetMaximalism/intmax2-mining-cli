@@ -81,6 +81,16 @@ pub async fn get_balance(address: Address) -> anyhow::Result<U256> {
     Ok(balance)
 }
 
+pub async fn get_gas_price() -> anyhow::Result<U256> {
+    info!("Getting gas price");
+    let client = get_client().await?;
+    let gas_price = client
+        .get_gas_price()
+        .await
+        .map_err(|e| CLIError::NetworkError(e.to_string()))?;
+    Ok(gas_price)
+}
+
 pub async fn get_tx_receipt(
     tx_hash: H256,
 ) -> anyhow::Result<ethers::core::types::TransactionReceipt> {
