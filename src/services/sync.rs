@@ -1,11 +1,8 @@
-use std::thread::sleep;
-
 use crate::{
     external_api::{
         contracts::{
             events::get_deposit_leaf_inserted_event,
             int1::{get_deposit_root, get_deposit_root_exits},
-            minter::get_eligible_root,
         },
         github::fetch_latest_tree_from_github,
     },
