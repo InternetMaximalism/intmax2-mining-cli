@@ -41,8 +41,8 @@ pub async fn mining_loop(
                 && assets_status.not_withdrawn_indices.is_empty()
             {
                 print_status(format!(
-                    "Max deposits reached for {:?}. Exiting.",
-                    key.deposit_address
+                    "Max deposits {} reached for {:?}. Please use another deposit address.",
+                    mining_times, key.deposit_address
                 ));
                 break;
             }
