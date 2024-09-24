@@ -41,7 +41,7 @@ async fn main() {
     match run(args.mode).await {
         Ok(_) => {}
         Err(e) => {
-            print_error(format!("{:#}", e));
+            print_error(format!("{}\nPlease Retry", e.to_string()));
         }
     }
 }

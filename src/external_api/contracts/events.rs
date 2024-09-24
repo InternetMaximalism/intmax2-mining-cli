@@ -3,6 +3,7 @@ use intmax2_zkp::{
     common::deposit::Deposit,
     ethereum_types::{bytes32::Bytes32, u256::U256, u32limb_trait::U32LimbTrait},
 };
+use log::info;
 
 use super::{
     int1::get_int1_contract,
@@ -30,6 +31,7 @@ impl Deposited {
 }
 
 pub async fn get_deposited_event_by_sender(sender: Address) -> anyhow::Result<Vec<Deposited>> {
+    info!("Getting deposit event by sender");
     let int1 = get_int1_contract().await?;
     let events = int1
         .deposited_filter()

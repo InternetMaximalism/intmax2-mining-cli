@@ -3,6 +3,7 @@ use ethers::{
     providers::{Http, Provider},
     types::{Address, U256},
 };
+use log::info;
 
 use super::utils::get_client;
 
@@ -21,6 +22,7 @@ abigen!(
 );
 
 pub async fn get_token_contract() -> anyhow::Result<IERC20<Provider<Http>>> {
+    info!("Getting token contract");
     let settings = crate::utils::config::Settings::new()?;
     let client = get_client().await?;
     let token_address: Address = settings.blockchain.token_address.parse()?;

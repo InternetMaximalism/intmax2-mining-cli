@@ -27,6 +27,7 @@ pub async fn get_client() -> anyhow::Result<Arc<Provider<Http>>> {
     info!("Getting client");
     let provider = get_provider().await?;
     let client = Arc::new(provider);
+    info!("Client created");
     Ok(client)
 }
 

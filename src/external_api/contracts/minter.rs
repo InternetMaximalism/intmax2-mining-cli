@@ -9,12 +9,14 @@ use ethers::{
     types::{Address, H256},
 };
 use intmax2_zkp::ethereum_types::{bytes32::Bytes32, u32limb_trait::U32LimbTrait};
+use log::info;
 
 use super::utils::{get_client, get_client_with_signer};
 
 abigen!(MinterV1, "abi/MinterV1.json",);
 
 pub async fn get_minter_contract() -> anyhow::Result<minter_v1::MinterV1<Provider<Http>>> {
+    info!("Getting minter contract");
     let settings = crate::utils::config::Settings::new()?;
     let client = get_client().await?;
     let minter_address: Address = settings.blockchain.minter_address.parse()?;

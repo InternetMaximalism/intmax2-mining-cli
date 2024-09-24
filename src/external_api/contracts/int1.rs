@@ -9,12 +9,14 @@ use ethers::{
     types::{Address, H256, U256},
 };
 use intmax2_zkp::ethereum_types::{bytes32::Bytes32, u32limb_trait::U32LimbTrait};
+use log::info;
 
 use super::utils::{get_client, get_client_with_signer};
 
 abigen!(Int1, "abi/Int1.json",);
 
 pub async fn get_int1_contract() -> anyhow::Result<int_1::Int1<Provider<Http>>> {
+    info!("Getting int1 contract");
     let settings = crate::utils::config::Settings::new()?;
     let client = get_client().await?;
     let int1_address: Address = settings.blockchain.int1_address.parse()?;
