@@ -45,19 +45,31 @@ pub async fn sync_trees(
                 "Deposit root does not exist on chain: {}",
                 deposit_tree_info.root
             );
-            // let mut count = 0;
-            // loop {
-            //     let onchain_eligible_root = get_eligible_root().await?;
-            //     if onchain_eligible_root == eligible_tree_info.root || count > 100 {
-            //         break;
-            //     }
-            //     info!(
-            //         "Eligible root mismatch: onchain {}, got {}. Count: {} Retrying in 20 seconds...",
-            //         onchain_eligible_root, eligible_tree_info.root, count
-            //     );
-            //     count += 1;
-            //     sleep(std::time::Duration::from_secs(20));
-            // }
+            let mut count = 0;
+            loop {
+                let onchain_eligible_root =
+                    crate::external_api::contracts::minter::get_eligible_root().await?;
+                if onchain_eligible_root == eligible_tree_info.root {
+                    info!(
+                        "Eligible root matched: onchain {}, file {}. Count: {}",
+                        onchain_eligible_root, eligible_tree_info.root, count
+                    );
+                    break;
+                }
+                if count >= 10 {
+                    anyhow::bail!(
+                        "Eligible root mismatch: {} Count: {}",
+                        onchain_eligible_root,
+                        count
+                    );
+                }
+                warn!(
+                    "Eligible root mismatch: onchain {}, file {}. Count: {} Retrying in 20 seconds...",
+                    onchain_eligible_root, eligible_tree_info.root, count
+                );
+                count += 1;
+                tokio::time::sleep(std::time::Duration::from_secs(20)).await;
+            }
             *last_update = new_last_update;
             *deposit_hash_tree = deposit_tree_info.tree;
             *eligible_tree = eligible_tree_info.tree;

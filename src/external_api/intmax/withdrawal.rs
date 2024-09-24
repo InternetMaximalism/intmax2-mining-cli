@@ -7,7 +7,6 @@ use log::info;
 use mining_circuit_v1::withdrawal::simple_withraw_circuit::SimpleWithdrawalPublicInputs;
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
-use tokio::time::sleep;
 
 use crate::{
     external_api::contracts::int1::{get_int1_contract_with_signer, int_1},
@@ -91,7 +90,7 @@ async fn localnet_withdrawal(
     let tx = int1.withdraw(public_inputs, proof);
     let pending_tx: PendingTransaction<Http> = match tx.send().await {
         Ok(tx) => {
-            sleep(std::time::Duration::from_secs(5)).await;
+            tokio::time::sleep(std::time::Duration::from_secs(5)).await;
             tx
         }
         Err(e) => {
