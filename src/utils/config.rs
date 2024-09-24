@@ -4,6 +4,8 @@ use serde::Deserialize;
 
 use crate::utils::network::get_network;
 
+use super::errors::CLIError;
+
 fn config_name() -> String {
     format!("config.{}", get_network())
 }
@@ -13,16 +15,6 @@ pub struct Settings {
     pub api: Api,
     pub blockchain: Blockchain,
     pub service: Service,
-}
-
-impl Settings {
-    pub fn new() -> anyhow::Result<Self> {
-        let s = Config::builder()
-            .add_source(File::with_name(&config_name()))
-            .build()
-            .context("Failed to load config")?;
-        s.try_deserialize().context("Failed to deserialize config")
-    }
 }
 
 #[derive(Clone, Debug, Deserialize)]
@@ -48,4 +40,17 @@ pub struct Blockchain {
 #[derive(Clone, Debug, Deserialize)]
 pub struct Service {
     pub mining_max_cooldown_in_sec: u64,
+}
+
+impl Settings {
+    pub fn new() -> anyhow::Result<Self> {
+        let s = Config::builder()
+            .add_source(File::with_name(&config_name()))
+            .build()
+            .context("Failed to load config")?;
+        let s = s.try_deserialize().map_err(|e| {
+            CLIError::ParseError(format!("Failed to parse {}.toml. {:?}", config_name(), e))
+        })?;
+        Ok(s)
+    }
 }
