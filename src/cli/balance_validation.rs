@@ -7,6 +7,7 @@ use crate::{
     },
     services::{
         assets_status::{fetch_assets_status, AssetsStatus},
+        claim::MAX_CLAIMS,
         contracts::pretty_format_u256,
     },
     state::state::State,
@@ -98,10 +99,11 @@ pub async fn validate_claim_address_balance(
     claim_address: Address,
 ) -> anyhow::Result<()> {
     let remaining_claims = assets_status.not_claimed_indices.len();
+    let num_claim_tx = (remaining_claims / MAX_CLAIMS) + 1;
     let settings = Settings::new()?;
     let gas_price = get_gas_price().await?;
     let single_claim_gas: U256 = settings.blockchain.single_claim_gas.into();
-    let min_balance = single_claim_gas * gas_price * U256::from(remaining_claims);
+    let min_balance = single_claim_gas * gas_price * U256::from(num_claim_tx);
     let balance = get_balance(claim_address).await?;
     if balance < min_balance {
         return Err(CLIError::BalanceError(format!(
