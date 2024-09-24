@@ -6,7 +6,7 @@ use ethers::{
     middleware::SignerMiddleware,
     providers::{Http, Provider},
     signers::Wallet,
-    types::{Address, H256},
+    types::{Address, H256, U256},
 };
 use intmax2_zkp::ethereum_types::{bytes32::Bytes32, u32limb_trait::U32LimbTrait};
 
@@ -36,6 +36,13 @@ pub async fn get_deposit_root() -> anyhow::Result<Bytes32> {
     let int1 = get_int1_contract().await?;
     let root = int1.get_deposit_root().call().await?;
     Ok(Bytes32::from_bytes_be(&root))
+}
+
+pub async fn get_deposit_root_exits(root: Bytes32) -> anyhow::Result<bool> {
+    let int1 = get_int1_contract().await?;
+    let root: [u8; 32] = root.to_bytes_be().try_into().unwrap();
+    let block_number: U256 = int1.deposit_roots(root).call().await?;
+    Ok(block_number != 0.into())
 }
 
 #[derive(Debug, Clone, Default, PartialEq)]

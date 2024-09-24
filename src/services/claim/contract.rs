@@ -5,6 +5,7 @@ use ethers::{
     types::{Address, Bytes, H256, U256},
 };
 use intmax2_zkp::ethereum_types::u32limb_trait::U32LimbTrait;
+use log::info;
 use mining_circuit_v1::claim::{claim_circuit::ClaimPublicInputs, mining_claim::MiningClaim};
 
 use crate::{
@@ -39,6 +40,10 @@ pub async fn claim_tokens(
     let claim_address = get_wallet(claim_key).await?.address();
     print_status(format!("Claiming tokens for address: {}", claim_address));
     let minter = get_minter_contract_with_signer(claim_key).await?;
+    info!(
+        "Calling claim_tokens: claims {:?}, pis {:?}, proof {:?}",
+        mint_claims, pis, proof
+    );
     let tx = minter.claim_tokens(mint_claims.clone(), pis.clone(), proof.clone());
     handle_contract_call(tx, claim_address, "claim", "claim").await?;
     Ok(())

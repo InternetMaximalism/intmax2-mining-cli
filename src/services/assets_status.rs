@@ -3,12 +3,16 @@ use intmax2_zkp::{
     common::deposit::get_pubkey_salt_hash, ethereum_types::u256::U256,
     utils::leafable::Leafable as _,
 };
+use log::warn;
 use mining_circuit_v1::claim::claim_inner_circuit::get_deposit_nullifier;
 
 use crate::{
     external_api::contracts::{
         events::{get_deposited_event_by_sender, Deposited},
-        int1::{get_deposit_data, get_withdrawal_nullifier_exists, DepositData},
+        int1::{
+            get_deposit_data, get_last_processed_deposit_id, get_withdrawal_nullifier_exists,
+            DepositData,
+        },
         minter::get_claim_nullifier_exists,
     },
     state::state::State,
@@ -61,6 +65,14 @@ pub async fn fetch_assets_status(
         } else if deposit_data == DepositData::default() {
             cancelled_indices.push(index);
         } else {
+            let last_processed_deposit_id = get_last_processed_deposit_id().await?;
+            // this may occur because of the delay of the event log
+            if event.deposit_id < last_processed_deposit_id {
+                warn!(
+                    "Deposit should have been processed: last_processed_deposit_id={}, deposit_id={}",
+                    last_processed_deposit_id, event.deposit_id
+                );
+            }
             pending_indices.push(index);
         }
     }
