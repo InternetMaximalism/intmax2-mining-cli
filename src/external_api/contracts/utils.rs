@@ -119,3 +119,20 @@ pub fn u256_as_bytes_be(u256: ethers::types::U256) -> [u8; 32] {
     u256.to_big_endian(&mut bytes);
     bytes
 }
+
+#[cfg(test)]
+mod tests {
+    use ethers::types::Address;
+
+    use crate::{external_api::contracts::token::get_token_balance, utils::config::Settings};
+
+    #[tokio::test]
+    async fn test_get_minter_token_balance() -> anyhow::Result<()> {
+        dotenv::dotenv().ok();
+        let settings = Settings::new()?;
+        let minter_address: Address = settings.blockchain.minter_address.parse()?;
+        let balance = get_token_balance(minter_address).await?;
+        println!("{}", balance);
+        Ok(())
+    }
+}

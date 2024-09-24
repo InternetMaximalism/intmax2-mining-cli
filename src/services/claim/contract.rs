@@ -23,6 +23,10 @@ pub async fn claim_tokens(
     pis: ClaimPublicInputs,
     proof: &str,
 ) -> anyhow::Result<()> {
+    info!(
+        "Calling claim_tokens: claims {:?}, pis {:?}, proof {:?}",
+        claims, pis, proof
+    );
     let mut mint_claims = Vec::<minter_v1::MintClaim>::new();
     for claim in claims {
         mint_claims.push(minter_v1::MintClaim {
@@ -40,11 +44,8 @@ pub async fn claim_tokens(
     let claim_address = get_wallet(claim_key).await?.address();
     print_status(format!("Claiming tokens for address: {}", claim_address));
     let minter = get_minter_contract_with_signer(claim_key).await?;
-    info!(
-        "Calling claim_tokens: claims {:?}, pis {:?}, proof {:?}",
-        mint_claims, pis, proof
-    );
     let tx = minter.claim_tokens(mint_claims.clone(), pis.clone(), proof.clone());
+    info!("Calling claim_tokens: tx {:?}", tx);
     handle_contract_call(tx, claim_address, "claim", "claim").await?;
     Ok(())
 }
