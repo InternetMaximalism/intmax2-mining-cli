@@ -25,7 +25,7 @@ v1-mining-cli is a tool that allows users to mine ITX tokens by participating in
 
 ### Minimum Requirements
 
-- Memory: 8GB or more
+- Memory: 12GB or more
 - CPU: 4 cores or more, with a clock speed of 2 GHz or higher
 
 ## Installation
