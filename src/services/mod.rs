@@ -35,7 +35,11 @@ pub async fn mining_loop(
                     .await
                     .context("Failed fetch assets status")?;
 
-            if assets_status.senders_deposits.len() >= mining_times {
+            if assets_status.senders_deposits.len() >= mining_times
+                && assets_status.pending_indices.is_empty()
+                && assets_status.rejected_indices.is_empty()
+                && assets_status.not_withdrawn_indices.is_empty()
+            {
                 print_status(format!(
                     "Max deposits reached for {:?}. Exiting.",
                     key.deposit_address
