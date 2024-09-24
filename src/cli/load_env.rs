@@ -44,6 +44,7 @@ pub async fn load_env(mode: RunMode) -> anyhow::Result<Config> {
             let deposit_private_keys = load_deposit_private_keys()?;
             let withdrawal_address = load_withdrawal_address()?;
             let keys = MiningKeys::new(deposit_private_keys, withdrawal_address).await;
+            check_mining_keys(&keys)?;
             Config::Mining(MiningConfig {
                 keys,
                 mining_unit,
@@ -54,12 +55,14 @@ pub async fn load_env(mode: RunMode) -> anyhow::Result<Config> {
             let deposit_private_keys = load_deposit_private_keys()?;
             let claim_private_key = load_claim_private_key()?;
             let keys = ClaimKeys::new(deposit_private_keys, claim_private_key).await;
+            check_claim_keys(&keys)?;
             Config::Claim(ClaimConfig { keys })
         }
         RunMode::Exit => {
             let deposit_private_keys = load_deposit_private_keys()?;
             let withdrawal_address = load_withdrawal_address()?;
             let keys = MiningKeys::new(deposit_private_keys, withdrawal_address).await;
+            check_mining_keys(&keys)?;
             Config::Exit(ExitConfig { keys })
         }
     };
@@ -102,7 +105,7 @@ async fn load_rpc_url() -> anyhow::Result<String> {
         .map_err(|_| CLIError::EnvError("RPC_URL environment variable is not set".to_string()))?;
     check_rpc_url(&rpc_url)
         .await
-        .map_err(|_| CLIError::EnvError("Wrong RPC_URL".to_string()))?;
+        .map_err(|_| CLIError::EnvError(format!("Wrong RPC_URL {}", rpc_url)))?;
     Ok(rpc_url)
 }
 
@@ -124,6 +127,14 @@ fn load_deposit_private_keys() -> anyhow::Result<Vec<H256>> {
             })
         })
         .collect::<Result<Vec<H256>, CLIError>>()?;
+    for &key in &keys {
+        if key.is_zero() {
+            return Err(CLIError::EnvError(format!(
+                "Invalid DEPOSIT_PRIVATE_KEYS: Zero private key",
+            ))
+            .into());
+        }
+    }
     Ok(keys)
 }
 
@@ -137,6 +148,11 @@ fn load_claim_private_key() -> anyhow::Result<H256> {
             claim_private_key
         ))
     })?;
+    if key.is_zero() {
+        return Err(
+            CLIError::EnvError("Invalid CLAIM_PRIVATE_KEY: Zero private key".to_string()).into(),
+        );
+    }
     Ok(key)
 }
 
@@ -150,7 +166,36 @@ fn load_withdrawal_address() -> anyhow::Result<Address> {
             withdrawal_address
         ))
     })?;
+    if address == Address::default() {
+        return Err(
+            CLIError::EnvError(format!("Invalid WITHDRAWAL_ADDRESS: Zero address",)).into(),
+        );
+    }
     Ok(address)
+}
+
+fn check_mining_keys(keys: &MiningKeys) -> anyhow::Result<()> {
+    if keys.deposit_private_keys.is_empty() {
+        return Err(CLIError::EnvError("No deposit private keys".to_string()).into());
+    }
+    if keys.deposit_addresses.contains(&keys.withdrawal_address) {
+        return Err(
+            CLIError::EnvError("Withdrawal address is also a deposit address".to_string()).into(),
+        );
+    }
+    Ok(())
+}
+
+fn check_claim_keys(keys: &ClaimKeys) -> anyhow::Result<()> {
+    if keys.deposit_private_keys.is_empty() {
+        return Err(CLIError::EnvError("No deposit private keys".to_string()).into());
+    }
+    if keys.deposit_addresses.contains(&keys.claim_address) {
+        return Err(
+            CLIError::EnvError("Claim address is also a deposit address".to_string()).into(),
+        );
+    }
+    Ok(())
 }
 
 async fn check_rpc_url(rpc_url: &str) -> anyhow::Result<()> {
