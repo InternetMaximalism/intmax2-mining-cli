@@ -66,7 +66,7 @@ mining-cli --version
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ```
 
-2. Follow steps 2 and 3 from the Ubuntu instructions.
+1. Follow steps 2 and 3 from the Linux/WSL instructions.
 
 ## Updating the CLI
 
@@ -87,8 +87,6 @@ cargo install --path .
 
 3. Restart the mining-cli if it's currently running.
 
-Note: Always check the release notes or changelog for any important updates or breaking changes before updating.
-
 ## Mining flow
 
 <div align="center">
@@ -98,12 +96,12 @@ Note: Always check the release notes or changelog for any important updates or b
 1. **Preparation**: You need three types of Ethereum addresses:
 
 - **Deposit address**: Where you initially deposit ETH for mining
-- **Withdrawal address**: Where mined ETH is withdrawn to
+- **Withdrawal address**: Where deposited ETH is withdrawn to after subtraction of gas fees
 - **Claim address**: Where you receive ITX token rewards
 
 Additionally, you need a mainnet RPC URL. We strongly recommend using Alchemy's RPC (the free plan is sufficient). This is because it has a high limit for retrieving event logs. You can set these through environment variables. Please refer to the Operating Commands section below for more details.
 
-2. **Mining Process**:
+1. **Mining Process**:
 
 - The CLI automatically deposits smaller amounts (0.1 or 1 ETH) into intmax2. The deposit amount can be configured through environment variables.
 - After a few hours, it withdraws these amounts to your withdrawal address.
@@ -195,11 +193,14 @@ A: Your funds are safe as long as you don't lose your deposit private key.
 Q: Is this process self-custodial?
 A: Yes, but the contract is currently upgradable. The intmax team plans to relinquish this ability soon.
 
-Q: How much can I earn?
-A: The amount of ITX tokens you can earn proportionally depends on the amount of ETH you deposit.
+Q: What are the costs associated with mining?
+A: Gas fees are incurred for each deposit, withdrawal, and claim. The gas fee for withdrawal is deducted from the withdrawn ETH.
 
-Q: How often should I update the CLI?
-A: It's recommended to check for updates regularly, at least once a week, to ensure you have the latest features and security improvements.
+Q: How is the amount of ITX that can be mined determined?
+A: The amount of ITX that can be mined is proportional to the amount of ETH deposited. For example, if you deposit 0.1 ETH 10 times, you can earn the same amount of ITX as if you deposited 1 ETH. Also, the rewards for that day are determined based on the proportion of the ETH deposited that day to the ETH you deposited.
+
+Q: What actions will disqualify me from receiving ITX token rewards?
+A: Avoid actions that link your deposit and withdrawal addresses. For example, if you directly or indirectly transfer funds from your withdrawal address to your deposit address, you will not be eligible for ITX rewards. Also, using the funds in the withdrawal address for the next mining directly is considered a linking action. By using other privacy protocols, you can avoid linking actions.
 
 Q: How do I stop the CLI?
 A: To stop the CLI, simply press Ctrl+C in the terminal where it's running. This will safely terminate the process. If there is a balance in intmax2, you can withdraw it by running in the exit mode.
