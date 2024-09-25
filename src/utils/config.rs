@@ -39,6 +39,7 @@ pub struct Blockchain {
 
 #[derive(Clone, Debug, Deserialize)]
 pub struct Service {
+    pub repository_url: String,
     pub mining_max_cooldown_in_sec: u64,
     pub loop_cooldown_in_sec: u64,
     pub high_gas_retry_inverval_in_sec: u64,

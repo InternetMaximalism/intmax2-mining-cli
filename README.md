@@ -117,15 +117,15 @@ The mining-cli has three main commands. Before running any command, ensure that 
 
 ### Environment Variables
 
-| Variable Name           | Details                                                                                                                                                         | Example                                               |
-| ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
-| `RPC_URL`               | Blockchain RPC URL. Alchemy's RPC is strongly recommended.                                                                                                      | `"https://eth-mainnet.alchemyapi.io/v2/your-api-key"` |
-| `MINING_UNIT`           | Amount of ETH per mining operation. Set to "0.1" or "1".                                                                                                        | `"0.1"`                                               |
-| `MINING_TIMES`          | Number of mining operations (sets of deposit and withdrawal). Can be set to "10" or "100".                                                                      | `"10"`                                                |
-| `DEPOSIT_PRIVATE_KEYS`  | Array of private keys for deposit accounts. Each address must contain ETH equal to MINING_UNIT \* MINING_TIMES plus gas fees.                                   | `'["0x123...", "0x456..."]'`                          |
-| `WITHDRAWAL_ADDRESS`    | Address of the account for withdrawals. Balance can be 0 as gas fees are deducted from withdrawn ETH.                                                           | `"0x789..."`                                          |
-| `CLAIM_PRIVATE_KEY`     | Private key of the account used for claiming. Must contain enough ETH for gas fees.                                                                             | `"0xabc..."`                                          |
-| `MAX_GAS_PRICE_IN_GWEI` | Maximum gas price in Gwei allowed when executing transactions. If the gas price exceeds this value, the system will wait until it drops. Default value is "30". | `"30"`                                                |
+| Variable Name           | Details                                                                                                                                                      | Example                                               |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------- |
+| `RPC_URL`               | Blockchain RPC URL. Alchemy's RPC is strongly recommended.                                                                                                   | `"https://eth-mainnet.alchemyapi.io/v2/your-api-key"` |
+| `MINING_UNIT`           | Amount of ETH per mining operation. Set to "0.1" or "1".                                                                                                     | `"0.1"`                                               |
+| `MINING_TIMES`          | Number of mining operations (sets of deposit and withdrawal). Can be set to "10" or "100".                                                                   | `"10"`                                                |
+| `DEPOSIT_PRIVATE_KEYS`  | Array of private keys for deposit accounts. Each address must contain ETH equal to MINING_UNIT \* MINING_TIMES plus gas fees.                                | `'["0x123...", "0x456..."]'`                          |
+| `WITHDRAWAL_ADDRESS`    | Address of the account for withdrawals. Balance can be 0 as gas fees are deducted from withdrawn ETH.                                                        | `"0x789..."`                                          |
+| `CLAIM_PRIVATE_KEY`     | Private key of the account used for claiming. Must contain enough ETH for gas fees.                                                                          | `"0xabc..."`                                          |
+| `MAX_GAS_PRICE_IN_GWEI` | Maximum gas price in Gwei allowed when executing transactions. If the gas price exceeds this value, the cli will wait until it drops. Default value is "30". | `"30"`                                                |
 
 You can set them in your shell. For example:
 
@@ -136,6 +136,9 @@ export MINING_TIMES="10"
 export DEPOSIT_PRIVATE_KEYS='["0x123...", "0x456..."]'
 export WITHDRAWAL_ADDRESS="0x789..."
 export CLAIM_PRIVATE_KEY="0xabc..."
+
+# Optional
+export MAX_GAS_PRICE_IN_GWEI="20" # Default is 30
 ```
 
 Or you can create a `.env` file in the same directory. Please refer to the `.env.example` file for the format.

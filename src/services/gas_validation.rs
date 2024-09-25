@@ -6,7 +6,9 @@ use crate::{
 
 pub async fn await_until_low_gas_price() -> anyhow::Result<()> {
     let max_gas_price = load_max_gas_price()?;
-    let high_gas_retry_inverval_in_sec = Settings::new()?.service.high_gas_retry_inverval_in_sec;
+    let settings = Settings::new()?;
+    let high_gas_retry_inverval_in_sec = settings.service.high_gas_retry_inverval_in_sec;
+    let url = settings.service.repository_url;
     loop {
         let current_gas_price = get_gas_price().await?;
         if current_gas_price <= max_gas_price {
@@ -18,8 +20,8 @@ pub async fn await_until_low_gas_price() -> anyhow::Result<()> {
             break;
         }
         print_warning(format!(
-            "Current gas price: {:?} is higher than max gas price: {:?}. Retrying in {:?} seconds",
-            current_gas_price, max_gas_price, high_gas_retry_inverval_in_sec
+            "Current gas price: {:?} is higher than max gas price: {:?}. Please see README at {}",
+            current_gas_price, max_gas_price, url
         ));
         tokio::time::sleep(std::time::Duration::from_secs(
             high_gas_retry_inverval_in_sec,
