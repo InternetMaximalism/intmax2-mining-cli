@@ -14,7 +14,7 @@ use crate::{
         minter::{get_minter_contract_with_signer, minter_v1},
         utils::get_wallet,
     },
-    services::contracts::handle_contract_call,
+    services::{contracts::handle_contract_call, gas_validation::await_until_low_gas_price},
 };
 
 pub async fn claim_tokens(
@@ -43,6 +43,8 @@ pub async fn claim_tokens(
     let proof = Bytes::from_str(proof).unwrap();
     let claim_address = get_wallet(claim_key).await?.address();
     print_status(format!("Claiming tokens for address: {}", claim_address));
+
+    await_until_low_gas_price().await?;
     let minter = get_minter_contract_with_signer(claim_key).await?;
     let tx = minter.claim_tokens(mint_claims.clone(), pis.clone(), proof.clone());
     info!("Calling claim_tokens: tx {:?}", tx);

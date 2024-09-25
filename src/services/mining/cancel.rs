@@ -5,7 +5,7 @@ use crate::{
         events::Deposited,
         int1::{get_int1_contract_with_signer, int_1},
     },
-    services::contracts::handle_contract_call,
+    services::{contracts::handle_contract_call, gas_validation::await_until_low_gas_price},
     state::{keys::Key, state::State},
 };
 
@@ -16,6 +16,8 @@ pub async fn cancel_task(_state: &State, key: &Key, event: Deposited) -> anyhow:
         amount: ethers::types::U256::from_big_endian(&event.amount.to_bytes_be()),
     };
     let deposit_address = key.deposit_address;
+
+    await_until_low_gas_price().await?;
     let int1 = get_int1_contract_with_signer(key.deposit_private_key).await?;
     let tx = int1.cancel_deposit(event.deposit_id.into(), deposit.clone());
     handle_contract_call(tx, deposit_address, "deposit", "cancel").await?;

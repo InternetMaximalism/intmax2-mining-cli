@@ -12,6 +12,7 @@ use crate::{
             withdrawal::submit_withdrawal,
         },
     },
+    services::gas_validation::await_until_low_gas_price,
     state::{keys::Key, state::State},
     utils::config::Settings,
 };
@@ -129,6 +130,7 @@ async fn from_step5(_state: &State, _key: &Key) -> anyhow::Result<()> {
         token_index: status.witness.deposit_leaf.token_index,
         amount: status.witness.deposit_leaf.amount,
     };
+    await_until_low_gas_price().await?;
     let tx_hash = submit_withdrawal(pis, status.gnark_proof.as_ref().unwrap()).await?;
     // delete here because get_tx_receipt may fail, and we don't want to retry this step
     temp::WithdrawalStatus::delete()?;

@@ -5,7 +5,7 @@ use intmax2_zkp::{
 
 use crate::{
     external_api::contracts::{int1::get_int1_contract_with_signer, utils::get_account_nonce},
-    services::contracts::handle_contract_call,
+    services::{contracts::handle_contract_call, gas_validation::await_until_low_gas_price},
     state::{keys::Key, state::State},
     utils::salt::{get_pubkey_from_private_key, get_salt_from_private_key_nonce},
 };
@@ -21,6 +21,8 @@ pub async fn deposit_task(_state: &State, key: &Key, mining_unit: U256) -> anyho
         .unwrap();
 
     let deposit_address = key.deposit_address;
+
+    await_until_low_gas_price().await?;
     let int1 = get_int1_contract_with_signer(key.deposit_private_key).await?;
     let mut tx = int1
         .deposit_native_token(pubkey_salt_hash)

@@ -34,8 +34,9 @@ pub struct ExitConfig {
 }
 
 pub async fn load_env(mode: RunMode) -> anyhow::Result<Config> {
-    // test load rpc url but not used
+    // test load global variables
     let _rpc_url = load_rpc_url().await?;
+    let _max_gas_price = load_max_gas_price()?;
 
     let keys = match mode {
         RunMode::Mining => {
@@ -173,6 +174,18 @@ fn load_withdrawal_address() -> anyhow::Result<Address> {
         );
     }
     Ok(address)
+}
+
+pub fn load_max_gas_price() -> anyhow::Result<U256> {
+    let max_gas_price_gwei = env::var("MAX_GAS_PRICE_IN_GWEI").unwrap_or("30".to_string());
+    let max_gas_price_gwei: u32 = max_gas_price_gwei.parse().map_err(|_| {
+        CLIError::EnvError(format!(
+            "Invalid MAX_GAS_PRICE_IN_GWEI environment variable {}",
+            max_gas_price_gwei
+        ))
+    })?;
+    let max_gas_price = U256::from(max_gas_price_gwei) * U256::exp10(9);
+    Ok(max_gas_price)
 }
 
 fn check_mining_keys(keys: &MiningKeys) -> anyhow::Result<()> {

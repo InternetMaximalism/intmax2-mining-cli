@@ -138,4 +138,12 @@ mod tests {
         println!("{}", balance);
         Ok(())
     }
+
+    #[tokio::test]
+    async fn test_get_gas_price() -> anyhow::Result<()> {
+        dotenv::dotenv().ok();
+        let gas_price = super::get_gas_price().await?;
+        println!("{}", gas_price);
+        Ok(())
+    }
 }

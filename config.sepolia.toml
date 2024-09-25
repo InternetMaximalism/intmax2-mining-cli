@@ -17,3 +17,4 @@ single_claim_gas = 600000
 [service]
 mining_max_cooldown_in_sec = 20
 loop_cooldown_in_sec = 10
+high_gas_retry_inverval_in_sec = 10
