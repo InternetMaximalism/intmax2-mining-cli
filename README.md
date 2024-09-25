@@ -200,7 +200,7 @@ Q: How is the amount of ITX that can be mined determined?
 A: The amount of ITX that can be mined is proportional to the amount of ETH deposited. For example, if you deposit 0.1 ETH 10 times, you can earn the same amount of ITX as if you deposited 1 ETH. Also, the rewards for that day are determined based on the proportion of the ETH deposited that day to the ETH you deposited.
 
 Q: What actions will disqualify me from receiving ITX token rewards?
-A: Avoid actions that link your deposit and withdrawal addresses. For example, if you directly or indirectly transfer funds from your withdrawal address to your deposit address, you will not be eligible for ITX rewards. Also, using the funds in the withdrawal address for the next mining directly is considered a linking action. By using other privacy protocols, you can avoid linking actions.
+A: Avoid actions that link your deposit and withdrawal addresses. For example, if you directly or indirectly transfer funds from your withdrawal address to your deposit address, you will not be eligible for ITX rewards. Also, using the funds in the withdrawal address for the next mining directly is considered a linking action. 
 
 Q: How do I stop the CLI?
 A: To stop the CLI, simply press Ctrl+C in the terminal where it's running. This will safely terminate the process. If there is a balance in intmax2, you can withdraw it by running in the exit mode.
