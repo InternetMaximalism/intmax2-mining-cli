@@ -154,7 +154,7 @@ mod tests {
         let mut state = crate::test::get_dummy_state().await;
         state.sync_trees().await.unwrap();
 
-        let dummy_key = crate::test::get_dummy_keys().await;
+        let dummy_key = crate::test::get_dummy_keys();
 
         let result = super::fetch_assets_status(
             &state,

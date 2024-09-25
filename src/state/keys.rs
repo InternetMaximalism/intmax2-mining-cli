@@ -19,10 +19,10 @@ pub struct MiningKeys {
 }
 
 impl MiningKeys {
-    pub async fn new(deposit_private_keys: Vec<H256>, withdrawal_address: Address) -> Self {
+    pub fn new(deposit_private_keys: Vec<H256>, withdrawal_address: Address) -> Self {
         let mut deposit_addresses = Vec::new();
         for key in deposit_private_keys.iter() {
-            let address = get_address(*key).await;
+            let address = get_address(*key);
             deposit_addresses.push(address);
         }
         Self {
@@ -60,13 +60,13 @@ pub struct ClaimKeys {
 }
 
 impl ClaimKeys {
-    pub async fn new(deposit_private_keys: Vec<H256>, claim_private_key: H256) -> Self {
+    pub fn new(deposit_private_keys: Vec<H256>, claim_private_key: H256) -> Self {
         let mut deposit_addresses = Vec::new();
         for key in deposit_private_keys.iter() {
-            let address = get_address(*key).await;
+            let address = get_address(*key);
             deposit_addresses.push(address);
         }
-        let claim_address = get_address(claim_private_key).await;
+        let claim_address = get_address(claim_private_key);
         Self {
             deposit_private_keys,
             deposit_addresses,

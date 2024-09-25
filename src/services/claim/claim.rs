@@ -167,7 +167,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_claim_task() {
-        let dummy_key = get_dummy_keys().await;
+        let dummy_key = get_dummy_keys();
 
         let mut state = get_dummy_state().await;
         state.sync_trees().await.unwrap();

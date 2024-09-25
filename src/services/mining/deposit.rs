@@ -38,7 +38,7 @@ mod tests {
     #[tokio::test]
     async fn test_deposit() {
         let state = get_dummy_state().await;
-        let dummy_key = get_dummy_keys().await;
+        let dummy_key = get_dummy_keys();
 
         let mining_uint = 100_000_000_000_000_000u128.into();
         super::deposit_task(&state, &dummy_key, mining_uint)

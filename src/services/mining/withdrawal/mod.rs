@@ -155,7 +155,7 @@ mod tests {
         let mut state = get_dummy_state().await;
         state.sync_trees().await.unwrap();
 
-        let dummy_key = get_dummy_keys().await;
+        let dummy_key = get_dummy_keys();
 
         let assets_status = fetch_assets_status(
             &state,
@@ -179,7 +179,7 @@ mod tests {
     async fn test_resume_withdrawal() {
         let mut state = get_dummy_state().await;
         state.sync_trees().await.unwrap();
-        let dummy_key = get_dummy_keys().await;
+        let dummy_key = get_dummy_keys();
         let prover = Prover::new();
         state.prover = Some(prover);
         super::resume_withdrawal_task(&state, &dummy_key)

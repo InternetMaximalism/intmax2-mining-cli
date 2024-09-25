@@ -3,6 +3,7 @@ use ethers::types::{Address, H256, U256};
 use std::env;
 use std::str::FromStr;
 
+use crate::external_api::contracts::utils::get_address;
 use crate::state::keys::{ClaimKeys, MiningKeys};
 use crate::state::mode::RunMode;
 use crate::utils::config::Settings;
@@ -43,7 +44,7 @@ pub async fn load_env(mode: RunMode) -> anyhow::Result<Config> {
 
             let deposit_private_keys = load_deposit_private_keys()?;
             let withdrawal_address = load_withdrawal_address()?;
-            let keys = MiningKeys::new(deposit_private_keys, withdrawal_address).await;
+            let keys = MiningKeys::new(deposit_private_keys, withdrawal_address);
             check_mining_keys(&keys)?;
             Config::Mining(MiningConfig {
                 keys,
@@ -54,14 +55,14 @@ pub async fn load_env(mode: RunMode) -> anyhow::Result<Config> {
         RunMode::Claim => {
             let deposit_private_keys = load_deposit_private_keys()?;
             let claim_private_key = load_claim_private_key()?;
-            let keys = ClaimKeys::new(deposit_private_keys, claim_private_key).await;
+            let keys = ClaimKeys::new(deposit_private_keys, claim_private_key);
             check_claim_keys(&keys)?;
             Config::Claim(ClaimConfig { keys })
         }
         RunMode::Exit => {
             let deposit_private_keys = load_deposit_private_keys()?;
             let withdrawal_address = load_withdrawal_address()?;
-            let keys = MiningKeys::new(deposit_private_keys, withdrawal_address).await;
+            let keys = MiningKeys::new(deposit_private_keys, withdrawal_address);
             check_mining_keys(&keys)?;
             Config::Exit(ExitConfig { keys })
         }
@@ -183,6 +184,27 @@ fn check_mining_keys(keys: &MiningKeys) -> anyhow::Result<()> {
             CLIError::EnvError("Withdrawal address is also a deposit address".to_string()).into(),
         );
     }
+
+    // check claim address if it is set in the environment
+    match load_claim_private_key() {
+        Ok(claim_private_key) => {
+            let claim_address = get_address(claim_private_key);
+            if keys.deposit_addresses.contains(&claim_address) {
+                return Err(CLIError::EnvError(
+                    "Claim address is also a deposit address".to_string(),
+                )
+                .into());
+            }
+            if keys.withdrawal_address == claim_address {
+                return Err(CLIError::EnvError(
+                    "Claim address is also a withdrawal address".to_string(),
+                )
+                .into());
+            }
+        }
+        Err(_) => {}
+    }
+
     Ok(())
 }
 
@@ -194,6 +216,24 @@ fn check_claim_keys(keys: &ClaimKeys) -> anyhow::Result<()> {
         return Err(
             CLIError::EnvError("Claim address is also a deposit address".to_string()).into(),
         );
+    }
+
+    match load_withdrawal_address() {
+        Ok(withdrawal_address) => {
+            if keys.deposit_addresses.contains(&withdrawal_address) {
+                return Err(CLIError::EnvError(
+                    "Withdrawal address is also a deposit address".to_string(),
+                )
+                .into());
+            }
+            if keys.claim_address == withdrawal_address {
+                return Err(CLIError::EnvError(
+                    "Claim address is also a withdrawal address".to_string(),
+                )
+                .into());
+            }
+        }
+        Err(_) => {}
     }
     Ok(())
 }

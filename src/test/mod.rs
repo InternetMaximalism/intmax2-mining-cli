@@ -6,19 +6,16 @@ use num_bigint::BigUint;
 
 use crate::{
     external_api::contracts::utils::get_address,
-    state::{
-        keys::Key,
-        state::State,
-    },
+    state::{keys::Key, state::State},
     utils::{deposit_hash_tree::DepositHashTree, eligible_tree_with_map::EligibleTreeWithMap},
 };
 
-pub async fn get_dummy_keys() -> Key {
+pub fn get_dummy_keys() -> Key {
     let deposit_private_key: H256 =
         "0xdf57089febbacf7ba0bc227dafbffa9fc08a93fdc68e1e42411a14efcf23656e"
             .parse()
             .unwrap();
-    let deposit_address = get_address(deposit_private_key).await;
+    let deposit_address = get_address(deposit_private_key);
     let withdrawal_address: Address = "0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1199"
         .parse()
         .unwrap();

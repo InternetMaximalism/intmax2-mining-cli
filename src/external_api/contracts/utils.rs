@@ -4,8 +4,9 @@ use ethers::{
     core::k256::{ecdsa::SigningKey, SecretKey},
     middleware::SignerMiddleware,
     providers::{Http, Middleware, Provider},
-    signers::{Signer, Wallet},
+    signers::{LocalWallet, Signer, Wallet},
     types::{Address, H256, U256},
+    utils::hex::ToHex,
 };
 use log::info;
 
@@ -56,9 +57,11 @@ pub async fn get_wallet(private_key: H256) -> anyhow::Result<Wallet<SigningKey>>
     Ok(wallet)
 }
 
-pub async fn get_address(private_key: H256) -> Address {
-    info!("Getting address");
-    let wallet = get_wallet(private_key).await.unwrap();
+pub fn get_address(private_key: H256) -> Address {
+    let wallet = private_key
+        .encode_hex::<String>()
+        .parse::<LocalWallet>()
+        .unwrap();
     wallet.address()
 }
 
