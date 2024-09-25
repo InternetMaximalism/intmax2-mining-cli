@@ -1,7 +1,9 @@
-use anyhow::Context;
 use claim::single_claim_task;
 
-use crate::state::{keys::Key, state::State};
+use crate::{
+    state::{keys::Key, state::State},
+    utils::errors::CLIError,
+};
 
 use super::assets_status::AssetsStatus;
 
@@ -21,7 +23,7 @@ pub async fn claim_task(
         for events in assets_status.get_not_claimed_events().chunks(MAX_CLAIMS) {
             single_claim_task(state, key, &events)
                 .await
-                .context("Failed claim task")?;
+                .map_err(|e| CLIError::InternalError(format!("Failed to claim: {:#}", e)))?;
         }
     }
     Ok(())

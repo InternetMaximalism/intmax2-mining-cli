@@ -1,10 +1,12 @@
-use anyhow::Context;
 use cancel::cancel_task;
 use deposit::deposit_task;
 use ethers::types::U256;
 use withdrawal::withdrawal_task;
 
-use crate::state::{keys::Key, state::State};
+use crate::{
+    state::{keys::Key, state::State},
+    utils::errors::CLIError,
+};
 
 use super::assets_status::AssetsStatus;
 
@@ -24,9 +26,9 @@ pub async fn mining_task(
     if !assets_status.pending_indices.is_empty() && cancel_pending_deposits {
         for &index in assets_status.pending_indices.iter() {
             let event = assets_status.senders_deposits[index].clone();
-            cancel_task(state, key, event)
-                .await
-                .context("Failed to cancel pending deposits")?;
+            cancel_task(state, key, event).await.map_err(|e| {
+                CLIError::InternalError(format!("Failed to cancel a pending deposit: {:#}", e))
+            })?;
         }
     }
 
@@ -34,9 +36,9 @@ pub async fn mining_task(
     if !assets_status.rejected_indices.is_empty() {
         for &index in assets_status.rejected_indices.iter() {
             let event = assets_status.senders_deposits[index].clone();
-            cancel_task(state, key, event)
-                .await
-                .context("Failed to cancel rejected deposit")?;
+            cancel_task(state, key, event).await.map_err(|e| {
+                CLIError::InternalError(format!("Failed to cancel a rejected deposit: {:#}", e))
+            })?;
         }
     }
 
@@ -46,7 +48,7 @@ pub async fn mining_task(
             let event = assets_status.senders_deposits[index].clone();
             withdrawal_task(state, key, event)
                 .await
-                .context("Failed withdrawal task")?;
+                .map_err(|e| CLIError::InternalError(format!("Failed to withdrawal: {:#}", e)))?;
         }
         return Ok(true);
     }
@@ -55,7 +57,7 @@ pub async fn mining_task(
     if new_deposit {
         deposit_task(state, key, mining_unit)
             .await
-            .context("Failed deposit task")?;
+            .map_err(|e| CLIError::InternalError(format!("Failed to deposit: {:#}", e)))?;
         return Ok(true);
     }
 

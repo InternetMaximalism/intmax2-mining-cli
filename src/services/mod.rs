@@ -1,4 +1,3 @@
-use anyhow::Context;
 use assets_status::fetch_assets_status;
 use claim::claim_task;
 use ethers::types::U256;
@@ -11,7 +10,7 @@ use crate::{
         keys::{ClaimKeys, MiningKeys},
         state::State,
     },
-    utils::config::Settings,
+    utils::{config::Settings, errors::CLIError},
 };
 
 pub mod assets_status;
@@ -33,7 +32,12 @@ pub async fn mining_loop(
             let assets_status =
                 fetch_assets_status(&state, key.deposit_address, key.deposit_private_key)
                     .await
-                    .context("Failed fetch assets status")?;
+                    .map_err(|e| {
+                        CLIError::NetworkError(format!(
+                            "Failed while fetching assets status for {:?}: {:?}",
+                            key.deposit_address, e
+                        ))
+                    })?;
 
             if assets_status.senders_deposits.len() >= mining_times
                 && assets_status.pending_indices.is_empty()
@@ -57,7 +61,12 @@ pub async fn mining_loop(
             let assets_status =
                 fetch_assets_status(&state, key.deposit_address, key.deposit_private_key)
                     .await
-                    .context("Failed fetch assets status")?;
+                    .map_err(|e| {
+                        CLIError::NetworkError(format!(
+                            "Failed while fetching assets status for {:?}: {:?}",
+                            key.deposit_address, e
+                        ))
+                    })?;
             print_assets_status(&assets_status);
 
             if cooldown {
@@ -79,7 +88,12 @@ pub async fn exit_loop(state: &mut State, mining_keys: &MiningKeys) -> anyhow::R
             let assets_status =
                 fetch_assets_status(&state, key.deposit_address, key.deposit_private_key)
                     .await
-                    .context("Failed fetch assets status")?;
+                    .map_err(|e| {
+                        CLIError::NetworkError(format!(
+                            "Failed while fetching assets status for {:?}: {:?}",
+                            key.deposit_address, e
+                        ))
+                    })?;
 
             if assets_status.pending_indices.is_empty()
                 && assets_status.rejected_indices.is_empty()
@@ -109,11 +123,16 @@ pub async fn claim_loop(state: &mut State, claim_keys: ClaimKeys) -> anyhow::Res
             let assets_status =
                 fetch_assets_status(&state, key.deposit_address, key.deposit_private_key)
                     .await
-                    .context("Failed fetch assets status")?;
+                    .map_err(|e| {
+                        CLIError::NetworkError(format!(
+                            "Failed while fetching assets status for {:?}: {:?}",
+                            key.deposit_address, e
+                        ))
+                    })?;
 
             if assets_status.not_claimed_indices.is_empty() {
                 print_status(format!(
-                    "All eligible deposits are claimed for {:?}. Claim process ended.",
+                    "All eligible rewards are claimed for {:?}.",
                     key.deposit_address
                 ));
                 break;
