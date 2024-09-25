@@ -52,7 +52,7 @@ pub async fn mining_loop(
             let cooldown =
                 mining_task(state, key, &assets_status, new_deposit, false, mining_uinit).await?;
 
-            // print assets status
+            // print assets status after mining
             state.sync_trees().await?;
             let assets_status =
                 fetch_assets_status(&state, key.deposit_address, key.deposit_private_key)
@@ -63,6 +63,8 @@ pub async fn mining_loop(
             if cooldown {
                 mining_cooldown().await?;
             }
+
+            common_loop_cool_down().await;
         }
     }
 
@@ -91,6 +93,8 @@ pub async fn exit_loop(state: &mut State, mining_keys: &MiningKeys) -> anyhow::R
             }
 
             mining_task(state, key, &assets_status, false, true, 0.into()).await?;
+
+            common_loop_cool_down().await;
         }
     }
 
@@ -116,10 +120,20 @@ pub async fn claim_loop(state: &mut State, claim_keys: ClaimKeys) -> anyhow::Res
             }
 
             claim_task(state, key, &assets_status).await?;
+
+            common_loop_cool_down().await;
         }
     }
 
     Ok(())
+}
+
+async fn common_loop_cool_down() {
+    let settings = Settings::new().expect("Failed to load settings");
+    tokio::time::sleep(std::time::Duration::from_secs(
+        settings.service.loop_cooldown_in_sec,
+    ))
+    .await;
 }
 
 /// Cooldown for mining. Random time between 0 and `mining_max_cooldown_in_sec` to improve privacy.
