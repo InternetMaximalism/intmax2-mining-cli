@@ -187,36 +187,23 @@ The status message components are:
 
 ## FAQs
 
-Q: Can I lose my mining funds?
-
+Q: Can I lose my mining funds?<br>
 A: Your funds are safe as long as you don't lose your deposit private key.
 
-
-Q: Is this process self-custodial?
-
+Q: Is this process self-custodial?<br>
 A: Yes, but the contract is currently upgradable. The intmax team plans to relinquish this ability soon.
 
-
-Q: What are the costs associated with mining?
-
+Q: What are the costs associated with mining?<br>
 A: Gas fees are incurred for each deposit, withdrawal, and claim. The gas fee for withdrawal is deducted from the withdrawn ETH.
 
-
-Q: How is the amount of ITX that can be mined determined?
-
+Q: How is the amount of ITX that can be mined determined?<br>
 A: The amount of ITX that can be mined is proportional to the amount of ETH deposited. For example, if you deposit 0.1 ETH 10 times, you can earn the same amount of ITX as if you deposited 1 ETH. Also, the rewards for that day are determined based on the proportion of the ETH deposited that day to the ETH you deposited.
 
+Q: What actions will disqualify me from receiving ITX token rewards?<br>
+A: Avoid actions that link your deposit and withdrawal addresses. For example, if you directly or indirectly transfer funds from your withdrawal address to your deposit address, you will not be eligible for ITX rewards. Also, using the funds in the withdrawal address for the next mining directly is considered a linking action.
 
-Q: What actions will disqualify me from receiving ITX token rewards?
-
-A: Avoid actions that link your deposit and withdrawal addresses. For example, if you directly or indirectly transfer funds from your withdrawal address to your deposit address, you will not be eligible for ITX rewards. Also, using the funds in the withdrawal address for the next mining directly is considered a linking action. 
-
-
-Q: How do I stop the CLI?
-
+Q: How do I stop the CLI?<br>
 A: To stop the CLI, simply press Ctrl+C in the terminal where it's running. This will safely terminate the process. If there is a balance in intmax2, you can withdraw it by running in the exit mode.
 
-
-Q: An error occurred during execution. What should I do?
-
+Q: An error occurred during execution. What should I do?<br>
 A: Feel free to run it again. It's designed to be safe for re-execution.
