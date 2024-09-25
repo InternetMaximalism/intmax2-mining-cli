@@ -21,12 +21,12 @@ pub async fn run(mode: RunMode) -> anyhow::Result<()> {
     );
     check_avaliability().await?;
 
-    let config: Config = load_env(mode).await?;
+    let config: Config = load_env().await?;
     let mut state = State::new();
     let prover_future = tokio::spawn(async { Prover::new() });
 
     // valance validation
-    balance_validation::balance_validation(&mut state, config.clone()).await?;
+    balance_validation::balance_validation(&mut state, mode, config.clone()).await?;
 
     // wait for prover to be ready
     println!(); // newline because print_status clears the last line
@@ -36,26 +36,17 @@ pub async fn run(mode: RunMode) -> anyhow::Result<()> {
 
     // main loop
     match mode {
-        RunMode::Mining => match config {
-            Config::Mining(mining_config) => {
-                mining_loop(
-                    &mut state,
-                    &mining_config.keys,
-                    mining_config.mining_unit,
-                    mining_config.mining_times,
-                )
-                .await?
-            }
-            _ => unreachable!(),
-        },
-        RunMode::Claim => match config {
-            Config::Claim(claim_config) => claim_loop(&mut state, claim_config.keys).await?,
-            _ => unreachable!(),
-        },
-        RunMode::Exit => match config {
-            Config::Exit(exit_config) => exit_loop(&mut state, &exit_config.keys).await?,
-            _ => unreachable!(),
-        },
+        RunMode::Mining => {
+            mining_loop(
+                &mut state,
+                &config.keys,
+                config.mining_unit,
+                config.mining_times,
+            )
+            .await?
+        }
+        RunMode::Claim => claim_loop(&mut state, &config.keys).await?,
+        RunMode::Exit => exit_loop(&mut state, &config.keys).await?,
     }
 
     Ok(())

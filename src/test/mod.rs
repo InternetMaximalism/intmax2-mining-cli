@@ -1,5 +1,5 @@
 use chrono::NaiveDateTime;
-use ethers::types::{Address, H256};
+use ethers::types::H256;
 use intmax2_zkp::ethereum_types::u256::U256;
 use mining_circuit_v1::eligible_tree::EligibleLeaf;
 use num_bigint::BigUint;
@@ -16,16 +16,12 @@ pub fn get_dummy_keys() -> Key {
             .parse()
             .unwrap();
     let deposit_address = get_address(deposit_private_key);
-    let withdrawal_address: Address = "0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1199"
-        .parse()
-        .unwrap();
 
     Key {
         deposit_private_key,
         deposit_address,
-        claim_private_key: Some(deposit_private_key),
-        claim_address: Some(deposit_address),
-        withdrawal_address: Some(withdrawal_address),
+        withdrawal_address: deposit_address,
+        withdrawal_private_key: deposit_private_key,
     }
 }
 

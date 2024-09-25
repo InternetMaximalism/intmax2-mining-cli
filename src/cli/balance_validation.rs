@@ -10,27 +10,23 @@ use crate::{
         claim::MAX_CLAIMS,
         contracts::pretty_format_u256,
     },
-    state::state::State,
+    state::{mode::RunMode, state::State},
     utils::{config::Settings, errors::CLIError},
 };
 
 use super::load_env::Config;
 
-pub async fn balance_validation(state: &mut State, config: Config) -> anyhow::Result<()> {
-    let deposit_private_keys = match &config {
-        Config::Mining(mining_config) => &mining_config.keys.deposit_private_keys,
-        Config::Claim(claim_config) => &claim_config.keys.deposit_private_keys,
-        Config::Exit(exit_config) => &exit_config.keys.deposit_private_keys,
-    };
-    let deposit_addresses: Vec<Address> = match &config {
-        Config::Mining(mining_config) => mining_config.keys.deposit_addresses.clone(),
-        Config::Claim(claim_config) => claim_config.keys.deposit_addresses.clone(),
-        Config::Exit(exit_config) => exit_config.keys.deposit_addresses.clone(),
-    };
-
-    if let Config::Mining(mining_config) = config.clone() {
-        for (&deposit_private_key, &deposit_address) in
-            deposit_private_keys.iter().zip(deposit_addresses.iter())
+pub async fn balance_validation(
+    state: &mut State,
+    mode: RunMode,
+    config: Config,
+) -> anyhow::Result<()> {
+    if mode == RunMode::Mining {
+        for (&deposit_private_key, &deposit_address) in config
+            .keys
+            .deposit_private_keys
+            .iter()
+            .zip(config.keys.deposit_addresses.iter())
         {
             state.sync_trees().await?;
             let assets_status =
@@ -38,19 +34,23 @@ pub async fn balance_validation(state: &mut State, config: Config) -> anyhow::Re
             validate_deposit_address_balance(
                 &assets_status,
                 deposit_address,
-                mining_config.mining_unit,
-                mining_config.mining_times,
+                config.mining_unit,
+                config.mining_times,
             )
             .await?;
         }
-    } else if let Config::Claim(claim_config) = config.clone() {
-        for (&deposit_private_key, &deposit_address) in
-            deposit_private_keys.iter().zip(deposit_addresses.iter())
+    } else if mode == RunMode::Claim {
+        for (&deposit_private_key, &deposit_address) in config
+            .keys
+            .deposit_private_keys
+            .iter()
+            .zip(config.keys.deposit_addresses.iter())
         {
             state.sync_trees().await?;
             let assets_status =
                 fetch_assets_status(state, deposit_address, deposit_private_key).await?;
-            validate_claim_address_balance(&assets_status, claim_config.keys.claim_address).await?;
+            validate_withdrawal_address_balance(&assets_status, config.keys.withdrawal_address)
+                .await?;
         }
     }
     Ok(())
@@ -94,9 +94,9 @@ pub async fn validate_deposit_address_balance(
     Ok(())
 }
 
-pub async fn validate_claim_address_balance(
+pub async fn validate_withdrawal_address_balance(
     assets_status: &AssetsStatus,
-    claim_address: Address,
+    withdrawal_address: Address,
 ) -> anyhow::Result<()> {
     let remaining_claims = assets_status.not_claimed_indices.len();
     let num_claim_tx = (remaining_claims / MAX_CLAIMS) + 1;
@@ -104,23 +104,22 @@ pub async fn validate_claim_address_balance(
     let gas_price = get_gas_price().await?;
     let single_claim_gas: U256 = settings.blockchain.single_claim_gas.into();
     let min_balance = single_claim_gas * gas_price * U256::from(num_claim_tx);
-    let balance = get_balance(claim_address).await?;
+    let balance = get_balance(withdrawal_address).await?;
     if balance < min_balance {
         return Err(CLIError::BalanceError(format!(
-            "Insufficient balance for claim address {:?}: current {}ETH < required {} ETH",
-            claim_address,
+            "Insufficient balance for withdrawal address {:?}: current {}ETH < required {} ETH",
+            withdrawal_address,
             pretty_format_u256(balance),
             pretty_format_u256(min_balance)
         ))
         .into());
     }
-
-    let balance = get_balance(claim_address).await?;
-    let token_balance = get_token_balance(claim_address).await?;
+    let balance = get_balance(withdrawal_address).await?;
+    let token_balance = get_token_balance(withdrawal_address).await?;
     println!(
-        "Claim address: {:?} Unclaimed: {} Balance: {} ETH {} ITX",
-        claim_address,
-        assets_status.not_claimed_indices.len(),
+        "Withdawal address: {:?} Unclaimed: {} Balance: {} ETH {} ITX",
+        withdrawal_address,
+        remaining_claims,
         pretty_format_u256(balance),
         pretty_format_u256(token_balance)
     );

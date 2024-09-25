@@ -1,74 +1,33 @@
+use crate::state::keys::Keys;
+use crate::utils::config::Settings;
+use crate::utils::errors::CLIError;
 use ethers::providers::Middleware;
-use ethers::types::{Address, H256, U256};
+use ethers::types::{H256, U256};
 use std::env;
 use std::str::FromStr;
 
-use crate::external_api::contracts::utils::get_address;
-use crate::state::keys::{ClaimKeys, MiningKeys};
-use crate::state::mode::RunMode;
-use crate::utils::config::Settings;
-use crate::utils::errors::CLIError;
-
 #[derive(Debug, Clone, PartialEq)]
-pub enum Config {
-    Mining(MiningConfig),
-    Claim(ClaimConfig),
-    Exit(ExitConfig),
-}
-
-#[derive(Debug, Clone, PartialEq)]
-pub struct MiningConfig {
-    pub keys: MiningKeys,
+pub struct Config {
+    pub keys: Keys,
     pub mining_unit: U256,
     pub mining_times: usize,
 }
 
-#[derive(Debug, Clone, PartialEq)]
-pub struct ClaimConfig {
-    pub keys: ClaimKeys,
-}
-
-#[derive(Debug, Clone, PartialEq)]
-pub struct ExitConfig {
-    pub keys: MiningKeys,
-}
-
-pub async fn load_env(mode: RunMode) -> anyhow::Result<Config> {
+pub async fn load_env() -> anyhow::Result<Config> {
     // test load global variables
     let _rpc_url = load_rpc_url().await?;
     let _max_gas_price = load_max_gas_price()?;
-
-    let keys = match mode {
-        RunMode::Mining => {
-            let mining_unit = load_mining_unit()?;
-            let mining_times = load_mining_times()?;
-
-            let deposit_private_keys = load_deposit_private_keys()?;
-            let withdrawal_address = load_withdrawal_address()?;
-            let keys = MiningKeys::new(deposit_private_keys, withdrawal_address);
-            check_mining_keys(&keys)?;
-            Config::Mining(MiningConfig {
-                keys,
-                mining_unit,
-                mining_times,
-            })
-        }
-        RunMode::Claim => {
-            let deposit_private_keys = load_deposit_private_keys()?;
-            let claim_private_key = load_claim_private_key()?;
-            let keys = ClaimKeys::new(deposit_private_keys, claim_private_key);
-            check_claim_keys(&keys)?;
-            Config::Claim(ClaimConfig { keys })
-        }
-        RunMode::Exit => {
-            let deposit_private_keys = load_deposit_private_keys()?;
-            let withdrawal_address = load_withdrawal_address()?;
-            let keys = MiningKeys::new(deposit_private_keys, withdrawal_address);
-            check_mining_keys(&keys)?;
-            Config::Exit(ExitConfig { keys })
-        }
-    };
-    Ok(keys)
+    let mining_unit = load_mining_unit()?;
+    let mining_times = load_mining_times()?;
+    let deposit_private_keys = load_deposit_private_keys()?;
+    let withdrawal_private_key = load_withdrawal_private_key()?;
+    let keys = Keys::new(deposit_private_keys, withdrawal_private_key);
+    check_keys(&keys)?;
+    Ok(Config {
+        keys,
+        mining_unit,
+        mining_times,
+    })
 }
 
 fn load_mining_unit() -> anyhow::Result<U256> {
@@ -140,40 +99,23 @@ fn load_deposit_private_keys() -> anyhow::Result<Vec<H256>> {
     Ok(keys)
 }
 
-fn load_claim_private_key() -> anyhow::Result<H256> {
-    let claim_private_key = env::var("CLAIM_PRIVATE_KEY").map_err(|_| {
-        CLIError::EnvError("CLAIM_PRIVATE_KEY environment variable is not set".to_string())
+fn load_withdrawal_private_key() -> anyhow::Result<H256> {
+    let withdrawal_private_key = env::var("WITHDRAWAL_PRIVATE_KEY").map_err(|_| {
+        CLIError::EnvError("WITHDRAWAL_PRIVATE_KEY environment variable is not set".to_string())
     })?;
-    let key = H256::from_str(&claim_private_key).map_err(|_| {
+    let key = H256::from_str(&withdrawal_private_key).map_err(|_| {
         CLIError::EnvError(format!(
-            "Invalid CLAIM_PRIVATE_KEY environment variable. Invalid private key: {}",
-            claim_private_key
+            "Invalid WITHDRAWAL_PRIVATE_KEY environment variable. Invalid private key: {}",
+            withdrawal_private_key
         ))
     })?;
     if key.is_zero() {
-        return Err(
-            CLIError::EnvError("Invalid CLAIM_PRIVATE_KEY: Zero private key".to_string()).into(),
-        );
+        return Err(CLIError::EnvError(
+            "Invalid WITHDRAWAL_PRIVATE_KEY: Zero private key".to_string(),
+        )
+        .into());
     }
     Ok(key)
-}
-
-fn load_withdrawal_address() -> anyhow::Result<Address> {
-    let withdrawal_address = env::var("WITHDRAWAL_ADDRESS").map_err(|_| {
-        CLIError::EnvError("WITHDRAWAL_ADDRESS environment variable is not set".to_string())
-    })?;
-    let address = Address::from_str(&withdrawal_address).map_err(|_| {
-        CLIError::EnvError(format!(
-            "Invalid WITHDRAWAL_ADDRESS: {}",
-            withdrawal_address
-        ))
-    })?;
-    if address == Address::default() {
-        return Err(
-            CLIError::EnvError(format!("Invalid WITHDRAWAL_ADDRESS: Zero address",)).into(),
-        );
-    }
-    Ok(address)
 }
 
 pub fn load_max_gas_price() -> anyhow::Result<U256> {
@@ -188,7 +130,7 @@ pub fn load_max_gas_price() -> anyhow::Result<U256> {
     Ok(max_gas_price)
 }
 
-fn check_mining_keys(keys: &MiningKeys) -> anyhow::Result<()> {
+fn check_keys(keys: &Keys) -> anyhow::Result<()> {
     if keys.deposit_private_keys.is_empty() {
         return Err(CLIError::EnvError("No deposit private keys".to_string()).into());
     }
@@ -196,57 +138,6 @@ fn check_mining_keys(keys: &MiningKeys) -> anyhow::Result<()> {
         return Err(
             CLIError::EnvError("Withdrawal address is also a deposit address".to_string()).into(),
         );
-    }
-
-    // check claim address if it is set in the environment
-    match load_claim_private_key() {
-        Ok(claim_private_key) => {
-            let claim_address = get_address(claim_private_key);
-            if keys.deposit_addresses.contains(&claim_address) {
-                return Err(CLIError::EnvError(
-                    "Claim address is also a deposit address".to_string(),
-                )
-                .into());
-            }
-            if keys.withdrawal_address == claim_address {
-                return Err(CLIError::EnvError(
-                    "Claim address is also a withdrawal address".to_string(),
-                )
-                .into());
-            }
-        }
-        Err(_) => {}
-    }
-
-    Ok(())
-}
-
-fn check_claim_keys(keys: &ClaimKeys) -> anyhow::Result<()> {
-    if keys.deposit_private_keys.is_empty() {
-        return Err(CLIError::EnvError("No deposit private keys".to_string()).into());
-    }
-    if keys.deposit_addresses.contains(&keys.claim_address) {
-        return Err(
-            CLIError::EnvError("Claim address is also a deposit address".to_string()).into(),
-        );
-    }
-
-    match load_withdrawal_address() {
-        Ok(withdrawal_address) => {
-            if keys.deposit_addresses.contains(&withdrawal_address) {
-                return Err(CLIError::EnvError(
-                    "Withdrawal address is also a deposit address".to_string(),
-                )
-                .into());
-            }
-            if keys.claim_address == withdrawal_address {
-                return Err(CLIError::EnvError(
-                    "Claim address is also a withdrawal address".to_string(),
-                )
-                .into());
-            }
-        }
-        Err(_) => {}
     }
     Ok(())
 }

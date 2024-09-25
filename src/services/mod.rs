@@ -6,10 +6,7 @@ use rand::Rng as _;
 
 use crate::{
     cli::console::{print_assets_status, print_status},
-    state::{
-        keys::{ClaimKeys, MiningKeys},
-        state::State,
-    },
+    state::{keys::Keys, state::State},
     utils::{config::Settings, errors::CLIError},
 };
 
@@ -22,7 +19,7 @@ pub mod sync;
 
 pub async fn mining_loop(
     state: &mut State,
-    mining_keys: &MiningKeys,
+    mining_keys: &Keys,
     mining_uinit: U256,
     mining_times: usize,
 ) -> anyhow::Result<()> {
@@ -81,7 +78,7 @@ pub async fn mining_loop(
     Ok(())
 }
 
-pub async fn exit_loop(state: &mut State, mining_keys: &MiningKeys) -> anyhow::Result<()> {
+pub async fn exit_loop(state: &mut State, mining_keys: &Keys) -> anyhow::Result<()> {
     for key in mining_keys.to_keys().iter() {
         print_status(format!("Exit loop for {:?}", key.deposit_address));
         loop {
@@ -116,8 +113,8 @@ pub async fn exit_loop(state: &mut State, mining_keys: &MiningKeys) -> anyhow::R
     Ok(())
 }
 
-pub async fn claim_loop(state: &mut State, claim_keys: ClaimKeys) -> anyhow::Result<()> {
-    for key in claim_keys.to_keys().iter() {
+pub async fn claim_loop(state: &mut State, keys: &Keys) -> anyhow::Result<()> {
+    for key in keys.to_keys().iter() {
         print_status(format!("Claim loop for {:?}", key.deposit_address));
         loop {
             state.sync_trees().await?;

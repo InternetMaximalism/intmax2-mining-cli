@@ -91,11 +91,11 @@ async fn from_step3(state: &State, key: &Key) -> anyhow::Result<()> {
     let mut status = temp::ClaimStatus::new()?;
     ensure!(status.next_step == temp::ClaimStep::GnarkStart);
     let settings = Settings::new()?;
-    let claim_address = key.claim_address.unwrap();
+    let withdrawal_address = key.withdrawal_address;
 
     let prover_url = settings.api.claim_gnark_prover_url.clone();
     let plonky2_proof = status.plonlky2_proof.clone().unwrap();
-    let output = gnark_start_prove(&prover_url, claim_address, plonky2_proof).await?;
+    let output = gnark_start_prove(&prover_url, withdrawal_address, plonky2_proof).await?;
     status.job_id = Some(output.job_id.clone());
     let now: u64 = std::time::SystemTime::now()
         .duration_since(UNIX_EPOCH)
@@ -145,7 +145,7 @@ async fn from_step5(_state: &State, key: &Key) -> anyhow::Result<()> {
     };
     temp::ClaimStatus::delete()?;
     claim_tokens(
-        key.claim_private_key.unwrap(),
+        key.withdrawal_private_key,
         &claims,
         pis,
         &status.gnark_proof.unwrap(),

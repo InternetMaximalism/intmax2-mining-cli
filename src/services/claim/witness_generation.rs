@@ -27,7 +27,7 @@ pub async fn generate_claim_witness(
     let deposit_tree_root = state.deposit_hash_tree.get_root();
     let eligible_tree_root: Bytes32 = state.eligible_tree.get_root().into();
     let pubkey = get_pubkey_from_private_key(key.deposit_private_key);
-    let recipient = Address::from_bytes_be(&key.claim_address.unwrap().as_bytes());
+    let recipient = Address::from_bytes_be(&key.withdrawal_address.as_bytes());
     let mut witnesses = Vec::new();
     let mut prev_claim_hash = Bytes32::default();
     for event in events {
