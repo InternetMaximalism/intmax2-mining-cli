@@ -22,6 +22,7 @@ pub struct Api {
     pub availability_server_url: String,
     pub withdrawal_gnark_prover_url: String,
     pub claim_gnark_prover_url: String,
+    pub circulation_server_url: String,
     pub tree_data_repository: String,
     pub gnark_get_proof_cooldown_in_sec: u64,
     pub withdrawal_server_url: String,

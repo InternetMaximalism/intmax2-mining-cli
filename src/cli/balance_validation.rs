@@ -1,9 +1,12 @@
 use ethers::types::{Address, U256};
 
 use crate::{
-    external_api::contracts::{
-        token::get_token_balance,
-        utils::{get_balance, get_gas_price},
+    external_api::{
+        contracts::{
+            token::get_token_balance,
+            utils::{get_balance, get_gas_price},
+        },
+        intmax::circulation::get_circulation,
     },
     services::{
         assets_status::{fetch_assets_status, AssetsStatus},
@@ -81,6 +84,14 @@ pub async fn validate_deposit_address_balance(
             deposit_address,
             pretty_format_u256(balance),
             pretty_format_u256(min_balance)
+        ))
+        .into());
+    }
+    let is_not_reward_target = get_circulation(deposit_address).await?.is_excluded;
+    if is_not_reward_target {
+        return Err(CLIError::CirculationError(format!(
+            "Deposit address {:?} is excluded from rewards",
+            deposit_address
         ))
         .into());
     }
