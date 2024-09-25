@@ -20,7 +20,7 @@ enum CirculationResponse {
 }
 
 pub async fn get_circulation(address: Address) -> anyhow::Result<CirculationSuccessResponse> {
-    info!("Getting circulation");
+    info!("Getting circulation for address {:?}", address);
     let settings = Settings::new()?;
     let response = reqwest::get(format!(
         "{}/addresses/{:?}/exclusion",
@@ -43,7 +43,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_circulation() {
-        let address = "0xFa1A4998136377DB9b09e24567bd6D17Ad78AaE6"
+        let address: Address = "0xFa1A4998136377DB9b09e24567bd6D17Ad78AaE6"
             .parse()
             .unwrap();
         let response = get_circulation(address).await.unwrap();
