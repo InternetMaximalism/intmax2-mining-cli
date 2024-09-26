@@ -22,21 +22,65 @@ pub struct EnvConfig {
     pub mining_times: u64,
 }
 
-// string version of EnvConfig
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
-pub struct EnvConfigString {
-    pub rpc_url: String,
-    pub max_gas_price: String,
-    pub encrypt: String,
-    pub deposit_private_keys: Option<String>,
-    pub withdrawal_private_key: Option<String>,
-    pub encrypted_keys: Option<String>,
-    pub mining_unit: String,  // "0.1" or "1"
-    pub mining_times: String, // "10" or "100"
-}
-
 impl EnvConfig {
-    pub fn to_string(&self) -> anyhow::Result<EnvConfigString> {
+    pub fn load_from_file() -> anyhow::Result<Self> {
+        let file = std::fs::File::open(&env_config_path())?;
+        let reader = BufReader::new(file);
+        let config: EnvConfig = serde_json::from_reader(reader)?;
+        Ok(config)
+    }
+
+    pub fn save_to_file(&self) -> anyhow::Result<()> {
+        let input = serde_json::to_vec_pretty(self)?;
+        create_file_with_content(&env_config_path(), &input)?;
+        Ok(())
+    }
+
+    pub fn export_to_env(&self) -> anyhow::Result<()> {
+        let config_string = self.to_string()?;
+        env::set_var("RPC_URL", &config_string.rpc_url);
+        env::set_var("MAX_GAS_PRICE", &config_string.max_gas_price);
+        env::set_var("ENCRYPT", &config_string.encrypt);
+        if let Some(deposit_private_keys) = &config_string.deposit_private_keys {
+            env::set_var("DEPOSIT_PRIVATE_KEYS", deposit_private_keys);
+        }
+        if let Some(withdrawal_private_key) = &config_string.withdrawal_private_key {
+            env::set_var("WITHDRAWAL_PRIVATE_KEY", withdrawal_private_key);
+        }
+        if let Some(encrypted_keys) = &config_string.encrypted_keys {
+            env::set_var("ENCRYPTED_KEYS", encrypted_keys);
+        }
+        env::set_var("MINING_UNIT", &config_string.mining_unit);
+        env::set_var("MINING_TIMES", &config_string.mining_times);
+        Ok(())
+    }
+
+    // import env config from env. Only checks format of env, not the correctness of the values
+    pub fn import_from_env() -> anyhow::Result<Self> {
+        let rpc_url = env::var("RPC_URL")
+            .map_err(|_| anyhow::Error::msg("RPC_URL environment variable is not set"))?;
+        let max_gas_price = env::var("MAX_GAS_PRICE").unwrap_or("30".to_string());
+        let encrypt = env::var("ENCRYPT").unwrap_or("false".to_string());
+        let deposit_private_keys = env::var("DEPOSIT_PRIVATE_KEYS").ok();
+        let withdrawal_private_key = env::var("WITHDRAWAL_PRIVATE_KEY").ok();
+        let encrypted_keys = env::var("ENCRYPTED_KEYS").ok();
+        let mining_unit = env::var("MINING_UNIT").unwrap_or("0.1".to_string());
+        let mining_times = env::var("MINING_TIMES").unwrap_or("10".to_string());
+        let config_string = EnvConfigString {
+            rpc_url,
+            max_gas_price,
+            encrypt,
+            deposit_private_keys,
+            withdrawal_private_key,
+            encrypted_keys,
+            mining_unit,
+            mining_times,
+        };
+        let config = EnvConfig::from_string(&config_string)?;
+        Ok(config)
+    }
+
+    fn to_string(&self) -> anyhow::Result<EnvConfigString> {
         let max_gas_price = ethers::utils::format_units(self.max_gas_price, "gwei").unwrap();
         let encrypt = if self.keys.is_some() {
             "false".to_string()
@@ -73,7 +117,7 @@ impl EnvConfig {
         })
     }
 
-    pub fn from_string(value: &EnvConfigString) -> anyhow::Result<Self> {
+    fn from_string(value: &EnvConfigString) -> anyhow::Result<Self> {
         let max_gas_price: U256 = ethers::utils::parse_units(value.max_gas_price.clone(), "gwei")
             .map_err(|_| anyhow::anyhow!("failed to parse MAX_GAS_PRICE"))?
             .into();
@@ -135,63 +179,17 @@ impl EnvConfig {
     }
 }
 
-impl EnvConfig {
-    pub fn load_from_file() -> anyhow::Result<Self> {
-        let file = std::fs::File::open(&env_config_path())?;
-        let reader = BufReader::new(file);
-        let config: EnvConfig = serde_json::from_reader(reader)?;
-        Ok(config)
-    }
-
-    pub fn save_to_file(&self) -> anyhow::Result<()> {
-        let input = serde_json::to_vec_pretty(self)?;
-        create_file_with_content(&env_config_path(), &input)?;
-        Ok(())
-    }
-
-    pub fn export_to_env(&self) -> anyhow::Result<()> {
-        let config_string = self.to_string()?;
-        env::set_var("RPC_URL", &config_string.rpc_url);
-        env::set_var("MAX_GAS_PRICE", &config_string.max_gas_price);
-        env::set_var("ENCRYPT", &config_string.encrypt);
-        if let Some(deposit_private_keys) = &config_string.deposit_private_keys {
-            env::set_var("DEPOSIT_PRIVATE_KEYS", deposit_private_keys);
-        }
-        if let Some(withdrawal_private_key) = &config_string.withdrawal_private_key {
-            env::set_var("WITHDRAWAL_PRIVATE_KEY", withdrawal_private_key);
-        }
-        if let Some(encrypted_keys) = &config_string.encrypted_keys {
-            env::set_var("ENCRYPTED_KEYS", encrypted_keys);
-        }
-        env::set_var("MINING_UNIT", &config_string.mining_unit);
-        env::set_var("MINING_TIMES", &config_string.mining_times);
-        Ok(())
-    }
-
-    // import env config from env. Only checks format of env, not the correctness of the values
-    pub fn import_from_env() -> anyhow::Result<Self> {
-        let rpc_url = env::var("RPC_URL")
-            .map_err(|_| anyhow::Error::msg("RPC_URL environment variable is not set"))?;
-        let max_gas_price = env::var("MAX_GAS_PRICE").unwrap_or("30".to_string());
-        let encrypt = env::var("ENCRYPT").unwrap_or("false".to_string());
-        let deposit_private_keys = env::var("DEPOSIT_PRIVATE_KEYS").ok();
-        let withdrawal_private_key = env::var("WITHDRAWAL_PRIVATE_KEY").ok();
-        let encrypted_keys = env::var("ENCRYPTED_KEYS").ok();
-        let mining_unit = env::var("MINING_UNIT").unwrap_or("0.1".to_string());
-        let mining_times = env::var("MINING_TIMES").unwrap_or("10".to_string());
-        let config_string = EnvConfigString {
-            rpc_url,
-            max_gas_price,
-            encrypt,
-            deposit_private_keys,
-            withdrawal_private_key,
-            encrypted_keys,
-            mining_unit,
-            mining_times,
-        };
-        let config = EnvConfig::from_string(&config_string)?;
-        Ok(config)
-    }
+// string version of EnvConfig
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+struct EnvConfigString {
+    rpc_url: String,
+    max_gas_price: String, // in gwei
+    encrypt: String,       // true or false
+    deposit_private_keys: Option<String>,
+    withdrawal_private_key: Option<String>,
+    encrypted_keys: Option<String>,
+    mining_unit: String, // in ether
+    mining_times: String,
 }
 
 #[cfg(test)]
@@ -240,6 +238,8 @@ mod tests {
 
         let env_config_recovered = super::EnvConfig::import_from_env().unwrap();
         assert_eq!(env_config, env_config_recovered);
+
+        env_config.save_to_file().unwrap();
     }
 
     #[test]
