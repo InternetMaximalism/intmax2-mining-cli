@@ -8,7 +8,7 @@ use crate::{state::keys::Keys, utils::network::get_network};
 use super::file::create_file_with_content;
 
 fn env_config_path() -> PathBuf {
-    PathBuf::from(format!("env.{}.json", get_network()))
+    PathBuf::from(format!("data/env.{}.json", get_network()))
 }
 
 // Structure for setting and getting env
