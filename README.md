@@ -16,40 +16,6 @@ A CLI tool for automatic mining of ITX tokens.
 
 v1-mining-cli is a tool that allows users to mine ITX tokens by participating in a simplified version of intmax2. By utilizing a simplified version of intmax2 that focuses on deposit and private withdrawal functions, users can contribute to enhancing Ethereum's privacy while earning rewards in ITX tokens.
 
-### Key Features
-
-- Automated mining process (deposit and withdrawal)
-- Weekly ITX token rewards
-
-## Mining flow
-
-<div align="center">
-  <img src="assets/diagram.png" width="800" alt="Mining diagram">
-</div>
-
-1. **Preparation**: You need two types of Ethereum addresses:
-
-- **Deposit address**: Where you initially deposit ETH for mining
-- **Withdrawal address**: Where deposited ETH is withdrawn to after subtraction of gas fees, and where you receive ITX token rewards
-
-1. **Mining Process**:
-
-- The CLI automatically deposits smaller amounts (0.1 or 1 ETH) into intmax2. The deposit amount can be configured through environment variables.
-- After a few hours, it withdraws these amounts to your withdrawal address.
-
-3. **Rewards**:
-
-- Receive ITX tokens weekly in your withdrawal address (available every Monday at 0:00 UTC. Rewards are delayed by one week. For example, mining done on a Sunday can be claimed not on the following Monday, but on the Monday 8 days later)
-- Ensure your withdrawal address has enough ETH for claim gas fees
-
-## System Requirements
-
-### Minimum Requirements
-
-- Memory: 12GB or more
-- CPU: 4 cores or more, with a clock speed of 2 GHz or higher
-- Storage: 10GB or more of free space
-
 # Quick Start Guide
 
 ## Prerequisites
@@ -78,6 +44,24 @@ Before you begin, please ensure you have the following:
    - Other configuration options (as needed)
 
 3. The application will guide you through the setup process and initiate the mining operation.
+
+### How It Works
+
+<div align="center">
+  <img src="assets/diagram.png" width="800" alt="Mining diagram">
+</div>
+
+1. **Automated Deposits and Withdrawals**: The CLI automatically transfers funds from your deposit address into a simplified Intmax2 system. After a random delay, the funds are withdrawn to your withdrawal address. Through Zero-Knowledge Proofs , the relationship between your deposit and withdrawal addresses remains confidential.
+
+2. **Reward Mechanism**: By participating in these private asset transfers, you contribute to enhancing Ethereum's privacy ecosystem. As a reward for your contribution, you earn ITX tokens. These tokens are distributed weekly to your withdrawal address, available every Monday at 00:00 UTC. Note that rewards are subject to a one-week delay. For instance, mining activities completed on a Sunday will be eligible for claiming not on the immediately following Monday, but on the Monday eight days later.
+
+## System Requirements
+
+### Minimum Requirements
+
+- Memory: 12GB or more
+- CPU: 4 cores or more, with a clock speed of 2 GHz or higher
+- Storage: 10GB or more of free space
 
 ## Build from Source Code
 
