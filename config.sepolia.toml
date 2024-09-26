@@ -3,14 +3,17 @@ availability_server_url = "https://dev.v1.mining-gateway.intmax.xyz/v1/availabil
 withdrawal_gnark_prover_url = "https://dev.v1.mining-gateway.intmax.xyz/v1/gnark-withdraw-circuit"
 claim_gnark_prover_url = "https://dev.v1.mining-gateway.intmax.xyz/v1/gnark-claim-circuit"
 withdrawal_server_url="https://dev.v1.mining-gateway.intmax.xyz/v1/withdrawal/submit-proof"
+circulation_server_url="https://dev.v1.mining-gateway.intmax.xyz/v1/mining"
 tree_data_repository="InternetMaximalism/intmax2-v1-mining-mock"
+tree_data_directory="data"
+tree_data_branch="main"
 gnark_get_proof_cooldown_in_sec = 15
 
 [blockchain]
 chain_id = 11155111
-int1_address = "0xe190199F43e81E0E12fBFdD3B0c86F7387617677"
-minter_address = "0xE4e61209814d933050f4F5de5d7e9aF6125F70D4"
-token_address = "0x15A839Bed67eD75B681ef8A187bf4C857Dd1De6F"
+int1_address = "0xF50C18ecd79475138b1f3AD786cA56Dd47122CD2"
+minter_address = "0xE1682013abB443D34224C996c611bD981b85F97E"
+token_address = "0x35C810028a7347C27635A18B57A840AEB44fbe86"
 single_deposit_gas = 88000
 single_claim_gas = 600000
 

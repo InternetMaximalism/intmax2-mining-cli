@@ -32,4 +32,5 @@ dir = "0.1.2"
 dirs = "5.0.1"
 clap = { version = "4.5.18", features = ["derive"] }
 dotenv = "0.15.0"
+hex = "0.4.3"
 

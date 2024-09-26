@@ -6,6 +6,7 @@ pub enum CLIError {
     EnvError(String),
     InternalError(String),
     BalanceError(String),
+    CirculationError(String),
     ParseError(String),
     NetworkError(String),
 }
@@ -17,6 +18,7 @@ impl fmt::Display for CLIError {
             CLIError::EnvError(msg) => write!(f, "Environment variable error: {}", msg),
             CLIError::InternalError(msg) => write!(f, "Internal error: {}", msg),
             CLIError::BalanceError(msg) => write!(f, "Balance error: {}", msg),
+            CLIError::CirculationError(msg) => write!(f, "Circulation error: {}", msg),
             CLIError::ParseError(msg) => write!(f, "Parse error: {}", msg),
             CLIError::NetworkError(msg) => write!(f, "Network error: {}", msg),
         }

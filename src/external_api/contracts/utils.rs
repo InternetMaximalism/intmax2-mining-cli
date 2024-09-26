@@ -51,7 +51,7 @@ pub async fn get_client_with_signer(
 
 pub async fn get_wallet(private_key: H256) -> anyhow::Result<Wallet<SigningKey>> {
     info!("Getting wallet");
-    let settings = crate::utils::config::Settings::new()?;
+    let settings = crate::utils::config::Settings::load()?;
     let key = SecretKey::from_be_bytes(private_key.as_bytes()).unwrap();
     let wallet = Wallet::from(key).with_chain_id(settings.blockchain.chain_id);
     Ok(wallet)
@@ -132,7 +132,7 @@ mod tests {
     #[tokio::test]
     async fn test_get_minter_token_balance() -> anyhow::Result<()> {
         dotenv::dotenv().ok();
-        let settings = Settings::new()?;
+        let settings = Settings::load()?;
         let minter_address: Address = settings.blockchain.minter_address.parse()?;
         let balance = get_token_balance(minter_address).await?;
         println!("{}", balance);

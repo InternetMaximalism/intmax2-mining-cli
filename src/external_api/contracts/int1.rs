@@ -17,7 +17,7 @@ abigen!(Int1, "abi/Int1.json",);
 
 pub async fn get_int1_contract() -> anyhow::Result<int_1::Int1<Provider<Http>>> {
     info!("Getting int1 contract");
-    let settings = crate::utils::config::Settings::new()?;
+    let settings = crate::utils::config::Settings::load()?;
     let client = get_client().await?;
     let int1_address: Address = settings.blockchain.int1_address.parse()?;
     let contract = Int1::new(int1_address, client);
@@ -27,7 +27,7 @@ pub async fn get_int1_contract() -> anyhow::Result<int_1::Int1<Provider<Http>>> 
 pub async fn get_int1_contract_with_signer(
     private_key: H256,
 ) -> anyhow::Result<int_1::Int1<SignerMiddleware<Provider<Http>, Wallet<SigningKey>>>> {
-    let settings = crate::utils::config::Settings::new()?;
+    let settings = crate::utils::config::Settings::load()?;
     let client = get_client_with_signer(private_key).await?;
     let int1_address: Address = settings.blockchain.int1_address.parse()?;
     let contract = Int1::new(int1_address, Arc::new(client));

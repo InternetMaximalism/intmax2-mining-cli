@@ -23,7 +23,7 @@ abigen!(
 
 pub async fn get_token_contract() -> anyhow::Result<IERC20<Provider<Http>>> {
     info!("Getting token contract");
-    let settings = crate::utils::config::Settings::new()?;
+    let settings = crate::utils::config::Settings::load()?;
     let client = get_client().await?;
     let token_address: Address = settings.blockchain.token_address.parse()?;
     let contract = IERC20::new(token_address, client);

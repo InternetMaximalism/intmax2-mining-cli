@@ -81,8 +81,8 @@ async fn from_step3(state: &State, key: &Key) -> anyhow::Result<()> {
     print_status("Withdrawal: starting gnark");
     let mut status = temp::WithdrawalStatus::new()?;
     ensure!(status.next_step == temp::WithdrawalStep::GnarkStart);
-    let settings = Settings::new()?;
-    let withdrawal_address = key.withdrawal_address.unwrap();
+    let settings = Settings::load()?;
+    let withdrawal_address = key.withdrawal_address;
     let prover_url = settings.api.withdrawal_gnark_prover_url.clone();
     let plonky2_proof = status.plonlky2_proof.clone().unwrap();
     let output = gnark_start_prove(&prover_url, withdrawal_address, plonky2_proof).await?;
@@ -103,7 +103,7 @@ async fn from_step4(state: &State, key: &Key) -> anyhow::Result<()> {
     print_status("Withdrawal: getting gnark proof");
     let mut status = temp::WithdrawalStatus::new()?;
     ensure!(status.next_step == temp::WithdrawalStep::GnarkGetProof);
-    let settings = Settings::new()?;
+    let settings = Settings::load()?;
     let prover_url = settings.api.withdrawal_gnark_prover_url.clone();
     let output = fetch_gnark_proof(
         &prover_url,

@@ -17,11 +17,13 @@ pub async fn fetch_latest_tree_from_github(
         "Fetching latest deposit and eligible trees from GitHub, last update: {}",
         last_update
     );
-    let settings = Settings::new()?;
+    let settings = Settings::load()?;
     let client = reqwest::Client::new();
     let url = format!(
-        "https://api.github.com/repos/{}/contents/data",
-        settings.api.tree_data_repository
+        "https://api.github.com/repos/{}/contents/{}?ref={}",
+        settings.api.tree_data_repository,
+        settings.api.tree_data_directory,
+        settings.api.tree_data_branch
     );
     let response = client
         .get(&url)
