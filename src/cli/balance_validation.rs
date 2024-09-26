@@ -13,23 +13,21 @@ use crate::{
         claim::MAX_CLAIMS,
         contracts::pretty_format_u256,
     },
-    state::{mode::RunMode, state::State},
-    utils::{config::Settings, errors::CLIError},
+    state::{keys::Keys, mode::RunMode, state::State},
+    utils::{config::Settings, env_config::EnvConfig, errors::CLIError},
 };
-
-use super::load_env::Config;
 
 pub async fn balance_validation(
     state: &mut State,
     mode: RunMode,
-    config: Config,
+    config: &EnvConfig,
+    keys: &Keys,
 ) -> anyhow::Result<()> {
     if mode == RunMode::Mining {
-        for (&deposit_private_key, &deposit_address) in config
-            .keys
+        for (&deposit_private_key, &deposit_address) in keys
             .deposit_private_keys
             .iter()
-            .zip(config.keys.deposit_addresses.iter())
+            .zip(keys.deposit_addresses.iter())
         {
             state.sync_trees().await?;
             let assets_status =
@@ -43,17 +41,15 @@ pub async fn balance_validation(
             .await?;
         }
     } else if mode == RunMode::Claim {
-        for (&deposit_private_key, &deposit_address) in config
-            .keys
+        for (&deposit_private_key, &deposit_address) in keys
             .deposit_private_keys
             .iter()
-            .zip(config.keys.deposit_addresses.iter())
+            .zip(keys.deposit_addresses.iter())
         {
             state.sync_trees().await?;
             let assets_status =
                 fetch_assets_status(state, deposit_address, deposit_private_key).await?;
-            validate_withdrawal_address_balance(&assets_status, config.keys.withdrawal_address)
-                .await?;
+            validate_withdrawal_address_balance(&assets_status, keys.withdrawal_address).await?;
         }
     }
     Ok(())
@@ -63,9 +59,9 @@ pub async fn validate_deposit_address_balance(
     assets_status: &AssetsStatus,
     deposit_address: Address,
     mining_unit: U256,
-    mining_times: usize,
+    mining_times: u64,
 ) -> anyhow::Result<()> {
-    let num_deposits = assets_status.senders_deposits.len();
+    let num_deposits = assets_status.senders_deposits.len() as u64;
     let remaining_deposits = if mining_times > num_deposits {
         mining_times - num_deposits
     } else {

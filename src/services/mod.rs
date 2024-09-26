@@ -21,7 +21,7 @@ pub async fn mining_loop(
     state: &mut State,
     mining_keys: &Keys,
     mining_uinit: U256,
-    mining_times: usize,
+    mining_times: u64,
 ) -> anyhow::Result<()> {
     for key in mining_keys.to_keys().iter() {
         print_status(format!("Mining loop for {:?}", key.deposit_address));
@@ -37,7 +37,7 @@ pub async fn mining_loop(
                         ))
                     })?;
 
-            if assets_status.senders_deposits.len() >= mining_times
+            if assets_status.senders_deposits.len() >= mining_times as usize
                 && assets_status.pending_indices.is_empty()
                 && assets_status.rejected_indices.is_empty()
                 && assets_status.not_withdrawn_indices.is_empty()
@@ -49,7 +49,7 @@ pub async fn mining_loop(
                 break;
             }
 
-            let new_deposit = (assets_status.senders_deposits.len() < mining_times) // deposit only if less than max deposits
+            let new_deposit = (assets_status.senders_deposits.len() < mining_times as usize) // deposit only if less than max deposits
             && (assets_status.pending_indices.is_empty()); // deposit only if no pending deposits
             let cooldown =
                 mining_task(state, key, &assets_status, new_deposit, false, mining_uinit).await?;

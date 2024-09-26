@@ -6,6 +6,7 @@ use intmax2_zkp::ethereum_types::u32limb_trait::U32LimbTrait;
 use log::info;
 use mining_circuit_v1::withdrawal::simple_withraw_circuit::SimpleWithdrawalPublicInputs;
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use std::str::FromStr;
 
 use crate::{
@@ -63,7 +64,9 @@ pub async fn submit_withdrawal(
             .send()
             .await
             .map_err(|e| CLIError::NetworkError(e.to_string()))?;
-        let response: SumbitWithdrawalResponse = response.json().await?;
+        let response: Value = response.json().await?;
+        info!("submitting withdrawal response: {}", response);
+        let response: SumbitWithdrawalResponse = serde_json::from_value(response)?;
         match response {
             SumbitWithdrawalResponse::Sucess(success) => H256::from_str(&success.transaction_hash)?,
             SumbitWithdrawalResponse::Error(error) => {
