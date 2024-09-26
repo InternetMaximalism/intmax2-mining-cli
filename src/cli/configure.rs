@@ -30,15 +30,23 @@ async fn new_config() -> anyhow::Result<EnvConfig> {
     let deposit_private_key: H256 = {
         let deposit_private_key: String = Password::new()
             .with_prompt(format!("Deposit private key of {}", get_network()))
-            .validate_with(|input: &String| validate_private_key(input))
+            .validate_with(|input: &String| validate_private_key_with_duplication_check(&[], input))
             .interact()?;
         let deposit_private_key: H256 = deposit_private_key.parse().unwrap();
         let deposit_address = get_address(deposit_private_key);
         println!("Deposit Address: {:?}", deposit_address);
         deposit_private_key
     };
-    let deposit_private_keys = append_deposit_private_keys(&[deposit_private_key])?;
-    let withdrawal_private_key: H256 = input_withdrawal_private_key()?;
+    let is_more = Confirm::new()
+        .with_prompt("Add more deposit private keys?")
+        .default(false)
+        .interact()?;
+    let deposit_private_keys = if is_more {
+        append_deposit_private_keys(&[deposit_private_key])?
+    } else {
+        vec![deposit_private_key]
+    };
+    let withdrawal_private_key: H256 = input_withdrawal_private_key(&deposit_private_keys)?;
     let (keys, encrypted_keys) = input_encryption(&deposit_private_keys, withdrawal_private_key)?;
     let config = EnvConfig {
         rpc_url,
@@ -81,7 +89,7 @@ async fn modify_config(config: &EnvConfig) -> anyhow::Result<EnvConfig> {
         println!("{:?}", deposit_address);
     }
     let append_deposit_address = Confirm::new()
-        .with_prompt("Append deposit account?")
+        .with_prompt("Append deposit accounts?")
         .default(false)
         .interact()?;
     let deposit_private_keys = if append_deposit_address {
@@ -98,25 +106,23 @@ async fn modify_config(config: &EnvConfig) -> anyhow::Result<EnvConfig> {
         .default(false)
         .interact()?;
     let withdrawal_private_key = if modify_withdrawal_address {
-        input_withdrawal_private_key()?
+        input_withdrawal_private_key(&deposit_private_keys)?
     } else {
         keys.withdrawal_private_key
     };
 
     let modify_encryption = Confirm::new()
         .with_prompt(format!(
-            "Modify encryption {}",
+            "Modify encryption current={}?",
             config.encrypted_keys.is_some()
         ))
         .default(false)
         .interact()?;
-
     let (keys, encrypted_keys) = if modify_encryption {
         input_encryption(&deposit_private_keys, withdrawal_private_key)?
     } else {
         (Some(keys.clone()), config.encrypted_keys.clone())
     };
-
     let config = EnvConfig {
         rpc_url,
         max_gas_price,
@@ -125,7 +131,6 @@ async fn modify_config(config: &EnvConfig) -> anyhow::Result<EnvConfig> {
         mining_unit: config.mining_unit,
         mining_times: config.mining_times,
     };
-
     Ok(config)
 }
 
@@ -205,25 +210,25 @@ fn input_mining_times() -> anyhow::Result<u64> {
 fn append_deposit_private_keys(current_deposit_private_keys: &[H256]) -> anyhow::Result<Vec<H256>> {
     let mut deposit_private_keys = current_deposit_private_keys.to_vec();
     loop {
+        let deposit_private_key: H256 = {
+            let deposit_private_key: String = Password::new()
+                .with_prompt(format!("Deposit private key of {}", get_network()))
+                .validate_with(|input: &String| {
+                    validate_private_key_with_duplication_check(&deposit_private_keys, input)
+                })
+                .interact()?;
+            let deposit_private_key: H256 = deposit_private_key.parse().unwrap();
+            let deposit_address = get_address(deposit_private_key);
+            println!("Deposit Address: {:?}", deposit_address);
+            deposit_private_key
+        };
+        deposit_private_keys.push(deposit_private_key);
         let is_more = Confirm::new()
             .with_prompt("Add more deposit private keys?")
             .default(false)
             .interact()?;
-
         if is_more {
-            let deposit_private_key: H256 = {
-                let deposit_private_key: String = Password::new()
-                    .with_prompt(format!("Deposit private key of {}", get_network()))
-                    .validate_with(|input: &String| {
-                        validate_private_key_with_duplication_check(&deposit_private_keys, input)
-                    })
-                    .interact()?;
-                let deposit_private_key: H256 = deposit_private_key.parse().unwrap();
-                let deposit_address = get_address(deposit_private_key);
-                println!("Deposit Address: {:?}", deposit_address);
-                deposit_private_key
-            };
-            deposit_private_keys.push(deposit_private_key);
+            continue;
         } else {
             break;
         }
@@ -231,10 +236,12 @@ fn append_deposit_private_keys(current_deposit_private_keys: &[H256]) -> anyhow:
     Ok(deposit_private_keys)
 }
 
-fn input_withdrawal_private_key() -> anyhow::Result<H256> {
+fn input_withdrawal_private_key(deposit_private_keys: &[H256]) -> anyhow::Result<H256> {
     let withdrawal_private_key: String = Password::new()
         .with_prompt(format!("Withdrawal private key of {}", get_network()))
-        .validate_with(|input: &String| validate_private_key(input))
+        .validate_with(|input: &String| {
+            validate_private_key_with_duplication_check(deposit_private_keys, input)
+        })
         .interact()?;
     let withdrawal_private_key: H256 = withdrawal_private_key.parse().unwrap();
     let withdrawal_address = get_address(withdrawal_private_key);
@@ -267,18 +274,6 @@ fn input_encryption(
         None
     };
     Ok((keys, encrypted_keys))
-}
-
-fn validate_private_key(input: &str) -> Result<(), &'static str> {
-    match input.parse() {
-        Ok(H256(x)) => {
-            if x == H256::zero().0 {
-                return Err("Invalid private key");
-            }
-            Ok(())
-        }
-        Err(_) => return Err("Invalid private key"),
-    }
 }
 
 fn validate_private_key_with_duplication_check(
@@ -318,7 +313,13 @@ mod tests {
 
     #[tokio::test]
     async fn test_new_config() {
-        new_config().await.unwrap();
+        new_config().await.unwrap().save_to_file().unwrap();
+    }
+
+    #[tokio::test]
+    async fn test_modify_config() {
+        let config = EnvConfig::load_from_file().unwrap();
+        modify_config(&config).await.unwrap();
     }
 
     #[tokio::test]

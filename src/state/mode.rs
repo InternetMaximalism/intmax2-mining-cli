@@ -1,8 +1,8 @@
 use std::fmt::Display;
 
-use clap::ValueEnum;
+use clap::{Subcommand, ValueEnum};
 
-#[derive(Debug, Copy, Clone, PartialEq, ValueEnum)]
+#[derive(Subcommand, Debug, Copy, Clone, PartialEq, ValueEnum)]
 pub enum RunMode {
     Mining, // only mining
     Claim,  // only claim

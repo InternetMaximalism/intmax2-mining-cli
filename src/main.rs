@@ -19,15 +19,13 @@ pub mod utils;
 struct Args {
     /// The mode to run the program in
     #[arg(value_enum)]
-    mode: RunMode,
+    command: Option<RunMode>,
 }
 
 #[tokio::main]
 async fn main() {
     dotenv().ok();
-
-    // parse args
-    let args = Args::parse();
+    let mode = Args::parse().command.unwrap_or(RunMode::Config);
 
     // load config
     utils::config::Settings::load().expect("Failed to load config");
@@ -39,7 +37,7 @@ async fn main() {
     WriteLogger::init(LevelFilter::Info, Config::default(), log_file).unwrap();
 
     // run the CLI
-    match run(args.mode).await {
+    match run(mode).await {
         Ok(_) => {}
         Err(e) => {
             error!("{:#}", e);

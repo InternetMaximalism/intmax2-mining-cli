@@ -1,14 +1,13 @@
 use availability::check_avaliability;
 use configure::recover_keys;
 use console::print_status;
-use dialoguer::Password;
 
 use crate::{
     services::{claim_loop, exit_loop, mining_loop},
-    state::{keys::Keys, mode::RunMode, prover::Prover, state::State},
+    state::{mode::RunMode, prover::Prover, state::State},
     utils::{
-        encryption::decrypt, env_config::EnvConfig, env_validation::validate_env_config,
-        errors::CLIError, network::get_network,
+        env_config::EnvConfig, env_validation::validate_env_config, errors::CLIError,
+        network::get_network,
     },
 };
 
