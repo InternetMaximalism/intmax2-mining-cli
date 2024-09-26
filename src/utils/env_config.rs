@@ -61,7 +61,7 @@ impl EnvConfig {
         let rpc_url = env::var("RPC_URL")
             .map_err(|_| anyhow::Error::msg("RPC_URL environment variable is not set"))?;
         let max_gas_price = env::var("MAX_GAS_PRICE").unwrap_or("30".to_string());
-        let encrypt = env::var("ENCRYPT").unwrap_or("false".to_string());
+        let encrypt = env::var("ENCRYPT").unwrap_or("true".to_string());
         let deposit_private_keys = env::var("DEPOSIT_PRIVATE_KEYS").ok();
         let withdrawal_private_key = env::var("WITHDRAWAL_PRIVATE_KEY").ok();
         let encrypted_keys = env::var("ENCRYPTED_KEYS").ok();

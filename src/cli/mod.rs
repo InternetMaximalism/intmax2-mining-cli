@@ -31,10 +31,18 @@ pub async fn run(mode: RunMode) -> anyhow::Result<()> {
         mode.clone()
     };
 
-    // load env config
+    // export env config
+    match EnvConfig::load_from_file() {
+        Ok(config) => {
+            config.export_to_env()?;
+        }
+        Err(_) => {}
+    }
+
     let config = EnvConfig::import_from_env().map_err(|e| CLIError::EnvError(e.to_string()))?;
     let keys = recover_keys(&config)?;
     validate_env_config(&config, &keys).await?;
+    config.export_to_env()?;
 
     let mut state = State::new();
     let prover_future = tokio::spawn(async { Prover::new() });
