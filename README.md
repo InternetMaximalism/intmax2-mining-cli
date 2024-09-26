@@ -21,6 +21,29 @@ v1-mining-cli is a tool that allows users to mine ITX tokens by participating in
 - Automated mining process (deposit and withdrawal)
 - Weekly ITX token rewards
 
+## Mining flow
+
+<div align="center">
+  <img src="assets/diagram.png" width="800" alt="Mining diagram">
+</div>
+
+1. **Preparation**: You need two types of Ethereum addresses:
+
+- **Deposit address**: Where you initially deposit ETH for mining
+- **Withdrawal address**: Where deposited ETH is withdrawn to after subtraction of gas fees, and where you receive ITX token rewards
+
+Additionally, you need a mainnet RPC URL. We strongly recommend using Alchemy's RPC (the free plan is sufficient). This is because it has a high limit for retrieving event logs. You can set these through environment variables. Please refer to the Operating Commands section below for more details.
+
+1. **Mining Process**:
+
+- The CLI automatically deposits smaller amounts (0.1 or 1 ETH) into intmax2. The deposit amount can be configured through environment variables.
+- After a few hours, it withdraws these amounts to your withdrawal address.
+
+3. **Rewards**:
+
+- Receive ITX tokens weekly in your withdrawal address (available every Monday at 0:00 UTC. Rewards are delayed by one week. For example, mining done on a Sunday can be claimed not on the following Monday, but on the Monday 8 days later)
+- Ensure your withdrawal address has enough ETH for claim gas fees
+
 ## System Requirements
 
 ### Minimum Requirements
@@ -29,7 +52,36 @@ v1-mining-cli is a tool that allows users to mine ITX tokens by participating in
 - CPU: 4 cores or more, with a clock speed of 2 GHz or higher
 - Storage: 10GB or more of free space
 
-## Installation
+# Quick Start Guide
+
+## Prerequisites
+
+Before you begin, please ensure you have the following:
+
+- **Ethereum (ETH)**: A minimum of 1 ETH plus additional ETH for deposit fees.
+- **RPC URL**: We recommend using Alchemy's free plan. Sign up at [https://www.alchemy.com/](https://www.alchemy.com/)
+- **Deposit Private Key**: The private key of the address you'll use to deposit ETH.
+- **Withdrawal Private Key**: The private key of the address you'll use to withdraw ETH and receive ITX tokens.
+
+## Installation and Setup
+
+1. Navigate to the [Releases](https://github.com/InternetMaximalism/intmax2-mining-cli/releases) page of this repository.
+2. Download the ZIP file appropriate for your operating system.
+3. Extract the contents of the ZIP file to your desired location.
+
+## Running the Application
+
+1. Locate the extracted files and double-click on the executable file to launch the application.
+2. Follow the CLI prompts to input the required information:
+
+   - RPC URL
+   - Deposit Private Key
+   - Withdrawal Private Key
+   - Other configuration options (as needed)
+
+3. The application will guide you through the setup process and initiate the mining operation.
+
+## Build from Source Code
 
 ### For Linux / Windows Subsystem for Linux (WSL)
 
@@ -87,77 +139,35 @@ cargo install --path .
 
 3. Restart the mining-cli if it's currently running.
 
-## Mining flow
-
-<div align="center">
-  <img src="assets/diagram.png" width="800" alt="Mining diagram">
-</div>
-
-1. **Preparation**: You need three types of Ethereum addresses:
-
-- **Deposit address**: Where you initially deposit ETH for mining
-- **Withdrawal address**: Where deposited ETH is withdrawn to after subtraction of gas fees
-- **Claim address**: Where you receive ITX token rewards
-
-Additionally, you need a mainnet RPC URL. We strongly recommend using Alchemy's RPC (the free plan is sufficient). This is because it has a high limit for retrieving event logs. You can set these through environment variables. Please refer to the Operating Commands section below for more details.
-
-1. **Mining Process**:
-
-- The CLI automatically deposits smaller amounts (0.1 or 1 ETH) into intmax2. The deposit amount can be configured through environment variables.
-- After a few hours, it withdraws these amounts to your withdrawal address.
-
-3. **Rewards**:
-
-- Receive ITX tokens weekly in your claim address (available every Monday at 0:00 UTC. Rewards are delayed by one week. For example, mining done on a Sunday can be claimed not on the following Monday, but on the Monday 8 days later)
-- Ensure your claim address has enough ETH for gas fees
-
 ## Operating Commands
 
-The mining-cli has three main commands. Before running any command, ensure that all required environment variables are set. You can set these variables in your shell or use a `.env` file in the same directory as the CLI.
+The CLI can be operated interactively or run automatically by setting environment variables. Below is a list of environment variables required by the CLI.
+Users utilizing the interactive mode do not need to set these environment variables.
 
 ### Environment Variables
 
-| Variable Name           | Details                                                                                                                                                      | Example                                               |
-| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------- |
-| `RPC_URL`               | Blockchain RPC URL. Alchemy's RPC is strongly recommended.                                                                                                   | `"https://eth-mainnet.alchemyapi.io/v2/your-api-key"` |
-| `MINING_UNIT`           | Amount of ETH per mining operation. Set to "0.1" or "1".                                                                                                     | `"0.1"`                                               |
-| `MINING_TIMES`          | Number of mining operations (sets of deposit and withdrawal). Can be set to "10" or "100".                                                                   | `"10"`                                                |
-| `DEPOSIT_PRIVATE_KEYS`  | Array of private keys for deposit accounts. Each address must contain ETH equal to MINING_UNIT \* MINING_TIMES plus gas fees.                                | `'["0x123...", "0x456..."]'`                          |
-| `WITHDRAWAL_ADDRESS`    | Address of the account for withdrawals. Balance can be 0 as gas fees are deducted from withdrawn ETH.                                                        | `"0x789..."`                                          |
-| `CLAIM_PRIVATE_KEY`     | Private key of the account used for claiming. Must contain enough ETH for gas fees.                                                                          | `"0xabc..."`                                          |
-| `MAX_GAS_PRICE_IN_GWEI` | Maximum gas price in Gwei allowed when executing transactions. If the gas price exceeds this value, the cli will wait until it drops. Default value is "30". | `"30"`                                                |
-
-You can set them in your shell. For example:
-
-```bash
-export RPC_URL="https://eth-mainnet.alchemyapi.io/v2/your-api-key"
-export MINING_UNIT="0.1"
-export MINING_TIMES="10"
-export DEPOSIT_PRIVATE_KEYS='["0x123...", "0x456..."]'
-export WITHDRAWAL_ADDRESS="0x789..."
-export CLAIM_PRIVATE_KEY="0xabc..."
-
-# Optional
-export MAX_GAS_PRICE_IN_GWEI="20" # Default is 30
-```
-
-Or you can create a `.env` file in the same directory. Please refer to the `.env.example` file for the format.
+| Name                     | Description                                                                                                                                                                     | Example                                             | Default Value |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- | ------------- |
+| `RPC_URL`                | Blockchain RPC URL. Alchemy's RPC is strongly recommended. Required.                                                                                                            | `https://eth-mainnet.alchemyapi.io/v2/YOUR-API-KEY` | None          |
+| `MAX_GAS_PRICE`          | Maximum gas price in GWei allowed when executing transactions.                                                                                                                  | `30`                                                | `"30"`        |
+| `MINING_UNIT`            | Amount of ETH per mining operation.                                                                                                                                             | `"0.1"` or `"1"`                                    | `"0.1"`       |
+| `MINING_TIMES`           | Number of mining operations (sets of deposit and withdrawal).                                                                                                                   | `"10"` or `"100"`                                   | `"10"`        |
+| `DEPOSIT_PRIVATE_KEYS`   | Array of private keys for deposit accounts. Each address must contain ETH equal to `MINING_UNIT * MINING_TIMES` plus gas fees for deposits. Required when `ENCRYPT` is `false`. | `'["0x123...", "0x456..."]'`                        | None          |
+| `WITHDRAWAL_PRIVATE_KEY` | Private key of withdrawal address. Required when `ENCRYPT` is `false`.                                                                                                          | `"0x789..."`                                        | None          |
+| `ENCRYPTED_KEYS`         | Encrypted form of deposit private keys and withdrawal private key. Required when `ENCRYPT` is `true`.                                                                           | `"encrypted_string_here"`                           | None          |
 
 ### Commands
 
 1. `mining-cli mining`
 
    - Performs mining by repeatedly executing deposits and withdrawals.
-   - Required variables: `RPC_URL`, `MINING_UNIT`, `MINING_TIMES`, `DEPOSIT_PRIVATE_KEYS`, `WITHDRAWAL_ADDRESS`
 
 2. `mining-cli claim`
 
    - Claims available ITX tokens.
-   - Required variables: `RPC_URL`, `DEPOSIT_PRIVATE_KEYS`, `CLAIM_PRIVATE_KEY`
 
 3. `mining-cli exit`
    - Withdraws all balances currently in the simplified intmax2 and cancels pending deposits.
-   - Required variables: `RPC_URL`, `DEPOSIT_PRIVATE_KEYS`, `WITHDRAWAL_ADDRESS`
 
 ## About Pending Deposits
 
