@@ -16,7 +16,7 @@ A CLI tool for automatic mining of ITX tokens.
 
 v1-mining-cli is a tool that allows users to mine ITX tokens by participating in a simplified version of intmax2. By utilizing a simplified version of intmax2 that focuses on deposit and private withdrawal functions, users can contribute to enhancing Ethereum's privacy while earning rewards in ITX tokens.
 
-# Quick Start Guide
+## Quick Start Guide
 
 ## Prerequisites
 
@@ -45,7 +45,7 @@ Before you begin, please ensure you have the following:
 
 3. The application will guide you through the setup process and initiate the mining operation.
 
-### How It Works
+## How It Works
 
 <div align="center">
   <img src="assets/diagram.png" width="800" alt="Mining diagram">
