@@ -4,10 +4,10 @@ use clap::{Subcommand, ValueEnum};
 
 #[derive(Subcommand, Debug, Copy, Clone, PartialEq, ValueEnum)]
 pub enum RunMode {
-    Mining, // only mining
-    Claim,  // only claim
-    Exit,   // only withdraw or cancel pending deposits
-    Config, // make env.json file
+    Mining,      // only mining
+    Claim,       // only claim
+    Exit,        // only withdraw or cancel pending deposits
+    Interactive, // interactive mode
 }
 
 impl Display for RunMode {
@@ -16,7 +16,7 @@ impl Display for RunMode {
             RunMode::Mining => write!(f, "Mining"),
             RunMode::Claim => write!(f, "Claim"),
             RunMode::Exit => write!(f, "Exit"),
-            RunMode::Config => write!(f, "Config"),
+            RunMode::Interactive => write!(f, "Interactive"),
         }
     }
 }

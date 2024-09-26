@@ -12,17 +12,7 @@ use crate::{
     },
 };
 
-pub async fn configure() -> anyhow::Result<()> {
-    let new_config = match EnvConfig::load_from_file() {
-        Ok(existing_config) => modify_config(&existing_config).await?,
-        Err(_) => new_config().await?,
-    };
-    new_config.save_to_file()?;
-    new_config.export_to_env()?;
-    Ok(())
-}
-
-async fn new_config() -> anyhow::Result<EnvConfig> {
+pub async fn new_config() -> anyhow::Result<EnvConfig> {
     let rpc_url: String = input_rpc_url().await?;
     let max_gas_price: U256 = input_max_gas_price()?;
     let mining_unit = input_mining_unit()?;
@@ -59,7 +49,7 @@ async fn new_config() -> anyhow::Result<EnvConfig> {
     Ok(config)
 }
 
-async fn modify_config(config: &EnvConfig) -> anyhow::Result<EnvConfig> {
+pub async fn modify_config(config: &EnvConfig) -> anyhow::Result<EnvConfig> {
     let keys = recover_keys(config)?;
 
     let modify_rpc = Confirm::new()

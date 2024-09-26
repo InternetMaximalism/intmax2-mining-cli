@@ -15,6 +15,7 @@ pub mod availability;
 pub mod balance_validation;
 pub mod configure;
 pub mod console;
+pub mod interactive;
 
 pub async fn run(mode: RunMode) -> anyhow::Result<()> {
     println!(
@@ -24,10 +25,11 @@ pub async fn run(mode: RunMode) -> anyhow::Result<()> {
     );
     check_avaliability().await?;
 
-    if mode == RunMode::Config {
-        configure::configure().await?;
-        return Ok(());
-    }
+    let mode = if mode == RunMode::Interactive {
+        interactive::interactive().await?
+    } else {
+        mode.clone()
+    };
 
     // load env config
     let config = EnvConfig::import_from_env().map_err(|e| CLIError::EnvError(e.to_string()))?;
@@ -53,7 +55,7 @@ pub async fn run(mode: RunMode) -> anyhow::Result<()> {
         }
         RunMode::Claim => claim_loop(&mut state, &keys).await?,
         RunMode::Exit => exit_loop(&mut state, &keys).await?,
-        RunMode::Config => unreachable!(),
+        _ => unreachable!(),
     }
 
     Ok(())

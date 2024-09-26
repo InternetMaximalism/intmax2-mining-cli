@@ -25,7 +25,7 @@ struct Args {
 #[tokio::main]
 async fn main() {
     dotenv().ok();
-    let mode = Args::parse().command.unwrap_or(RunMode::Config);
+    let mode = Args::parse().command.unwrap_or(RunMode::Interactive);
 
     // load config
     utils::config::Settings::load().expect("Failed to load config");
