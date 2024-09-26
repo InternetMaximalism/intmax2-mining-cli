@@ -37,10 +37,12 @@ pub async fn new_config() -> anyhow::Result<EnvConfig> {
         vec![deposit_private_key]
     };
     let withdrawal_private_key: H256 = input_withdrawal_private_key(&deposit_private_keys)?;
-    let (keys, encrypted_keys) = input_encryption(&deposit_private_keys, withdrawal_private_key)?;
+    let (encrypt, keys, encrypted_keys) =
+        input_encryption(&deposit_private_keys, withdrawal_private_key)?;
     let config = EnvConfig {
         rpc_url,
         max_gas_price,
+        encrypt,
         keys,
         encrypted_keys,
         mining_unit,
@@ -108,14 +110,19 @@ pub async fn modify_config(config: &EnvConfig) -> anyhow::Result<EnvConfig> {
         ))
         .default(false)
         .interact()?;
-    let (keys, encrypted_keys) = if modify_encryption {
+    let (encrypt, keys, encrypted_keys) = if modify_encryption {
         input_encryption(&deposit_private_keys, withdrawal_private_key)?
     } else {
-        (Some(keys.clone()), config.encrypted_keys.clone())
+        (
+            config.encrypt,
+            config.keys.clone(),
+            config.encrypted_keys.clone(),
+        )
     };
     let config = EnvConfig {
         rpc_url,
         max_gas_price,
+        encrypt,
         keys,
         encrypted_keys,
         mining_unit: config.mining_unit,
@@ -242,7 +249,7 @@ fn input_withdrawal_private_key(deposit_private_keys: &[H256]) -> anyhow::Result
 fn input_encryption(
     deposit_private_keys: &[H256],
     withdrawal_private_key: H256,
-) -> anyhow::Result<(Option<Keys>, Option<Vec<u8>>)> {
+) -> anyhow::Result<(bool, Option<Keys>, Option<Vec<u8>>)> {
     let do_encrypt = Confirm::new()
         .with_prompt("Do you set password to encrypt private keys?")
         .default(true)
@@ -263,7 +270,7 @@ fn input_encryption(
     } else {
         None
     };
-    Ok((keys, encrypted_keys))
+    Ok((do_encrypt, keys, encrypted_keys))
 }
 
 fn validate_private_key_with_duplication_check(
@@ -286,8 +293,8 @@ fn validate_private_key_with_duplication_check(
 }
 
 pub fn recover_keys(config: &EnvConfig) -> anyhow::Result<Keys> {
-    let keys = if let Some(keys) = &config.keys {
-        keys.clone()
+    let keys = if !config.encrypt {
+        config.keys.clone().unwrap()
     } else {
         let password = Password::new().with_prompt("Password").interact()?;
         let keys: Keys = decrypt(&password, config.encrypted_keys.as_ref().unwrap())

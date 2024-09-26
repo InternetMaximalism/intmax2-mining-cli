@@ -16,6 +16,7 @@ fn env_config_path() -> PathBuf {
 pub struct EnvConfig {
     pub rpc_url: String,
     pub max_gas_price: U256,
+    pub encrypt: bool,
     pub keys: Option<Keys>,
     pub encrypted_keys: Option<Vec<u8>>,
     pub mining_unit: U256,
@@ -171,6 +172,7 @@ impl EnvConfig {
         Ok(EnvConfig {
             rpc_url: value.rpc_url.clone(),
             max_gas_price,
+            encrypt,
             keys,
             encrypted_keys,
             mining_unit,
@@ -208,6 +210,7 @@ mod tests {
         let env_config = super::EnvConfig {
             rpc_url: "http://localhost:8545".to_string(),
             max_gas_price: 30_000_000_000u64.into(),
+            encrypt: false,
             keys: Some(super::Keys::new(
                 vec![ethers::types::H256::random(), ethers::types::H256::random()],
                 ethers::types::H256::random(),
@@ -226,6 +229,7 @@ mod tests {
         let env_config = super::EnvConfig {
             rpc_url: "http://localhost:8545".to_string(),
             max_gas_price: 30_000_000_000u64.into(),
+            encrypt: false,
             keys: Some(super::Keys::new(
                 vec![ethers::types::H256::random(), ethers::types::H256::random()],
                 ethers::types::H256::random(),

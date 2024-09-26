@@ -8,19 +8,19 @@ pub async fn interactive() -> anyhow::Result<RunMode> {
     let is_file_exists = EnvConfig::load_from_file().is_ok();
 
     if is_file_exists {
-        let items = vec!["Overwite", "Modify", "Use existing"];
+        let items = vec!["Continue", "Overwrite", "Modify"];
         let selection = Select::new()
             .with_prompt("Config file already exists. What do you want to do?")
             .items(&items)
             .default(0)
             .interact()?;
         let config = match selection {
-            0 => new_config().await?,
-            1 => {
+            0 => EnvConfig::load_from_file()?,
+            1 => new_config().await?,
+            2 => {
                 let config = EnvConfig::load_from_file()?;
                 modify_config(&config).await?
             }
-            2 => EnvConfig::load_from_file()?,
             _ => unreachable!(),
         };
         config.save_to_file()?;
