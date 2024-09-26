@@ -10,7 +10,6 @@ use crate::{
 
 pub mod availability;
 pub mod balance_validation;
-pub mod configure;
 pub mod console;
 pub mod load_env;
 
@@ -48,6 +47,7 @@ pub async fn run(mode: RunMode) -> anyhow::Result<()> {
         }
         RunMode::Claim => claim_loop(&mut state, &config.keys).await?,
         RunMode::Exit => exit_loop(&mut state, &config.keys).await?,
+        RunMode::Config => unreachable!(),
     }
 
     Ok(())

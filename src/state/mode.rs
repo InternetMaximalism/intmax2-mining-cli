@@ -7,6 +7,7 @@ pub enum RunMode {
     Mining, // only mining
     Claim,  // only claim
     Exit,   // only withdraw or cancel pending deposits
+    Config, // make env.json file
 }
 
 impl Display for RunMode {
@@ -15,6 +16,7 @@ impl Display for RunMode {
             RunMode::Mining => write!(f, "Mining"),
             RunMode::Claim => write!(f, "Claim"),
             RunMode::Exit => write!(f, "Exit"),
+            RunMode::Config => write!(f, "Config"),
         }
     }
 }
