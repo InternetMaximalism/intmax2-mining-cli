@@ -32,8 +32,6 @@ v1-mining-cli is a tool that allows users to mine ITX tokens by participating in
 - **Deposit address**: Where you initially deposit ETH for mining
 - **Withdrawal address**: Where deposited ETH is withdrawn to after subtraction of gas fees, and where you receive ITX token rewards
 
-Additionally, you need a mainnet RPC URL. We strongly recommend using Alchemy's RPC (the free plan is sufficient). This is because it has a high limit for retrieving event logs. You can set these through environment variables. Please refer to the Operating Commands section below for more details.
-
 1. **Mining Process**:
 
 - The CLI automatically deposits smaller amounts (0.1 or 1 ETH) into intmax2. The deposit amount can be configured through environment variables.
