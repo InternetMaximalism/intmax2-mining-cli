@@ -53,6 +53,10 @@ pub async fn submit_withdrawal(
             public_inputs: pis,
             proof: "0x".to_string() + proof, // add 0x prefix
         };
+        info!(
+            "Submitting withdrawal to {}, body: {:?}",
+            settings.api.withdrawal_server_url, input
+        );
         let response = reqwest::Client::new()
             .post(settings.api.withdrawal_server_url)
             .json(&input)

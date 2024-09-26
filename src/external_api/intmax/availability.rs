@@ -33,6 +33,9 @@ pub async fn get_availability() -> anyhow::Result<AvaliabilityServerSuccessRespo
     match response_json {
         AvaliabilityServerResponse::Success(success) => Ok(success),
         AvaliabilityServerResponse::Error(error) => {
+            if error.code == "FORBIDDEN" {
+                anyhow::bail!("{}", error.message)
+            }
             anyhow::bail!("Availability server error: {:?}", error)
         }
     }

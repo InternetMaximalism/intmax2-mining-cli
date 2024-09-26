@@ -43,7 +43,7 @@ async fn main() {
         Ok(_) => {}
         Err(e) => {
             error!("{:#}", e);
-            print_error(format!("{}\nPlease Retry", e.to_string()));
+            print_error(format!("{}", e.to_string()));
         }
     }
 }
