@@ -10,9 +10,9 @@ pub enum Network {
 impl Display for Network {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Network::Localnet => write!(f, "localnet"),
-            Network::Sepolia => write!(f, "sepolia"),
-            Network::Mainnet => write!(f, "mainnet"),
+            Network::Localnet => write!(f, "Localnet"),
+            Network::Sepolia => write!(f, "Sepolia"),
+            Network::Mainnet => write!(f, "Mainnet"),
         }
     }
 }
