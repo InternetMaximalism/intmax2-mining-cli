@@ -16,6 +16,12 @@ A CLI tool for automatic mining of ITX tokens.
 
 v1-mining-cli is a tool that allows users to mine ITX tokens by participating in a simplified version of intmax2. By utilizing a simplified version of intmax2 that focuses on deposit and private withdrawal functions, users can contribute to enhancing Ethereum's privacy while earning rewards in ITX tokens.
 
+## Minimum Requirements
+
+- Memory: 12GB or more
+- CPU: 4 cores or more, with a clock speed of 2 GHz or higher
+- Storage: 10GB or more of free space
+
 ## Quick Start Guide
 
 ## Prerequisites
@@ -54,14 +60,6 @@ Before you begin, please ensure you have the following:
 1. **Automated Deposits and Withdrawals**: The CLI automatically transfers funds from your deposit address into a simplified Intmax2 system. After a random delay, the funds are withdrawn to your withdrawal address. Through Zero-Knowledge Proofs , the relationship between your deposit and withdrawal addresses remains confidential.
 
 2. **Reward Mechanism**: By participating in these private asset transfers, you contribute to enhancing Ethereum's privacy ecosystem. As a reward for your contribution, you earn ITX tokens. These tokens are distributed weekly to your withdrawal address, available every Monday at 00:00 UTC. Note that rewards are subject to a one-week delay. For instance, mining activities completed on a Sunday will be eligible for claiming not on the immediately following Monday, but on the Monday eight days later.
-
-## System Requirements
-
-### Minimum Requirements
-
-- Memory: 12GB or more
-- CPU: 4 cores or more, with a clock speed of 2 GHz or higher
-- Storage: 10GB or more of free space
 
 ## Build from Source Code
 
