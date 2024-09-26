@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e  # エラーが発生した時点でスクリプトを終了
+set -e  # Exit on error
 
 # Get the project name from Cargo.toml
 PROJECT_NAME=$(grep '^name' Cargo.toml | sed 's/name[[:space:]]*=[[:space:]]*//' | sed 's/"//g' | tr -d '[:space:]')
@@ -50,7 +50,7 @@ build_and_zip() {
 build_and_zip "x86_64-apple-darwin" ""  # Intel Mac
 build_and_zip "aarch64-apple-darwin" ""  # Apple Silicon Mac
 build_and_zip "x86_64-unknown-linux-gnu" ""  # Linux
-# build_and_zip "x86_64-pc-windows-msvc" ".exe"  # Windows
+build_and_zip "x86_64-pc-windows-msvc" ".exe"  # Windows
 
 echo "Build and ZIP process completed."
 echo "Created ZIP files:"
