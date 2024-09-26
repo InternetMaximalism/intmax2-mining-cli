@@ -13,21 +13,22 @@ pub struct Config {
     pub mining_times: usize,
 }
 
-pub async fn load_env() -> anyhow::Result<Config> {
-    // test load global variables
-    let _rpc_url = load_rpc_url().await?;
-    let _max_gas_price = load_max_gas_price()?;
-    let mining_unit = load_mining_unit()?;
-    let mining_times = load_mining_times()?;
-    let deposit_private_keys = load_deposit_private_keys()?;
-    let withdrawal_private_key = load_withdrawal_private_key()?;
-    let keys = Keys::new(deposit_private_keys, withdrawal_private_key);
-    check_keys(&keys)?;
-    Ok(Config {
-        keys,
-        mining_unit,
-        mining_times,
-    })
+impl Config {
+    pub async fn load() -> anyhow::Result<Self> {
+        let _rpc_url = load_rpc_url().await?;
+        let _max_gas_price = load_max_gas_price()?;
+        let mining_unit = load_mining_unit()?;
+        let mining_times = load_mining_times()?;
+        let deposit_private_keys = load_deposit_private_keys()?;
+        let withdrawal_private_key = load_withdrawal_private_key()?;
+        let keys = Keys::new(deposit_private_keys, withdrawal_private_key);
+        check_keys(&keys)?;
+        Ok(Config {
+            keys,
+            mining_unit,
+            mining_times,
+        })
+    }
 }
 
 fn load_mining_unit() -> anyhow::Result<U256> {
@@ -145,7 +146,7 @@ fn check_keys(keys: &Keys) -> anyhow::Result<()> {
 async fn check_rpc_url(rpc_url: &str) -> anyhow::Result<()> {
     let client = ethers::providers::Provider::<ethers::providers::Http>::try_from(rpc_url)?;
     let chain_id = client.get_chainid().await?;
-    let setting = Settings::new()?;
+    let setting = Settings::load()?;
     if chain_id != setting.blockchain.chain_id.into() {
         return Err(anyhow::anyhow!(
             "RPC URL chain id {} does not match the expected chain id {}",

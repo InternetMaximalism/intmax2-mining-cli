@@ -17,7 +17,7 @@ abigen!(MinterV1, "abi/MinterV1.json",);
 
 pub async fn get_minter_contract() -> anyhow::Result<minter_v1::MinterV1<Provider<Http>>> {
     info!("Getting minter contract");
-    let settings = crate::utils::config::Settings::new()?;
+    let settings = crate::utils::config::Settings::load()?;
     let client = get_client().await?;
     let minter_address: Address = settings.blockchain.minter_address.parse()?;
     let contract = MinterV1::new(minter_address, client);
@@ -27,7 +27,7 @@ pub async fn get_minter_contract() -> anyhow::Result<minter_v1::MinterV1<Provide
 pub async fn get_minter_contract_with_signer(
     private_key: H256,
 ) -> anyhow::Result<minter_v1::MinterV1<SignerMiddleware<Provider<Http>, Wallet<SigningKey>>>> {
-    let settings = crate::utils::config::Settings::new()?;
+    let settings = crate::utils::config::Settings::load()?;
     let client = get_client_with_signer(private_key).await?;
     let minter_address: Address = settings.blockchain.minter_address.parse()?;
     let contract = MinterV1::new(minter_address, Arc::new(client));

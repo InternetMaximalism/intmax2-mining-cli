@@ -146,7 +146,7 @@ pub async fn claim_loop(state: &mut State, keys: &Keys) -> anyhow::Result<()> {
 }
 
 async fn common_loop_cool_down() {
-    let settings = Settings::new().expect("Failed to load settings");
+    let settings = Settings::load().expect("Failed to load settings");
     tokio::time::sleep(std::time::Duration::from_secs(
         settings.service.loop_cooldown_in_sec,
     ))
@@ -155,7 +155,7 @@ async fn common_loop_cool_down() {
 
 /// Cooldown for mining. Random time between 0 and `mining_max_cooldown_in_sec` to improve privacy.
 async fn mining_cooldown() -> anyhow::Result<()> {
-    let settings = Settings::new()?;
+    let settings = Settings::load()?;
     let cooldown = rand::thread_rng().gen_range(0..settings.service.mining_max_cooldown_in_sec);
     tokio::time::sleep(std::time::Duration::from_secs(cooldown)).await;
     Ok(())

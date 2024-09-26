@@ -90,7 +90,7 @@ async fn from_step3(state: &State, key: &Key) -> anyhow::Result<()> {
     print_status("Claim: starting gnark prover");
     let mut status = temp::ClaimStatus::new()?;
     ensure!(status.next_step == temp::ClaimStep::GnarkStart);
-    let settings = Settings::new()?;
+    let settings = Settings::load()?;
     let withdrawal_address = key.withdrawal_address;
 
     let prover_url = settings.api.claim_gnark_prover_url.clone();
@@ -113,7 +113,7 @@ async fn from_step4(state: &State, key: &Key) -> anyhow::Result<()> {
     print_status("Claim: getting gnark proof");
     let mut status = temp::ClaimStatus::new()?;
     ensure!(status.next_step == temp::ClaimStep::GnarkGetProof);
-    let settings = Settings::new()?;
+    let settings = Settings::load()?;
     let prover_url = settings.api.claim_gnark_prover_url.clone();
     let output = fetch_gnark_proof(
         &prover_url,

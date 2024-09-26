@@ -44,7 +44,7 @@ pub async fn submit_withdrawal(
     proof: &str,
 ) -> anyhow::Result<H256> {
     info!("Submitting withdrawal {:?} proof {}", pis, proof);
-    let settings = Settings::new()?;
+    let settings = Settings::load()?;
     let tx_hash = if get_network() == Network::Localnet {
         let tx_hash = localnet_withdrawal(pis, proof).await?;
         tx_hash

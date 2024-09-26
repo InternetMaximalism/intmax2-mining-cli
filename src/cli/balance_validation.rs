@@ -72,7 +72,7 @@ pub async fn validate_deposit_address_balance(
         0
     };
 
-    let settings = Settings::new()?;
+    let settings = Settings::load()?;
     let gas_price = get_gas_price().await?;
     let single_deposit_gas: U256 = settings.blockchain.single_deposit_gas.into();
     let min_balance =
@@ -111,7 +111,7 @@ pub async fn validate_withdrawal_address_balance(
 ) -> anyhow::Result<()> {
     let remaining_claims = assets_status.not_claimed_indices.len();
     let num_claim_tx = (remaining_claims / MAX_CLAIMS) + 1;
-    let settings = Settings::new()?;
+    let settings = Settings::load()?;
     let gas_price = get_gas_price().await?;
     let single_claim_gas: U256 = settings.blockchain.single_claim_gas.into();
     let min_balance = single_claim_gas * gas_price * U256::from(num_claim_tx);

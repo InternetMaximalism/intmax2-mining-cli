@@ -21,7 +21,7 @@ enum CirculationResponse {
 
 pub async fn get_circulation(address: Address) -> anyhow::Result<CirculationSuccessResponse> {
     info!("Getting circulation for address {:?}", address);
-    let settings = Settings::new()?;
+    let settings = Settings::load()?;
     let response = reqwest::get(format!(
         "{}/addresses/{:?}/exclusion",
         settings.api.circulation_server_url, address,

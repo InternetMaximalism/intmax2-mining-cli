@@ -22,7 +22,7 @@ enum AvaliabilityServerResponse {
 pub async fn get_availability() -> anyhow::Result<AvaliabilityServerSuccessResponse> {
     info!("Getting availability");
     let version = env!("CARGO_PKG_VERSION");
-    let settings = Settings::new()?;
+    let settings = Settings::load()?;
     let response = reqwest::get(format!(
         "{}?version={}",
         settings.api.availability_server_url, version,

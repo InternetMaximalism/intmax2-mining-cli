@@ -47,7 +47,7 @@ pub struct Service {
 }
 
 impl Settings {
-    pub fn new() -> anyhow::Result<Self> {
+    pub fn load() -> anyhow::Result<Self> {
         let s = Config::builder()
             .add_source(File::with_name(&config_name()))
             .build()

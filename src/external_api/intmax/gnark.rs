@@ -118,7 +118,7 @@ pub async fn fetch_gnark_proof(
     start_query_time: u64,
 ) -> anyhow::Result<GnarkProof> {
     info!("Fetching gnark proof for job_id: {}", job_id);
-    let cooldown = Settings::new()?.api.gnark_get_proof_cooldown_in_sec;
+    let cooldown = Settings::load()?.api.gnark_get_proof_cooldown_in_sec;
     sleep_until(start_query_time).await;
 
     loop {

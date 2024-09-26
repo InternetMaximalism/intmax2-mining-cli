@@ -30,7 +30,7 @@ async fn main() {
     let args = Args::parse();
 
     // load config
-    utils::config::Settings::new().expect("Failed to load config");
+    utils::config::Settings::load().expect("Failed to load config");
 
     // setup logging
     let log_path = PathBuf::from(format!("data/logs/{}.log", chrono::Utc::now().to_rfc3339()));

@@ -1,6 +1,6 @@
 use availability::check_avaliability;
 use console::print_status;
-use load_env::{load_env, Config};
+use load_env::Config;
 
 use crate::{
     services::{claim_loop, exit_loop, mining_loop},
@@ -10,6 +10,7 @@ use crate::{
 
 pub mod availability;
 pub mod balance_validation;
+pub mod configure;
 pub mod console;
 pub mod load_env;
 
@@ -21,7 +22,7 @@ pub async fn run(mode: RunMode) -> anyhow::Result<()> {
     );
     check_avaliability().await?;
 
-    let config: Config = load_env().await?;
+    let config = Config::load().await?;
     let mut state = State::new();
     let prover_future = tokio::spawn(async { Prover::new() });
 
