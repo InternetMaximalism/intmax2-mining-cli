@@ -5,10 +5,12 @@ use serde::{Deserialize, Serialize};
 
 use crate::{state::keys::Keys, utils::network::get_network};
 
-use super::file::create_file_with_content;
+use super::file::{create_file_with_content, get_project_root};
 
 fn env_config_path() -> PathBuf {
-    PathBuf::from(format!("data/env.{}.json", get_network()))
+    get_project_root()
+        .unwrap()
+        .join(format!("data/env.{}.json", get_network()))
 }
 
 // Structure for setting and getting env

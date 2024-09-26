@@ -1,13 +1,16 @@
-use anyhow::Context;
+use std::path::PathBuf;
+
 use config::{Config, File};
 use serde::Deserialize;
 
 use crate::utils::network::get_network;
 
-use super::errors::CLIError;
+use super::{errors::CLIError, file::get_project_root};
 
-fn config_name() -> String {
-    format!("config.{}", get_network())
+fn config_path() -> PathBuf {
+    let mut path = get_project_root().unwrap();
+    path.push(format!("config.{}.toml", get_network()));
+    path
 }
 
 #[derive(Clone, Debug, Deserialize)]
@@ -51,12 +54,11 @@ pub struct Service {
 impl Settings {
     pub fn load() -> anyhow::Result<Self> {
         let s = Config::builder()
-            .add_source(File::with_name(&config_name()))
-            .build()
-            .context("Failed to load config")?;
-        let s = s.try_deserialize().map_err(|e| {
-            CLIError::ParseError(format!("Failed to parse {}.toml. {:?}", config_name(), e))
-        })?;
+            .add_source(File::from(config_path()))
+            .build()?;
+        let s = s
+            .try_deserialize()
+            .map_err(|e| CLIError::ParseError(format!("Failed to parse config: {:?}", e)))?;
         Ok(s)
     }
 }

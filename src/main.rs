@@ -4,8 +4,8 @@ use dotenv::dotenv;
 use log::error;
 use simplelog::{Config, LevelFilter, WriteLogger};
 use state::mode::RunMode;
-use std::{fs::File, path::PathBuf};
-use utils::file::create_file_with_content;
+use std::fs::File;
+use utils::file::{create_file_with_content, get_project_root};
 
 pub mod cli;
 pub mod external_api;
@@ -31,7 +31,9 @@ async fn main() {
     utils::config::Settings::load().expect("Failed to load config");
 
     // setup logging
-    let log_path = PathBuf::from(format!("data/logs/{}.log", chrono::Utc::now().to_rfc3339()));
+    let log_path = get_project_root()
+        .unwrap()
+        .join(format!("data/logs/{}.log", chrono::Utc::now().to_rfc3339()));
     create_file_with_content(&log_path, &[]).expect("Failed to create log file");
     let log_file = File::create(log_path).unwrap();
     WriteLogger::init(LevelFilter::Info, Config::default(), log_file).unwrap();
