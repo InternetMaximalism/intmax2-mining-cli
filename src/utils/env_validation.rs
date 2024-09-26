@@ -29,7 +29,7 @@ fn validate_mining_times(mining_times: u64) -> anyhow::Result<()> {
     Ok(())
 }
 
-fn validate_keys(keys: &Keys) -> anyhow::Result<()> {
+pub fn validate_keys(keys: &Keys) -> anyhow::Result<()> {
     if keys.deposit_private_keys.is_empty() {
         anyhow::bail!("Deposit private keys are empty");
     }
@@ -45,7 +45,7 @@ fn validate_keys(keys: &Keys) -> anyhow::Result<()> {
     Ok(())
 }
 
-async fn validate_rpc_url(rpc_url: &str) -> anyhow::Result<()> {
+pub async fn validate_rpc_url(rpc_url: &str) -> anyhow::Result<()> {
     let client = ethers::providers::Provider::<ethers::providers::Http>::try_from(rpc_url)?;
     let chain_id = client.get_chainid().await?;
     let setting = Settings::load()?;

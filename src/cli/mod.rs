@@ -1,17 +1,21 @@
 use availability::check_avaliability;
+use configure::recover_keys;
 use console::print_status;
 use dialoguer::Password;
 
 use crate::{
     services::{claim_loop, exit_loop, mining_loop},
     state::{keys::Keys, mode::RunMode, prover::Prover, state::State},
-    utils::{encryption::decrypt, env_config::EnvConfig, network::get_network},
+    utils::{
+        encryption::decrypt, env_config::EnvConfig, env_validation::validate_env_config,
+        errors::CLIError, network::get_network,
+    },
 };
 
 pub mod availability;
 pub mod balance_validation;
+pub mod configure;
 pub mod console;
-// pub mod load_env;
 
 pub async fn run(mode: RunMode) -> anyhow::Result<()> {
     println!(
@@ -21,15 +25,15 @@ pub async fn run(mode: RunMode) -> anyhow::Result<()> {
     );
     check_avaliability().await?;
 
-    let config = EnvConfig::import_from_env()?;
-    let keys = if let Some(keys) = &config.keys {
-        keys.clone()
-    } else {
-        // require password to decrypt keys
-        let password = Password::new().with_prompt("Password").interact()?;
-        let keys: Keys = decrypt(&password, config.encrypted_keys.as_ref().unwrap())?;
-        keys
-    };
+    if mode == RunMode::Config {
+        configure::configure().await?;
+        return Ok(());
+    }
+
+    // load env config
+    let config = EnvConfig::import_from_env().map_err(|e| CLIError::EnvError(e.to_string()))?;
+    let keys = recover_keys(&config)?;
+    validate_env_config(&config, &keys).await?;
 
     let mut state = State::new();
     let prover_future = tokio::spawn(async { Prover::new() });
