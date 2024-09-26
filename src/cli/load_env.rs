@@ -3,10 +3,11 @@ use crate::utils::config::Settings;
 use crate::utils::errors::CLIError;
 use ethers::providers::Middleware;
 use ethers::types::{H256, U256};
+use serde::{Deserialize, Serialize};
 use std::env;
 use std::str::FromStr;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Config {
     pub keys: Keys,
     pub mining_unit: U256,

@@ -1,4 +1,5 @@
 use ethers::types::{Address, H256};
+use serde::{Deserialize, Serialize};
 
 use crate::external_api::contracts::utils::get_address;
 
@@ -10,7 +11,7 @@ pub struct Key {
     pub withdrawal_address: Address,
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Keys {
     pub deposit_private_keys: Vec<H256>,
     pub deposit_addresses: Vec<Address>,
