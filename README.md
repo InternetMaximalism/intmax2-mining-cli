@@ -20,7 +20,6 @@ v1-mining-cli is a tool that allows users to mine ITX tokens by participating in
 
 - Memory: 8GB or more
 - CPU: 4 cores or more, with a clock speed of 2 GHz or higher
-- Storage: 10GB or more of free space
 
 ## Quick Start Guide
 
@@ -134,7 +133,8 @@ Users utilizing the interactive mode do not need to set these environment variab
 | `MINING_TIMES`           | Number of mining operations (sets of deposit and withdrawal).                                                                                                                   | `"10"` or `"100"`                                   | `"10"`        |
 | `DEPOSIT_PRIVATE_KEYS`   | Array of private keys for deposit accounts. Each address must contain ETH equal to `MINING_UNIT * MINING_TIMES` plus gas fees for deposits. Required when `ENCRYPT` is `false`. | `'["0x123...", "0x456..."]'`                        | None          |
 | `WITHDRAWAL_PRIVATE_KEY` | Private key of withdrawal address. Required when `ENCRYPT` is `false`.                                                                                                          | `"0x789..."`                                        | None          |
-| `ENCRYPTED_KEYS`         | Encrypted form of deposit private keys and withdrawal private key. Required when `ENCRYPT` is `true`.                                                                           | `"encrypted_string_here"`                           | None          |
+| `ENCRYPTED_KEYS`         | Encrypted form of deposit private keys and withdrawal private key. Required when `ENCRYPT` is `true`.                                                                           | `"e356.."`                                          | None          |
+| `ENCRYPT`                | Flag to specify whether to encrypt and store deposit private keys and withdrawal private key. Takes values "true" or "false".                                                   | `"true"` or `"false"`                               | `"true"`      |
 
 ### Commands
 
