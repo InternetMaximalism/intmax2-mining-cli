@@ -20,7 +20,7 @@ pub async fn await_until_low_gas_price() -> anyhow::Result<()> {
             break;
         }
         print_warning(format!(
-            "Current gas price: {} GWei is higher than max gas price: {} GWei. Please see README",
+            "Current gas price: {} GWei is higher than max gas price: {} GWei.",
             ethers::utils::format_units(current_gas_price.clone(), "gwei").unwrap(),
             ethers::utils::format_units(max_gas_price.clone(), "gwei").unwrap(),
         ));

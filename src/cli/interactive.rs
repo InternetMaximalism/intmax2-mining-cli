@@ -1,3 +1,4 @@
+use console::style;
 use dialoguer::Select;
 
 use crate::{state::mode::RunMode, utils::env_config::EnvConfig};
@@ -8,7 +9,23 @@ pub async fn interactive() -> anyhow::Result<RunMode> {
     let is_file_exists = EnvConfig::load_from_file().is_ok();
 
     if is_file_exists {
-        let items = vec!["Continue", "Overwrite", "Modify"];
+        let items = vec![
+            format!(
+                "{} {}",
+                style("Continue:").bold(),
+                style("continue with the existing config").dim()
+            ),
+            format!(
+                "{} {}",
+                style("Overwrite:").bold(),
+                style("overwrite the existing config").dim()
+            ),
+            format!(
+                "{} {}",
+                style("Modify:").bold(),
+                style("modify the existing config").dim()
+            ),
+        ];
         let selection = Select::new()
             .with_prompt("Config file already exists. What do you want to do?")
             .items(&items)
@@ -31,10 +48,27 @@ pub async fn interactive() -> anyhow::Result<RunMode> {
         config.save_to_file()?;
         config.export_to_env()?;
     };
-
+    println!("Press Ctrl + C to stop the process");
+    let items = [
+        format!(
+            "{} {}",
+            style("Mining:").bold(),
+            style("performs mining by repeatedly executing deposits and withdrawals").dim()
+        ),
+        format!(
+            "{} {}",
+            style("Claim:").bold(),
+            style("claims available ITX tokens").dim()
+        ),
+        format!(
+            "{} {}",
+            style("Exit:").bold(),
+            style("withdraws all balances currently and cancels pending deposits").dim()
+        ),
+    ];
     let mode = Select::new()
         .with_prompt("Select mode")
-        .items(&["Mining", "Claim", "Exit"])
+        .items(&items)
         .default(0)
         .interact()?;
     let mode = match mode {
