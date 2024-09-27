@@ -1,6 +1,6 @@
 use availability::check_avaliability;
 use configure::recover_keys;
-use console::print_status;
+use console::{initialize_console, print_status};
 
 use crate::{
     services::{claim_loop, exit_loop, mining_loop},
@@ -51,7 +51,7 @@ pub async fn run(mode: RunMode) -> anyhow::Result<()> {
     balance_validation::balance_validation(&mut state, mode, &config, &keys).await?;
 
     // wait for prover to be ready
-    println!(); // newline because print_status clears the last line
+    initialize_console();
     print_status("Waiting for prover to be ready");
     let prover = prover_future.await?;
     state.prover = Some(prover);
