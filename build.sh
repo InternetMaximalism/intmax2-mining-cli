@@ -26,6 +26,7 @@ build_and_zip() {
     
     # Copy additional files and directories
     cp -R assets "${temp_dir}/" || echo "Warning: 'assets' directory not found"
+    cp -R docs "${temp_dir}/" || echo "Warning: 'docs' directory not found"
     cp .env.example "${temp_dir}/" || echo "Warning: '.env.example' file not found"
     cp config.sepolia.toml "${temp_dir}/" || echo "Warning: 'config.sepolia.toml' file not found"
     cp README.md "${temp_dir}/" || echo "Warning: 'README.md' file not found"
@@ -49,7 +50,7 @@ build_and_zip() {
 # Build and create ZIP for each target platform
 build_and_zip "x86_64-apple-darwin" ""  # Intel Mac
 build_and_zip "aarch64-apple-darwin" ""  # Apple Silicon Mac
-build_and_zip "x86_64-unknown-linux-gnu" ""  # Linux
+# build_and_zip "x86_64-unknown-linux-gnu" ""  # Linux
 build_and_zip "x86_64-pc-windows-gnu" ".exe"  # Windows
 
 echo "Build and ZIP process completed."

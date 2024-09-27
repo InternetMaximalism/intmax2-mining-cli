@@ -2,3 +2,5 @@ data/
 target/
 .env
 *.zip
+
+.DS_Store

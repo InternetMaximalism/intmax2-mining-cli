@@ -87,4 +87,5 @@ Users utilizing the interactive mode do not need to set these environment variab
    - Claims available ITX tokens.
 
 3. `mining-cli exit`
+
    - Withdraws all balances currently in the simplified intmax2 and cancels pending deposits.
