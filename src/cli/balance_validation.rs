@@ -34,7 +34,7 @@ pub async fn validate_withdrawal_address_balance(
     withdrawal_address: Address,
 ) -> anyhow::Result<()> {
     let remaining_claims = assets_status.not_claimed_indices.len();
-    let num_claim_tx = (remaining_claims / MAX_CLAIMS) + 1;
+    let num_claim_tx = remaining_claims.div_ceil(MAX_CLAIMS);
     let settings = Settings::load()?;
     let gas_price = get_gas_price().await?;
     let single_claim_gas: U256 = settings.blockchain.single_claim_gas.into();

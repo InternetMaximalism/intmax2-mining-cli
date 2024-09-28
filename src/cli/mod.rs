@@ -16,6 +16,7 @@ pub mod availability;
 pub mod balance_validation;
 pub mod configure;
 pub mod console;
+pub mod export_deposit_accounts;
 pub mod interactive;
 
 pub async fn run(mode: RunMode) -> anyhow::Result<()> {
@@ -44,6 +45,12 @@ pub async fn run(mode: RunMode) -> anyhow::Result<()> {
     let withdrawal_private_key = recover_withdrawal_private_key(&config)?;
     validate_env_config(&config).await?;
     config.export_to_env()?;
+
+    // for export mode, we only need to export the deposit accounts and exit
+    if mode == RunMode::Export {
+        export_deposit_accounts::export_deposit_accounts(withdrawal_private_key).await?;
+        return Ok(());
+    }
 
     let mut state = State::new();
     let prover_future = tokio::spawn(async { Prover::new() });

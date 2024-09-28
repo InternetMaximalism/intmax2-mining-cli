@@ -31,7 +31,7 @@ pub async fn mining_loop(
     loop {
         let key = Key::new(withdrawal_private_key, key_number);
         print_status(format!(
-            "Mining loop for deposit address #{} {:?}",
+            "Mining using deposit address #{} {:?}",
             key_number, key.deposit_address
         ));
         let assets_status = state.sync_and_fetch_assets(&key).await?;
@@ -79,6 +79,10 @@ pub async fn exit_loop(state: &mut State, withdrawal_private_key: H256) -> anyho
         if !is_address_used(key.deposit_address).await {
             return Ok(());
         }
+        print_status(format!(
+            "Exit for deposit address #{} {:?}",
+            key_number, key.deposit_address
+        ));
         loop {
             let assets_status = state.sync_and_fetch_assets(&key).await?;
             if assets_status.pending_indices.is_empty()
@@ -86,7 +90,7 @@ pub async fn exit_loop(state: &mut State, withdrawal_private_key: H256) -> anyho
                 && assets_status.not_withdrawn_indices.is_empty()
             {
                 print_status(format!(
-                    "All deposits are withdrawn for {:?}. Exiting.",
+                    "All deposits are withdrawn for {:?}.",
                     key.deposit_address,
                 ));
                 key_number += 1;
@@ -106,10 +110,13 @@ pub async fn claim_loop(state: &mut State, withdrawal_private_key: H256) -> anyh
         if !is_address_used(key.deposit_address).await {
             return Ok(());
         }
+        print_status(format!(
+            "Claim for deposit address {} {:?}",
+            key_number, key.deposit_address
+        ));
         let assets_status = state.sync_and_fetch_assets(&key).await?;
         validate_withdrawal_address_balance(&assets_status, key.withdrawal_address).await?;
 
-        print_status(format!("Claim loop for {:?}", key.deposit_address));
         let assets_status = state.sync_and_fetch_assets(&key).await?;
         claim_task(state, &key, &assets_status).await?;
         common_loop_cool_down().await;

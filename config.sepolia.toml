@@ -22,3 +22,8 @@ repository_url = "https://github.com/InternetMaximalism/intmax2-mining-cli"
 mining_max_cooldown_in_sec = 20
 loop_cooldown_in_sec = 10
 high_gas_retry_inverval_in_sec = 10
+
+[env]
+default_max_gas_price ="200"
+default_mining_times="10"
+default_mining_unit="0.1"

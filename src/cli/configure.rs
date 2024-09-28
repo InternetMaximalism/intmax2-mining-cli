@@ -4,6 +4,7 @@ use ethers::types::{H256, U256};
 use crate::{
     external_api::contracts::utils::get_address,
     utils::{
+        config::Settings,
         encryption::{decrypt, encrypt},
         env_config::EnvConfig,
         env_validation::validate_rpc_url,
@@ -13,15 +14,18 @@ use crate::{
 
 pub async fn new_config() -> anyhow::Result<EnvConfig> {
     let rpc_url: String = input_rpc_url().await?;
+    let default_env = Settings::load()?.env;
     let use_default = Confirm::new()
-        .with_prompt("Use default settings for gas price, mining unit and mining times?")
+        .with_prompt(format!("Do you use default settings for max gas price ({} gwei), mining unit ({} ETH) and mining times?", default_env.default_max_gas_price, default_env.default_mining_unit))
         .default(true)
         .interact()?;
     let (max_gas_price, mining_unit, mining_times) = if use_default {
         (
-            ethers::utils::parse_units("30", "gwei").unwrap().into(),
-            ethers::utils::parse_ether("0.1").unwrap(),
-            10,
+            ethers::utils::parse_units(default_env.default_max_gas_price, "gwei")
+                .unwrap()
+                .into(),
+            ethers::utils::parse_ether(default_env.default_mining_unit).unwrap(),
+            default_env.default_mining_times,
         )
     } else {
         let max_gas_price = input_max_gas_price()?;

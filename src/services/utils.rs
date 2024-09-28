@@ -69,6 +69,9 @@ pub async fn insuffient_balance_instruction(
     name: &str,
 ) -> anyhow::Result<()> {
     let balance = get_balance(address).await?;
+    if required_balance <= balance {
+        return Ok(());
+    }
     print_warning(format!(
         r"{} address {:?} has insufficient balance {} ETH < {} ETH. Waiting for your deposit...",
         name,
@@ -78,12 +81,12 @@ pub async fn insuffient_balance_instruction(
     ));
     loop {
         let new_balance = get_balance(address).await?;
-        if new_balance > balance {
+        if new_balance > required_balance {
             print_status("Balance updated");
-            tokio::time::sleep(std::time::Duration::from_secs(5)).await;
+            tokio::time::sleep(std::time::Duration::from_secs(10)).await;
             break;
         }
-        tokio::time::sleep(std::time::Duration::from_secs(5)).await;
+        tokio::time::sleep(std::time::Duration::from_secs(10)).await;
     }
     Ok(())
 }

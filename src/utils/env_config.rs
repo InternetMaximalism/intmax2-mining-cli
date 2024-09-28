@@ -5,7 +5,10 @@ use serde::{Deserialize, Serialize};
 
 use crate::utils::network::get_network;
 
-use super::file::{create_file_with_content, get_project_root};
+use super::{
+    config::Settings,
+    file::{create_file_with_content, get_project_root},
+};
 
 fn env_config_path() -> PathBuf {
     get_project_root()
@@ -62,14 +65,16 @@ impl EnvConfig {
 
     // import env config from env. Only checks format of env, not the correctness of the values
     pub fn import_from_env() -> anyhow::Result<Self> {
+        let default_env = Settings::load()?.env;
         let rpc_url = env::var("RPC_URL")
             .map_err(|_| anyhow::Error::msg("RPC_URL environment variable is not set"))?;
-        let max_gas_price = env::var("MAX_GAS_PRICE").unwrap_or("30".to_string());
+        let max_gas_price = env::var("MAX_GAS_PRICE").unwrap_or(default_env.default_max_gas_price);
         let encrypt = env::var("ENCRYPT").unwrap_or("true".to_string());
         let withdrawal_private_key = env::var("WITHDRAWAL_PRIVATE_KEY").ok();
         let encrypted_withdrawal_private_key = env::var("ENCRYPTED_WITHDRAWAL_PRIVATE_KEY").ok();
-        let mining_unit = env::var("MINING_UNIT").unwrap_or("0.1".to_string());
-        let mining_times = env::var("MINING_TIMES").unwrap_or("10".to_string());
+        let mining_unit = env::var("MINING_UNIT").unwrap_or(default_env.default_mining_unit);
+        let mining_times =
+            env::var("MINING_TIMES").unwrap_or(default_env.default_mining_times.to_string());
         let config_string = EnvConfigString {
             rpc_url,
             max_gas_price,

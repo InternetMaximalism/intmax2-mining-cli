@@ -18,7 +18,7 @@ pub fn print_status<S: ToString>(message: S) {
         style(message.to_string()).blue()
     );
     term.write_line(&colored_message).unwrap();
-    term.write_line("Press Ctrl + C to stop the process")
+    term.write_line("Press Ctrl + c to stop the process")
         .unwrap();
     info!("{}", message.to_string());
 }
@@ -32,7 +32,7 @@ pub fn print_warning<S: ToString>(message: S) {
         style(message.to_string()).yellow()
     );
     term.write_line(&colored_message).unwrap();
-    term.write_line("Press Ctrl + C to terminate the process")
+    term.write_line("Press Ctrl + c to terminate the process")
         .unwrap();
     warn!("{}", message.to_string());
 }

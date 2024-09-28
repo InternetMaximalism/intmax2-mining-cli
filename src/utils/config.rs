@@ -18,6 +18,7 @@ pub struct Settings {
     pub api: Api,
     pub blockchain: Blockchain,
     pub service: Service,
+    pub env: Env,
 }
 
 #[derive(Clone, Debug, Deserialize)]
@@ -41,6 +42,13 @@ pub struct Blockchain {
     pub token_address: String,
     pub single_deposit_gas: u64,
     pub single_claim_gas: u64,
+}
+
+#[derive(Clone, Debug, Deserialize)]
+pub struct Env {
+    pub default_max_gas_price: String,
+    pub default_mining_unit: String,
+    pub default_mining_times: u64,
 }
 
 #[derive(Clone, Debug, Deserialize)]
