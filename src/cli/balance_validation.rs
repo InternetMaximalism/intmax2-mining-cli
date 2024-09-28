@@ -9,35 +9,9 @@ use crate::{
         intmax::circulation::get_circulation,
     },
     services::{assets_status::AssetsStatus, claim::MAX_CLAIMS, contracts::pretty_format_u256},
-    state::{key::Keys, mode::RunMode, state::State},
+    state::{mode::RunMode, state::State},
     utils::{config::Settings, env_config::EnvConfig, errors::CLIError},
 };
-
-pub async fn balance_validation(
-    state: &mut State,
-    mode: RunMode,
-    config: &EnvConfig,
-    keys: &Keys,
-) -> anyhow::Result<()> {
-    if mode == RunMode::Mining {
-        for key in keys.to_keys().iter() {
-            let assets_status = state.sync_and_fetch_assets(key).await?;
-            validate_deposit_address_balance(
-                &assets_status,
-                key.deposit_address,
-                config.mining_unit,
-                config.mining_times,
-            )
-            .await?;
-        }
-    } else if mode == RunMode::Claim {
-        for key in keys.to_keys().iter() {
-            let assets_status = state.sync_and_fetch_assets(key).await?;
-            validate_withdrawal_address_balance(&assets_status, keys.withdrawal_address).await?;
-        }
-    }
-    Ok(())
-}
 
 pub async fn validate_deposit_address_balance(
     assets_status: &AssetsStatus,
