@@ -11,6 +11,9 @@ pub async fn export_deposit_accounts(withdrawal_private_key: H256) -> anyhow::Re
     loop {
         let key = Key::new(withdrawal_private_key, key_number);
         if !is_address_used(key.deposit_address).await {
+            if key_number == 0 {
+                println!("No deposit accounts found.");
+            }
             return Ok(());
         }
         let balance = get_balance(key.deposit_address).await?;

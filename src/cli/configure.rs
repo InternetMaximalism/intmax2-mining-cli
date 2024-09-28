@@ -1,3 +1,5 @@
+use std::env;
+
 use dialoguer::{Confirm, Input, Password, Select};
 use ethers::types::{H256, U256};
 
@@ -11,6 +13,22 @@ use crate::{
         network::get_network,
     },
 };
+
+pub fn select_network() -> anyhow::Result<String> {
+    let items = vec!["mainnet", "holesky (testnet)"];
+    let selection = Select::new()
+        .with_prompt("Choose network")
+        .items(&items)
+        .default(0)
+        .interact()?;
+    let network = match selection {
+        0 => "mainnet",
+        1 => "holesky",
+        _ => unreachable!(),
+    };
+    env::set_var("NETWORK", network);
+    Ok(network.to_string())
+}
 
 pub async fn new_config() -> anyhow::Result<EnvConfig> {
     let rpc_url: String = input_rpc_url().await?;

@@ -1,5 +1,5 @@
 use availability::check_avaliability;
-use configure::recover_withdrawal_private_key;
+use configure::{recover_withdrawal_private_key, select_network};
 use console::{initialize_console, print_status};
 
 use crate::{
@@ -20,6 +20,8 @@ pub mod export_deposit_accounts;
 pub mod interactive;
 
 pub async fn run(mode: RunMode) -> Result<(), CLIError> {
+    select_network().map_err(|e| CLIError::InternalError(e.to_string()))?;
+
     println!(
         "Welcome to the INTMAX mining CLI!. Network: {}, Mode: {:?}",
         get_network(),

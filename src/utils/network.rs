@@ -4,6 +4,7 @@ use std::{env, fmt::Display};
 pub enum Network {
     Localnet,
     Sepolia,
+    Holesky,
     Mainnet,
 }
 
@@ -12,6 +13,7 @@ impl Display for Network {
         match self {
             Network::Localnet => write!(f, "localnet"),
             Network::Sepolia => write!(f, "sepolia"),
+            Network::Holesky => write!(f, "holesky"),
             Network::Mainnet => write!(f, "mainnet"),
         }
     }
@@ -22,6 +24,7 @@ pub fn get_network() -> Network {
     match network.as_str() {
         "localnet" => Network::Localnet,
         "sepolia" => Network::Sepolia,
+        "holesky" => Network::Holesky,
         "mainnet" => Network::Mainnet,
         _ => panic!("Invalid NETWORK environment variable"),
     }
