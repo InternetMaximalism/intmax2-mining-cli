@@ -9,7 +9,7 @@ use ethers::{
 
 use crate::{
     cli::console::{print_status, print_warning},
-    external_api::contracts::utils::get_client,
+    external_api::contracts::utils::{get_balance, get_client},
 };
 
 pub async fn handle_contract_call<S: ToString>(
@@ -62,25 +62,21 @@ pub async fn handle_contract_call<S: ToString>(
     }
 }
 
-async fn insuffient_balance_instruction(
+pub async fn insuffient_balance_instruction(
     address: Address,
     required_balance: U256,
     name: &str,
 ) -> anyhow::Result<()> {
-    let client = get_client().await?;
-    let balance = client.get_balance(address, None).await?;
+    let balance = get_balance(address).await?;
     print_warning(format!(
-        r"Insufficient balance of {} address {:?}. 
-Current balance: {} ETH. At least {} ETH is required for the transaction.
-Waiting for your deposit...",
+        r"{} address {:?} has insufficient balance {} ETH < {} ETH. Waiting for your deposit...",
         name,
         address,
         pretty_format_u256(balance),
         pretty_format_u256(required_balance)
     ));
     loop {
-        let client = get_client().await?;
-        let new_balance = client.get_balance(address, None).await?;
+        let new_balance = get_balance(address).await?;
         if new_balance > balance {
             print_status("Balance updated");
             tokio::time::sleep(std::time::Duration::from_secs(5)).await;

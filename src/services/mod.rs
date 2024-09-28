@@ -1,6 +1,8 @@
 use crate::{
     cli::{
-        balance_validation::validate_deposit_address_balance,
+        balance_validation::{
+            validate_deposit_address_balance, validate_withdrawal_address_balance,
+        },
         console::{print_assets_status, print_status},
     },
     external_api::contracts::utils::{get_account_nonce, get_balance},
@@ -31,7 +33,6 @@ pub async fn mining_loop(
         let key = Key::new(withdrawal_private_key, key_number);
         print_status(format!("Mining loop for {:?}", key.deposit_address));
         let assets_status = state.sync_and_fetch_assets(&key).await?;
-        // todo! recover from error
         validate_deposit_address_balance(
             &assets_status,
             key.deposit_address,
@@ -103,6 +104,9 @@ pub async fn claim_loop(state: &mut State, withdrawal_private_key: H256) -> anyh
         if !is_address_used(key.deposit_address).await {
             return Ok(());
         }
+        let assets_status = state.sync_and_fetch_assets(&key).await?;
+        validate_withdrawal_address_balance(&assets_status, key.withdrawal_address).await?;
+
         print_status(format!("Claim loop for {:?}", key.deposit_address));
         let assets_status = state.sync_and_fetch_assets(&key).await?;
         claim_task(state, &key, &assets_status).await?;

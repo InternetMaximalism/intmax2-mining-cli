@@ -17,7 +17,6 @@ pub async fn new_config() -> anyhow::Result<EnvConfig> {
         .with_prompt("Use default settings for gas price, mining unit and mining times?")
         .default(true)
         .interact()?;
-    // todo: elimiate code duplication for default values
     let (max_gas_price, mining_unit, mining_times) = if use_default {
         (
             ethers::utils::parse_units("30", "gwei").unwrap().into(),

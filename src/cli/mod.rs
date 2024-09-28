@@ -48,6 +48,7 @@ pub async fn run(mode: RunMode) -> anyhow::Result<()> {
     let prover_future = tokio::spawn(async { Prover::new() });
 
     // todo: print deposit address status here and get start_key_number
+
     let start_key_number = 0;
 
     // wait for prover to be ready
