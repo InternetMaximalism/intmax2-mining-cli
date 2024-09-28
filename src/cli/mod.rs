@@ -11,6 +11,7 @@ use crate::{
     },
 };
 
+pub mod accounts_status;
 pub mod availability;
 pub mod balance_validation;
 pub mod configure;
@@ -47,9 +48,9 @@ pub async fn run(mode: RunMode) -> anyhow::Result<()> {
     let mut state = State::new();
     let prover_future = tokio::spawn(async { Prover::new() });
 
-    // todo: print deposit address status here and get start_key_number
-
-    let start_key_number = 0;
+    let start_key_number =
+        accounts_status::accounts_status(&mut state, config.mining_times, withdrawal_private_key)
+            .await?;
 
     // wait for prover to be ready
     initialize_console();

@@ -5,21 +5,20 @@ use crate::{
         },
         console::{print_assets_status, print_status},
     },
-    external_api::contracts::utils::{get_account_nonce, get_balance},
     state::{key::Key, state::State},
     utils::config::Settings,
 };
 use claim::claim_task;
-use ethers::types::{Address, H256, U256};
+use ethers::types::{H256, U256};
 use mining::mining_task;
 use rand::Rng as _;
+use utils::is_address_used;
 
 pub mod assets_status;
 pub mod claim;
-pub mod contracts;
-pub mod gas_validation;
 pub mod mining;
 pub mod sync;
+pub mod utils;
 
 pub async fn mining_loop(
     state: &mut State,
@@ -31,7 +30,10 @@ pub async fn mining_loop(
     let mut key_number = start_key_number;
     loop {
         let key = Key::new(withdrawal_private_key, key_number);
-        print_status(format!("Mining loop for {:?}", key.deposit_address));
+        print_status(format!(
+            "Mining loop for deposit address #{} {:?}",
+            key_number, key.deposit_address
+        ));
         let assets_status = state.sync_and_fetch_assets(&key).await?;
         validate_deposit_address_balance(
             &assets_status,
@@ -113,11 +115,6 @@ pub async fn claim_loop(state: &mut State, withdrawal_private_key: H256) -> anyh
         common_loop_cool_down().await;
         key_number += 1;
     }
-}
-
-async fn is_address_used(deposit_address: Address) -> bool {
-    get_account_nonce(deposit_address).await.unwrap() > 0
-        || get_balance(deposit_address).await.unwrap() > 0.into()
 }
 
 async fn common_loop_cool_down() {

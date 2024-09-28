@@ -3,7 +3,7 @@ use ethers::types::{Address, U256};
 use crate::{
     external_api::contracts::utils::get_gas_price,
     services::{
-        assets_status::AssetsStatus, claim::MAX_CLAIMS, contracts::insuffient_balance_instruction,
+        assets_status::AssetsStatus, claim::MAX_CLAIMS, utils::insuffient_balance_instruction,
     },
     utils::config::Settings,
 };
@@ -26,31 +26,6 @@ pub async fn validate_deposit_address_balance(
     let min_balance =
         (mining_unit + gas_price * single_deposit_gas) * U256::from(remaining_deposits);
     insuffient_balance_instruction(deposit_address, min_balance, "deposit").await?;
-    // let balance = get_balance(deposit_address).await?;
-    // if balance < min_balance {
-    //     return Err(CLIError::BalanceError(format!(
-    //         "Insufficient balance for deposit address {:?}: current {}ETH < required {} ETH",
-    //         deposit_address,
-    //         pretty_format_u256(balance),
-    //         pretty_format_u256(min_balance)
-    //     ))
-    //     .into());
-    // }
-    // let is_not_reward_target = get_circulation(deposit_address).await?.is_excluded;
-    // if is_not_reward_target {
-    //     return Err(CLIError::CirculationError(format!(
-    //         "Deposit address {:?} is excluded from rewards",
-    //         deposit_address
-    //     ))
-    //     .into());
-    // }
-    // println!(
-    //     "Deposit address: {:?} Deposits: {}/{} Balance {} ETH",
-    //     deposit_address,
-    //     num_deposits,
-    //     mining_times,
-    //     pretty_format_u256(balance)
-    // );
     Ok(())
 }
 

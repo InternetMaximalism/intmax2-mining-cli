@@ -12,7 +12,7 @@ use crate::{
             withdrawal::submit_withdrawal,
         },
     },
-    services::gas_validation::await_until_low_gas_price,
+    services::utils::await_until_low_gas_price,
     state::{key::Key, state::State},
     utils::config::Settings,
 };

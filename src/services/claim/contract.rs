@@ -14,7 +14,7 @@ use crate::{
         minter::{get_minter_contract_with_signer, minter_v1},
         utils::get_wallet,
     },
-    services::{contracts::handle_contract_call, gas_validation::await_until_low_gas_price},
+    services::utils::{await_until_low_gas_price, handle_contract_call},
 };
 
 pub async fn claim_tokens(
