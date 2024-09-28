@@ -36,7 +36,7 @@ async fn main() {
     let mode = Args::parse().command.unwrap_or(RunMode::Interactive);
 
     // test loading the setting
-    get_project_root().expect("Failed to get project root: cannot find .mining-cli-root");
+    get_project_root().expect("Failed to get project root: cannot find mining-cli-root");
     utils::config::Settings::load().expect("Failed to load config");
 
     create_file_with_content(&get_log_file_path(), &[]).expect("Failed to create log file");

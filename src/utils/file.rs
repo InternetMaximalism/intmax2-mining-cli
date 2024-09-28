@@ -9,7 +9,7 @@ use anyhow::bail;
 use super::errors::CLIError;
 
 pub const DATA_DIR: &str = "data";
-const PROJECT_ROOT_FILE: &str = ".mining-cli-root";
+const PROJECT_ROOT_FILE: &str = "mining-cli-root";
 
 pub fn create_file_with_content(path: &Path, content: &[u8]) -> anyhow::Result<()> {
     if let Some(parent) = path.parent() {

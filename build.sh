@@ -28,7 +28,7 @@ build_and_zip() {
     cp -R assets "${temp_dir}/" || echo "Warning: 'assets' directory not found"
     cp -R docs "${temp_dir}/" || echo "Warning: 'docs' directory not found"
     cp .env.example "${temp_dir}/" || echo "Warning: '.env.example' file not found"
-    cp .mining-cli-root "${temp_dir}/" || echo "Warning: '.mining-cli-root' file not found"
+    cp mining-cli-root "${temp_dir}/" || echo "Warning: 'mining-cli-root' file not found"
     cp config.sepolia.toml "${temp_dir}/" || echo "Warning: 'config.sepolia.toml' file not found"
     cp README.md "${temp_dir}/" || echo "Warning: 'README.md' file not found"
     
