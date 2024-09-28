@@ -2329,7 +2329,7 @@ checksum = "68354c5c6bd36d73ff3feceb05efa59b6acb7626617f4962be322a825e61f79a"
 
 [[package]]
 name = "mining-cli"
-version = "1.0.2"
+version = "1.0.0"
 dependencies = [
  "aes-gcm",
  "anyhow",

@@ -25,10 +25,14 @@ pub async fn run(mode: RunMode) -> anyhow::Result<()> {
         get_network(),
         mode
     );
-    check_avaliability().await?;
+    check_avaliability()
+        .await
+        .map_err(|e| CLIError::VersionError(e.to_string()))?;
 
     let mode = if mode == RunMode::Interactive {
-        interactive::interactive().await?
+        interactive::interactive()
+            .await
+            .map_err(|e| CLIError::InternalError(e.to_string()))?
     } else {
         mode.clone()
     };
@@ -36,19 +40,29 @@ pub async fn run(mode: RunMode) -> anyhow::Result<()> {
     // export env config
     match EnvConfig::load_from_file() {
         Ok(config) => {
-            config.export_to_env()?;
+            config
+                .export_to_env()
+                .map_err(|e| CLIError::EnvError(e.to_string()))?;
         }
         Err(_) => {}
     }
 
     let config = EnvConfig::import_from_env().map_err(|e| CLIError::EnvError(e.to_string()))?;
-    let withdrawal_private_key = recover_withdrawal_private_key(&config)?;
-    validate_env_config(&config).await?;
-    config.export_to_env()?;
+    let withdrawal_private_key = recover_withdrawal_private_key(&config)
+        .map_err(|e| CLIError::InternalError(e.to_string()))?;
+
+    validate_env_config(&config)
+        .await
+        .map_err(|e| CLIError::EnvError(e.to_string()))?;
+    config
+        .export_to_env()
+        .map_err(|e| CLIError::EnvError(e.to_string()))?;
 
     // for export mode, we only need to export the deposit accounts and exit
     if mode == RunMode::Export {
-        export_deposit_accounts::export_deposit_accounts(withdrawal_private_key).await?;
+        export_deposit_accounts::export_deposit_accounts(withdrawal_private_key)
+            .await
+            .map_err(|e| CLIError::InternalError(e.to_string()))?;
         return Ok(());
     }
 
@@ -57,7 +71,8 @@ pub async fn run(mode: RunMode) -> anyhow::Result<()> {
 
     let start_key_number =
         accounts_status::accounts_status(&mut state, config.mining_times, withdrawal_private_key)
-            .await?;
+            .await
+            .map_err(|e| CLIError::InternalError(e.to_string()))?;
 
     // wait for prover to be ready
     initialize_console();
@@ -75,10 +90,19 @@ pub async fn run(mode: RunMode) -> anyhow::Result<()> {
                 config.mining_unit,
                 config.mining_times,
             )
-            .await?
+            .await
+            .map_err(|e| CLIError::InternalError(e.to_string()))?;
         }
-        RunMode::Claim => claim_loop(&mut state, withdrawal_private_key).await?,
-        RunMode::Exit => exit_loop(&mut state, withdrawal_private_key).await?,
+        RunMode::Claim => {
+            claim_loop(&mut state, withdrawal_private_key)
+                .await
+                .map_err(|e| CLIError::InternalError(e.to_string()))?;
+        }
+        RunMode::Exit => {
+            exit_loop(&mut state, withdrawal_private_key)
+                .await
+                .map_err(|e| CLIError::InternalError(e.to_string()))?;
+        }
         _ => unreachable!(),
     }
 
