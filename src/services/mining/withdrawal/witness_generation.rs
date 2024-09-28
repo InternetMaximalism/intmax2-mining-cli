@@ -7,7 +7,7 @@ use mining_circuit_v1::withdrawal::simple_withraw_circuit::SimpleWithdrawalValue
 
 use crate::{
     external_api::contracts::events::Deposited,
-    state::{keys::Key, state::State},
+    state::{key::Key, state::State},
     utils::derive_key::{derive_pubkey_from_private_key, derive_salt_from_private_key_nonce},
 };
 

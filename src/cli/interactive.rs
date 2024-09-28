@@ -48,7 +48,7 @@ pub async fn interactive() -> anyhow::Result<RunMode> {
         config.save_to_file()?;
         config.export_to_env()?;
     };
-    println!("Press Ctrl + C to stop the process");
+    println!("Press Ctrl + c to stop the process");
     let items = [
         format!(
             "{} {}",
@@ -65,6 +65,11 @@ pub async fn interactive() -> anyhow::Result<RunMode> {
             style("Exit:").bold(),
             style("withdraws all balances currently and cancels pending deposits").dim()
         ),
+        format!(
+            "{} {}",
+            style("Export:").bold(),
+            style("export deposit private keys").dim()
+        ),
     ];
     let mode = Select::new()
         .with_prompt("Select mode")
@@ -75,6 +80,7 @@ pub async fn interactive() -> anyhow::Result<RunMode> {
         0 => RunMode::Mining,
         1 => RunMode::Claim,
         2 => RunMode::Exit,
+        3 => RunMode::Export,
         _ => unreachable!(),
     };
     Ok(mode)

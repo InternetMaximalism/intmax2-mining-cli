@@ -5,8 +5,8 @@ use crate::{
         events::Deposited,
         int1::{get_int1_contract_with_signer, int_1},
     },
-    services::{contracts::handle_contract_call, gas_validation::await_until_low_gas_price},
-    state::{keys::Key, state::State},
+    services::utils::{await_until_low_gas_price, handle_contract_call},
+    state::{key::Key, state::State},
 };
 
 pub async fn cancel_task(_state: &State, key: &Key, event: Deposited) -> anyhow::Result<()> {

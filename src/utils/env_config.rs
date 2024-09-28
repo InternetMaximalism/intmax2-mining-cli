@@ -3,9 +3,12 @@ use std::{env, io::BufReader, path::PathBuf};
 use ethers::types::{H256, U256};
 use serde::{Deserialize, Serialize};
 
-use crate::{state::keys::Keys, utils::network::get_network};
+use crate::utils::network::get_network;
 
-use super::file::{create_file_with_content, get_project_root};
+use super::{
+    config::Settings,
+    file::{create_file_with_content, get_project_root},
+};
 
 fn env_config_path() -> PathBuf {
     get_project_root()
@@ -19,8 +22,8 @@ pub struct EnvConfig {
     pub rpc_url: String,
     pub max_gas_price: U256,
     pub encrypt: bool,
-    pub keys: Option<Keys>,
-    pub encrypted_keys: Option<Vec<u8>>,
+    pub withdrawal_private_key: Option<H256>,
+    pub encrypted_withdrawal_private_key: Option<Vec<u8>>,
     pub mining_unit: U256,
     pub mining_times: u64,
 }
@@ -44,14 +47,16 @@ impl EnvConfig {
         env::set_var("RPC_URL", &config_string.rpc_url);
         env::set_var("MAX_GAS_PRICE", &config_string.max_gas_price);
         env::set_var("ENCRYPT", &config_string.encrypt);
-        if let Some(deposit_private_keys) = &config_string.deposit_private_keys {
-            env::set_var("DEPOSIT_PRIVATE_KEYS", deposit_private_keys);
-        }
-        if let Some(withdrawal_private_key) = &config_string.withdrawal_private_key {
-            env::set_var("WITHDRAWAL_PRIVATE_KEY", withdrawal_private_key);
-        }
-        if let Some(encrypted_keys) = &config_string.encrypted_keys {
-            env::set_var("ENCRYPTED_KEYS", encrypted_keys);
+        if self.encrypt {
+            env::set_var(
+                "ENCRYPTED_WITHDRAWAL_PRIVATE_KEY",
+                config_string.encrypted_withdrawal_private_key.unwrap(),
+            );
+        } else {
+            env::set_var(
+                "WITHDRAWAL_PRIVATE_KEY",
+                config_string.withdrawal_private_key.unwrap(),
+            );
         }
         env::set_var("MINING_UNIT", &config_string.mining_unit);
         env::set_var("MINING_TIMES", &config_string.mining_times);
@@ -60,22 +65,22 @@ impl EnvConfig {
 
     // import env config from env. Only checks format of env, not the correctness of the values
     pub fn import_from_env() -> anyhow::Result<Self> {
+        let default_env = Settings::load()?.env;
         let rpc_url = env::var("RPC_URL")
             .map_err(|_| anyhow::Error::msg("RPC_URL environment variable is not set"))?;
-        let max_gas_price = env::var("MAX_GAS_PRICE").unwrap_or("30".to_string());
+        let max_gas_price = env::var("MAX_GAS_PRICE").unwrap_or(default_env.default_max_gas_price);
         let encrypt = env::var("ENCRYPT").unwrap_or("true".to_string());
-        let deposit_private_keys = env::var("DEPOSIT_PRIVATE_KEYS").ok();
         let withdrawal_private_key = env::var("WITHDRAWAL_PRIVATE_KEY").ok();
-        let encrypted_keys = env::var("ENCRYPTED_KEYS").ok();
-        let mining_unit = env::var("MINING_UNIT").unwrap_or("0.1".to_string());
-        let mining_times = env::var("MINING_TIMES").unwrap_or("10".to_string());
+        let encrypted_withdrawal_private_key = env::var("ENCRYPTED_WITHDRAWAL_PRIVATE_KEY").ok();
+        let mining_unit = env::var("MINING_UNIT").unwrap_or(default_env.default_mining_unit);
+        let mining_times =
+            env::var("MINING_TIMES").unwrap_or(default_env.default_mining_times.to_string());
         let config_string = EnvConfigString {
             rpc_url,
             max_gas_price,
             encrypt,
-            deposit_private_keys,
             withdrawal_private_key,
-            encrypted_keys,
+            encrypted_withdrawal_private_key,
             mining_unit,
             mining_times,
         };
@@ -85,36 +90,26 @@ impl EnvConfig {
 
     fn to_string(&self) -> anyhow::Result<EnvConfigString> {
         let max_gas_price = ethers::utils::format_units(self.max_gas_price, "gwei").unwrap();
-        let encrypt = if self.keys.is_some() {
+        let encrypt = if self.withdrawal_private_key.is_some() {
             "false".to_string()
-        } else if self.encrypted_keys.is_some() {
+        } else if self.encrypted_withdrawal_private_key.is_some() {
             "true".to_string()
         } else {
             anyhow::bail!("Both keys and encrypted_keys are not set in the configuration file. Please set one of them.");
         };
-        let (deposit_private_keys, withdrawal_private_key) = self
-            .keys
+        let withdrawal_private_key = self.withdrawal_private_key.map(|key| format!("{:?}", key));
+        let encrypted_withdrawal_private_key = self
+            .encrypted_withdrawal_private_key
             .clone()
-            .map(|keys| {
-                let deposit_private_keys =
-                    serde_json::to_string(&keys.deposit_private_keys).unwrap();
-                let withdrawal_private_key = format!("{:?}", keys.withdrawal_private_key);
-                (Some(deposit_private_keys), Some(withdrawal_private_key))
-            })
-            .unwrap_or((None, None));
-        let encrypted_keys = self
-            .encrypted_keys
-            .clone()
-            .map(|encrypted_keys| hex::encode(encrypted_keys));
+            .map(|key| hex::encode(key));
         let mining_unit = ethers::utils::format_units(self.mining_unit, "ether").unwrap();
         let mining_times = self.mining_times.to_string();
         Ok(EnvConfigString {
             rpc_url: self.rpc_url.clone(),
             max_gas_price,
             encrypt,
-            deposit_private_keys,
             withdrawal_private_key,
-            encrypted_keys,
+            encrypted_withdrawal_private_key,
             mining_unit,
             mining_times,
         })
@@ -132,33 +127,29 @@ impl EnvConfig {
             anyhow::bail!("ENCRYPT must be either 'true' or 'false'");
         };
 
-        if !encrypt
-            && (value.deposit_private_keys.is_none() || value.withdrawal_private_key.is_none())
-        {
-            anyhow::bail!("DEPOSIT_PRIVATE_KEYS or WITHDRAWAL_PRIVATE_KEY is not set.");
-        } else if encrypt && value.encrypted_keys.is_none() {
-            anyhow::bail!("ENCRYPTED_KEYS is not set.");
+        if !encrypt && value.withdrawal_private_key.is_none() {
+            anyhow::bail!("WITHDRAWAL_PRIVATE_KEY is not set.");
+        } else if encrypt && value.encrypted_withdrawal_private_key.is_none() {
+            anyhow::bail!("ENCRYPTED_WITHDRAWAL_PRIVATE_KEY is not set.");
         }
 
-        let keys = if !encrypt {
-            let deposit_private_keys: Vec<H256> =
-                serde_json::from_str(&value.deposit_private_keys.as_ref().unwrap())
-                    .map_err(|_| anyhow::anyhow!("failed to parse DEPOSIT_PRIVATE_KEYS"))?;
+        let withdrawal_private_key = if !encrypt {
             let withdrawal_private_key: H256 = value
                 .withdrawal_private_key
                 .as_ref()
                 .unwrap()
                 .parse()
                 .map_err(|_| anyhow::anyhow!("failed to parse WITHDRAWAL_PRIVATE_KEY"))?;
-            Some(Keys::new(deposit_private_keys, withdrawal_private_key))
+            Some(withdrawal_private_key)
         } else {
             None
         };
-
-        let encrypted_keys = if encrypt {
-            let encrypted_keys: Vec<u8> = hex::decode(value.encrypted_keys.as_ref().unwrap())
-                .map_err(|_| anyhow::anyhow!("failed to parse ENCRYPTED_KEYS"))?;
-            Some(encrypted_keys)
+        let encrypted_withdrawal_private_key = if encrypt {
+            let encrypted_withdrawal_private_key: Vec<u8> = hex::decode(
+                value.encrypted_withdrawal_private_key.as_ref().unwrap(),
+            )
+            .map_err(|_| anyhow::anyhow!("failed to parse ENCRYPTED_WITHDRAWAL_PRIVATE_KEY"))?;
+            Some(encrypted_withdrawal_private_key)
         } else {
             None
         };
@@ -175,8 +166,8 @@ impl EnvConfig {
             rpc_url: value.rpc_url.clone(),
             max_gas_price,
             encrypt,
-            keys,
-            encrypted_keys,
+            withdrawal_private_key,
+            encrypted_withdrawal_private_key,
             mining_unit,
             mining_times,
         })
@@ -187,12 +178,11 @@ impl EnvConfig {
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 struct EnvConfigString {
     rpc_url: String,
-    max_gas_price: String, // in gwei
-    encrypt: String,       // true or false
-    deposit_private_keys: Option<String>,
+    max_gas_price: String,
+    encrypt: String,
     withdrawal_private_key: Option<String>,
-    encrypted_keys: Option<String>,
-    mining_unit: String, // in ether
+    encrypted_withdrawal_private_key: Option<String>,
+    mining_unit: String,
     mining_times: String,
 }
 
@@ -213,11 +203,8 @@ mod tests {
             rpc_url: "http://localhost:8545".to_string(),
             max_gas_price: 30_000_000_000u64.into(),
             encrypt: false,
-            keys: Some(super::Keys::new(
-                vec![ethers::types::H256::random(), ethers::types::H256::random()],
-                ethers::types::H256::random(),
-            )),
-            encrypted_keys: None,
+            withdrawal_private_key: Some(ethers::types::H256::random()),
+            encrypted_withdrawal_private_key: None,
             mining_unit: 100_000_000_000_000_000u128.into(),
             mining_times: 10,
         };
@@ -232,11 +219,8 @@ mod tests {
             rpc_url: "http://localhost:8545".to_string(),
             max_gas_price: 30_000_000_000u64.into(),
             encrypt: false,
-            keys: Some(super::Keys::new(
-                vec![ethers::types::H256::random(), ethers::types::H256::random()],
-                ethers::types::H256::random(),
-            )),
-            encrypted_keys: None,
+            withdrawal_private_key: Some(ethers::types::H256::random()),
+            encrypted_withdrawal_private_key: None,
             mining_unit: 100_000_000_000_000_000u128.into(),
             mining_times: 10,
         };

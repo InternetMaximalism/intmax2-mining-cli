@@ -12,8 +12,8 @@ use crate::{
             withdrawal::submit_withdrawal,
         },
     },
-    services::gas_validation::await_until_low_gas_price,
-    state::{keys::Key, state::State},
+    services::utils::await_until_low_gas_price,
+    state::{key::Key, state::State},
     utils::config::Settings,
 };
 
@@ -147,7 +147,6 @@ async fn from_step5(_state: &State, _key: &Key) -> anyhow::Result<()> {
 #[cfg(test)]
 mod tests {
     use crate::{
-        services::assets_status::fetch_assets_status,
         state::prover::Prover,
         test::{get_dummy_keys, get_dummy_state},
     };
@@ -155,17 +154,9 @@ mod tests {
     #[tokio::test]
     async fn test_withdrawal() {
         let mut state = get_dummy_state().await;
-        state.sync_trees().await.unwrap();
 
         let dummy_key = get_dummy_keys();
-
-        let assets_status = fetch_assets_status(
-            &state,
-            dummy_key.deposit_address,
-            dummy_key.deposit_private_key,
-        )
-        .await
-        .unwrap();
+        let assets_status = state.sync_and_fetch_assets(&dummy_key).await.unwrap();
         let events = assets_status.get_not_withdrawn_events();
         assert!(events.len() > 0);
 

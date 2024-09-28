@@ -1,6 +1,14 @@
-use std::{fs, io::Write as _, path::Path};
+use std::{
+    env, fs,
+    io::Write as _,
+    path::{Path, PathBuf},
+};
+
+use anyhow::bail;
 
 use super::errors::CLIError;
+
+const PROJECT_ROOT_FILE: &str = ".mining-cli-root";
 
 pub fn create_file_with_content(path: &Path, content: &[u8]) -> anyhow::Result<()> {
     if let Some(parent) = path.parent() {
@@ -11,11 +19,15 @@ pub fn create_file_with_content(path: &Path, content: &[u8]) -> anyhow::Result<(
     Ok(())
 }
 
-pub fn get_project_root() -> anyhow::Result<std::path::PathBuf> {
-    let mut path = std::env::current_exe()?;
-    while !path.join("README.md").exists() {
+pub fn get_project_root() -> anyhow::Result<PathBuf> {
+    let current_dir = env::current_dir()?;
+    if current_dir.join(PROJECT_ROOT_FILE).exists() {
+        return Ok(current_dir);
+    }
+    let mut path = env::current_exe()?;
+    while !path.join(PROJECT_ROOT_FILE).exists() {
         if !path.pop() {
-            anyhow::bail!("Could not find project root");
+            bail!("Could not find project root");
         }
     }
     Ok(path)
@@ -39,6 +51,6 @@ mod tests {
     #[test]
     fn test_get_project_root() {
         let path = get_project_root().unwrap();
-        assert!(path.join("README.md").exists());
+        assert!(path.join(PROJECT_ROOT_FILE).exists());
     }
 }

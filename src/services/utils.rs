@@ -9,7 +9,8 @@ use ethers::{
 
 use crate::{
     cli::console::{print_status, print_warning},
-    external_api::contracts::utils::get_client,
+    external_api::contracts::utils::{get_account_nonce, get_balance, get_client, get_gas_price},
+    utils::{config::Settings, env_config::EnvConfig},
 };
 
 pub async fn handle_contract_call<S: ToString>(
@@ -62,33 +63,65 @@ pub async fn handle_contract_call<S: ToString>(
     }
 }
 
-async fn insuffient_balance_instruction(
+pub async fn insuffient_balance_instruction(
     address: Address,
     required_balance: U256,
     name: &str,
 ) -> anyhow::Result<()> {
-    let client = get_client().await?;
-    let balance = client.get_balance(address, None).await?;
+    let balance = get_balance(address).await?;
+    if required_balance <= balance {
+        return Ok(());
+    }
     print_warning(format!(
-        r"Insufficient balance of {} address {:?}. 
-Current balance: {} ETH. At least {} ETH is required for the transaction.
-Waiting for your deposit...",
+        r"{} address {:?} has insufficient balance {} ETH < {} ETH. Waiting for your deposit...",
         name,
         address,
         pretty_format_u256(balance),
         pretty_format_u256(required_balance)
     ));
     loop {
-        let client = get_client().await?;
-        let new_balance = client.get_balance(address, None).await?;
-        if new_balance > balance {
+        let new_balance = get_balance(address).await?;
+        if new_balance > required_balance {
             print_status("Balance updated");
-            tokio::time::sleep(std::time::Duration::from_secs(5)).await;
+            tokio::time::sleep(std::time::Duration::from_secs(10)).await;
             break;
         }
-        tokio::time::sleep(std::time::Duration::from_secs(5)).await;
+        tokio::time::sleep(std::time::Duration::from_secs(10)).await;
     }
     Ok(())
+}
+
+pub async fn await_until_low_gas_price() -> anyhow::Result<()> {
+    let max_gas_price = EnvConfig::import_from_env()?.max_gas_price;
+    let settings = Settings::load()?;
+    let high_gas_retry_inverval_in_sec = settings.service.high_gas_retry_inverval_in_sec;
+    let _url = settings.service.repository_url;
+    loop {
+        let current_gas_price = get_gas_price().await?;
+        if current_gas_price <= max_gas_price {
+            log::info!(
+                "Current gas price: {} GWei is lower than max gas price: {} GWei",
+                ethers::utils::format_units(current_gas_price.clone(), "gwei").unwrap(),
+                ethers::utils::format_units(max_gas_price.clone(), "gwei").unwrap(),
+            );
+            break;
+        }
+        print_warning(format!(
+            "Current gas price: {} Gwei > max gas price: {} Gwei. Waiting for gas price to drop...",
+            ethers::utils::format_units(current_gas_price.clone(), "gwei").unwrap(),
+            ethers::utils::format_units(max_gas_price.clone(), "gwei").unwrap(),
+        ));
+        tokio::time::sleep(std::time::Duration::from_secs(
+            high_gas_retry_inverval_in_sec,
+        ))
+        .await;
+    }
+    Ok(())
+}
+
+pub async fn is_address_used(deposit_address: Address) -> bool {
+    get_account_nonce(deposit_address).await.unwrap() > 0
+        || get_balance(deposit_address).await.unwrap() > 0.into()
 }
 
 pub fn pretty_format_u256(value: U256) -> String {

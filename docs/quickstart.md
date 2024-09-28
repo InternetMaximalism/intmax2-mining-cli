@@ -86,7 +86,7 @@ However, the process will pause if the balance of the deposit address is insuffi
 
 In the former case, please send ETH to the deposit address. In the latter case, wait until the network's gas price drops or change the max gas price value.
 
-The mining process can be interrupted at any time with `Ctrl + C`. If you interrupt the mining process, the balance may remain in intmax2.
+The mining process can be interrupted at any time with `Ctrl + c`. If you interrupt the mining process, the balance may remain in intmax2.
 If you want to withdraw only the remaining balance in intmax2 without making a new deposit, select the `exit` mode to withdraw the balance. If you want to resume the mining process, run it again in `mining` mode.
 
 The `mining` process automatically ends when it completes the set number of `mining times`.

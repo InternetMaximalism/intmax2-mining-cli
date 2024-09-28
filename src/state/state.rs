@@ -1,8 +1,11 @@
 use chrono::NaiveDateTime;
 
-use super::prover::Prover;
+use super::{key::Key, prover::Prover};
 use crate::{
-    services::sync::sync_trees,
+    services::{
+        assets_status::{fetch_assets_status, AssetsStatus},
+        sync::sync_trees,
+    },
     utils::{deposit_hash_tree::DepositHashTree, eligible_tree_with_map::EligibleTreeWithMap},
 };
 
@@ -39,5 +42,10 @@ impl State {
         )
         .await?;
         Ok(())
+    }
+
+    pub async fn sync_and_fetch_assets(&mut self, key: &Key) -> anyhow::Result<AssetsStatus> {
+        self.sync_trees().await?;
+        fetch_assets_status(&self, key.deposit_address, key.deposit_private_key).await
     }
 }
