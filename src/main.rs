@@ -37,8 +37,7 @@ async fn main() {
 
     // test loading the setting
     get_project_root().expect("Failed to get project root: cannot find mining-cli-root");
-    utils::config::Settings::load().expect("Failed to load config");
-
+    
     create_file_with_content(&get_log_file_path(), &[]).expect("Failed to create log file");
     let log_file = File::create(get_log_file_path()).unwrap();
     WriteLogger::init(LevelFilter::Info, Config::default(), log_file).unwrap();

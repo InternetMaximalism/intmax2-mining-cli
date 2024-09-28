@@ -16,7 +16,6 @@ minter_address = "0x0A628b7c91B39a42830f6Df84F8e5fa70cDDe3F9"
 token_address = "0x40FD30D54bFc29989636A25A4407d38e1e92c900"
 single_deposit_gas = 88000
 single_claim_gas = 600000
-default_max_gas_price = "200"
 
 [service]
 repository_url = "https://github.com/InternetMaximalism/intmax2-mining-cli"
