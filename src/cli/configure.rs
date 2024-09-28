@@ -13,7 +13,6 @@ use crate::{
 
 pub async fn new_config() -> anyhow::Result<EnvConfig> {
     let rpc_url: String = input_rpc_url().await?;
-
     let use_default = Confirm::new()
         .with_prompt("Use default settings for gas price, mining unit and mining times?")
         .default(true)
@@ -108,26 +107,59 @@ pub async fn modify_config(config: &EnvConfig) -> anyhow::Result<EnvConfig> {
 
 async fn input_rpc_url() -> anyhow::Result<String> {
     loop {
-        let rpc_url: String = Input::new()
-            .with_prompt(format!(
-                "RPC URL of {}. We highly recommend using Alchemy's RPC",
-                get_network()
-            ))
-            .validate_with(|rpc_url: &String| {
-                if rpc_url.starts_with("http") {
-                    Ok(())
-                } else {
-                    Err("Invalid RPC URL")
-                }
-            })
+        let items = ["Alchemy", "Infura", "Other"];
+        let selection = Select::new()
+            .with_prompt("Choose RPC provider")
+            .items(&items)
+            .default(0)
             .interact()?;
+        let rpc_url = match selection {
+            0 => input_alchemy_url().await?,
+            1 => input_infura_url().await?,
+            2 => input_custom_url().await?,
+            _ => unreachable!(),
+        };
         match validate_rpc_url(&rpc_url).await {
             Ok(_) => break Ok(rpc_url),
             Err(_) => {
-                println!("Wrong RPC URL")
+                println!("Invalid RPC URL");
             }
         }
     }
+}
+
+async fn input_alchemy_url() -> anyhow::Result<String> {
+    let alchemy_api_key: String = Input::new().with_prompt("Alchemy API Key").interact()?;
+    let alchemy_url = format!(
+        "https://eth-{}.g.alchemy.com/v2/{}",
+        get_network(),
+        alchemy_api_key
+    );
+    Ok(alchemy_url)
+}
+
+async fn input_infura_url() -> anyhow::Result<String> {
+    let infura_project_id: String = Input::new().with_prompt("Infura Project ID").interact()?;
+    let infura_url = format!(
+        "https://{}.infura.io/v3/{}",
+        get_network(),
+        infura_project_id
+    );
+    Ok(infura_url)
+}
+
+async fn input_custom_url() -> anyhow::Result<String> {
+    let rpc_url: String = Input::new()
+        .with_prompt(format!("Custom RPC of {}", get_network()))
+        .validate_with(|rpc_url: &String| {
+            if rpc_url.starts_with("http") {
+                Ok(())
+            } else {
+                Err("Invalid RPC URL")
+            }
+        })
+        .interact()?;
+    Ok(rpc_url)
 }
 
 fn input_max_gas_price() -> anyhow::Result<U256> {
