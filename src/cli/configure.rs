@@ -166,9 +166,10 @@ async fn input_custom_url() -> anyhow::Result<String> {
 }
 
 fn input_max_gas_price() -> anyhow::Result<U256> {
+    let default_max_gas_price = Settings::load()?.env.default_max_gas_price;
     let max_gas_price: String = Input::new()
         .with_prompt("Max gas price for transactions in GWei")
-        .default("30".to_string())
+        .default(default_max_gas_price)
         .validate_with(|max_gas_price: &String| {
             let result = ethers::utils::parse_units(max_gas_price, "gwei");
             if let Ok(x) = result {
