@@ -8,4 +8,4 @@ pub mod env_validation;
 pub mod errors;
 pub mod file;
 pub mod network;
-pub mod salt;
+pub mod derive_key;

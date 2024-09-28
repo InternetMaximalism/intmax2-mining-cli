@@ -10,7 +10,7 @@ use crate::{
     external_api::contracts::events::Deposited,
     services::claim::MAX_CLAIMS,
     state::{keys::Key, state::State},
-    utils::salt::{get_pubkey_from_private_key, get_salt_from_private_key_nonce},
+    utils::derive_key::{derive_pubkey_from_private_key, derive_salt_from_private_key_nonce},
 };
 
 pub async fn generate_claim_witness(
@@ -26,7 +26,7 @@ pub async fn generate_claim_witness(
     );
     let deposit_tree_root = state.deposit_hash_tree.get_root();
     let eligible_tree_root: Bytes32 = state.eligible_tree.get_root().into();
-    let pubkey = get_pubkey_from_private_key(key.deposit_private_key);
+    let pubkey = derive_pubkey_from_private_key(key.deposit_private_key);
     let recipient = Address::from_bytes_be(&key.withdrawal_address.as_bytes());
     let mut witnesses = Vec::new();
     let mut prev_claim_hash = Bytes32::default();
@@ -40,7 +40,7 @@ pub async fn generate_claim_witness(
         let eligible_index = state.eligible_tree.get_leaf_index(deposit_index).unwrap();
         let eligible_merkle_proof = state.eligible_tree.tree.prove(eligible_index as usize);
         let eligible_leaf = state.eligible_tree.tree.get_leaf(eligible_index as usize);
-        let salt = get_salt_from_private_key_nonce(key.deposit_private_key, event.tx_nonce);
+        let salt = derive_salt_from_private_key_nonce(key.deposit_private_key, event.tx_nonce);
         let value = ClaimInnerValue::new(
             deposit_tree_root,
             deposit_index,

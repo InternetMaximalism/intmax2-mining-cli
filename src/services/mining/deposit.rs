@@ -7,14 +7,14 @@ use crate::{
     external_api::contracts::{int1::get_int1_contract_with_signer, utils::get_account_nonce},
     services::{contracts::handle_contract_call, gas_validation::await_until_low_gas_price},
     state::{keys::Key, state::State},
-    utils::salt::{get_pubkey_from_private_key, get_salt_from_private_key_nonce},
+    utils::derive_key::{derive_pubkey_from_private_key, derive_salt_from_private_key_nonce},
 };
 
 pub async fn deposit_task(_state: &State, key: &Key, mining_unit: U256) -> anyhow::Result<()> {
     let deposit_address = key.deposit_address;
     let nonce = get_account_nonce(deposit_address).await?;
-    let salt = get_salt_from_private_key_nonce(key.deposit_private_key, nonce);
-    let pubkey = get_pubkey_from_private_key(key.deposit_private_key);
+    let salt = derive_salt_from_private_key_nonce(key.deposit_private_key, nonce);
+    let pubkey = derive_pubkey_from_private_key(key.deposit_private_key);
     let pubkey_salt_hash: [u8; 32] = get_pubkey_salt_hash(pubkey, salt)
         .to_bytes_be()
         .try_into()

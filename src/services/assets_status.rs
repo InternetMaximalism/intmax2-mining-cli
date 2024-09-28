@@ -16,7 +16,7 @@ use crate::{
         minter::get_claim_nullifier_exists,
     },
     state::state::State,
-    utils::salt::get_salt_from_private_key_nonce,
+    utils::derive_key::derive_salt_from_private_key_nonce,
 };
 
 #[derive(Debug, Clone)]
@@ -81,7 +81,7 @@ pub async fn fetch_assets_status(
     let mut not_withdrawn_indices = Vec::new();
     for &index in contained_indices.iter() {
         let event = &senders_deposits[index];
-        let salt = get_salt_from_private_key_nonce(deposit_private_key, event.tx_nonce);
+        let salt = derive_salt_from_private_key_nonce(deposit_private_key, event.tx_nonce);
         let nullifier = get_pubkey_salt_hash(U256::default(), salt);
         let is_exists = get_withdrawal_nullifier_exists(nullifier).await?;
         if is_exists {
@@ -107,7 +107,7 @@ pub async fn fetch_assets_status(
     let mut not_claimed_indices = Vec::new();
     for &index in &eligible_indices {
         let event = &senders_deposits[index];
-        let salt = get_salt_from_private_key_nonce(deposit_private_key, event.tx_nonce);
+        let salt = derive_salt_from_private_key_nonce(deposit_private_key, event.tx_nonce);
         let nullifier = get_deposit_nullifier(&event.deposit(), salt);
         let is_exists = get_claim_nullifier_exists(nullifier).await?;
         if is_exists {
