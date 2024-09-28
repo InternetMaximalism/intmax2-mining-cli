@@ -16,7 +16,7 @@ pub async fn new_config() -> anyhow::Result<EnvConfig> {
     let rpc_url: String = input_rpc_url().await?;
     let default_env = Settings::load()?.env;
     let use_default = Confirm::new()
-        .with_prompt(format!("Do you use default settings for max gas price ({} gwei), mining unit ({} ETH) and mining times?", default_env.default_max_gas_price, default_env.default_mining_unit))
+        .with_prompt(format!("Use default settings for max gas price ({} gwei), mining unit ({} ETH) and mining times ({})?", default_env.default_max_gas_price, default_env.default_mining_unit, default_env.default_mining_times))
         .default(true)
         .interact()?;
     let (max_gas_price, mining_unit, mining_times) = if use_default {
@@ -171,7 +171,10 @@ fn input_max_gas_price() -> anyhow::Result<U256> {
         .default("30".to_string())
         .validate_with(|max_gas_price: &String| {
             let result = ethers::utils::parse_units(max_gas_price, "gwei");
-            if result.is_ok() {
+            if let Ok(x) = result {
+                if x > ethers::utils::parse_units("210", "gwei").unwrap() {
+                    return Err("Gas price too high");
+                }
                 Ok(())
             } else {
                 Err("Invalid gas price")
