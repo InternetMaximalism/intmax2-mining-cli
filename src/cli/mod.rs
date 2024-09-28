@@ -19,7 +19,7 @@ pub mod console;
 pub mod export_deposit_accounts;
 pub mod interactive;
 
-pub async fn run(mode: RunMode) -> anyhow::Result<()> {
+pub async fn run(mode: RunMode) -> Result<(), CLIError> {
     println!(
         "Welcome to the INTMAX mining CLI!. Network: {}, Mode: {:?}",
         get_network(),
@@ -77,10 +77,11 @@ pub async fn run(mode: RunMode) -> anyhow::Result<()> {
     // wait for prover to be ready
     initialize_console();
     print_status("Waiting for prover to be ready");
-    let prover = prover_future.await?;
+    let prover = prover_future
+        .await
+        .map_err(|e| CLIError::InternalError(e.to_string()))?;
     state.prover = Some(prover);
 
-    // main loop
     match mode {
         RunMode::Mining => {
             mining_loop(

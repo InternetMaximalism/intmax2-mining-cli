@@ -7,13 +7,14 @@ use crate::utils::network::get_network;
 
 use super::{
     config::Settings,
-    file::{create_file_with_content, get_project_root},
+    file::{create_file_with_content, get_project_root, DATA_DIR},
 };
 
 fn env_config_path() -> PathBuf {
     get_project_root()
         .unwrap()
-        .join(format!("data/env.{}.json", get_network()))
+        .join(DATA_DIR)
+        .join(format!("env.{}.json", get_network()))
 }
 
 // Structure for setting and getting env
