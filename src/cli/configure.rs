@@ -3,7 +3,7 @@ use ethers::types::{H256, U256};
 
 use crate::{
     external_api::contracts::utils::get_address,
-    state::keys::Keys,
+    state::key::Keys,
     utils::{
         encryption::{decrypt, encrypt},
         env_config::EnvConfig,
@@ -43,8 +43,8 @@ pub async fn new_config() -> anyhow::Result<EnvConfig> {
         rpc_url,
         max_gas_price,
         encrypt,
-        keys,
-        encrypted_keys,
+        withdrawal_private_key: keys,
+        encrypted_withdrawal_private_key: encrypted_keys,
         mining_unit,
         mining_times,
     };
@@ -106,7 +106,7 @@ pub async fn modify_config(config: &EnvConfig) -> anyhow::Result<EnvConfig> {
     let modify_encryption = Confirm::new()
         .with_prompt(format!(
             "Modify encryption current={}?",
-            config.encrypted_keys.is_some()
+            config.encrypted_withdrawal_private_key.is_some()
         ))
         .default(false)
         .interact()?;
@@ -115,16 +115,16 @@ pub async fn modify_config(config: &EnvConfig) -> anyhow::Result<EnvConfig> {
     } else {
         (
             config.encrypt,
-            config.keys.clone(),
-            config.encrypted_keys.clone(),
+            config.withdrawal_private_key.clone(),
+            config.encrypted_withdrawal_private_key.clone(),
         )
     };
     let config = EnvConfig {
         rpc_url,
         max_gas_price,
         encrypt,
-        keys,
-        encrypted_keys,
+        withdrawal_private_key: keys,
+        encrypted_withdrawal_private_key: encrypted_keys,
         mining_unit: config.mining_unit,
         mining_times: config.mining_times,
     };
@@ -294,11 +294,14 @@ fn validate_private_key_with_duplication_check(
 
 pub fn recover_keys(config: &EnvConfig) -> anyhow::Result<Keys> {
     let keys = if !config.encrypt {
-        config.keys.clone().unwrap()
+        config.withdrawal_private_key.clone().unwrap()
     } else {
         let password = Password::new().with_prompt("Password").interact()?;
-        let keys: Keys = decrypt(&password, config.encrypted_keys.as_ref().unwrap())
-            .map_err(|_| anyhow::anyhow!("Invalid password"))?;
+        let keys: Keys = decrypt(
+            &password,
+            config.encrypted_withdrawal_private_key.as_ref().unwrap(),
+        )
+        .map_err(|_| anyhow::anyhow!("Invalid password"))?;
         keys
     };
     Ok(keys)

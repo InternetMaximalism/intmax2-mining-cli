@@ -6,7 +6,7 @@ use intmax2_zkp::{
 use crate::{
     external_api::contracts::{int1::get_int1_contract_with_signer, utils::get_account_nonce},
     services::{contracts::handle_contract_call, gas_validation::await_until_low_gas_price},
-    state::{keys::Key, state::State},
+    state::{key::Key, state::State},
     utils::derive_key::{derive_pubkey_from_private_key, derive_salt_from_private_key_nonce},
 };
 

@@ -6,7 +6,7 @@ use num_bigint::BigUint;
 
 use crate::{
     external_api::contracts::utils::get_address,
-    state::{keys::Key, state::State},
+    state::{key::Key, state::State},
     utils::{deposit_hash_tree::DepositHashTree, eligible_tree_with_map::EligibleTreeWithMap},
 };
 

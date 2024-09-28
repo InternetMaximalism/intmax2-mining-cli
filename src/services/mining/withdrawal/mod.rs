@@ -13,7 +13,7 @@ use crate::{
         },
     },
     services::gas_validation::await_until_low_gas_price,
-    state::{keys::Key, state::State},
+    state::{key::Key, state::State},
     utils::config::Settings,
 };
 

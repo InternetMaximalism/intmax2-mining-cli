@@ -4,7 +4,7 @@ use ethers::types::U256;
 use withdrawal::withdrawal_task;
 
 use crate::{
-    state::{keys::Key, state::State},
+    state::{key::Key, state::State},
     utils::errors::CLIError,
 };
 

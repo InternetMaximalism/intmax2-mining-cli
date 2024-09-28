@@ -1,7 +1,7 @@
 use claim::single_claim_task;
 
 use crate::{
-    state::{keys::Key, state::State},
+    state::{key::Key, state::State},
     utils::errors::CLIError,
 };
 

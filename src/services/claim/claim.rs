@@ -10,7 +10,7 @@ use crate::{
         contracts::events::Deposited,
         intmax::gnark::{fetch_gnark_proof, gnark_start_prove},
     },
-    state::{keys::Key, state::State},
+    state::{key::Key, state::State},
     utils::config::Settings,
 };
 

@@ -5,7 +5,7 @@ use rand::Rng as _;
 
 use crate::{
     cli::console::{print_assets_status, print_status},
-    state::{keys::Keys, state::State},
+    state::{key::Keys, state::State},
     utils::{config::Settings, errors::CLIError},
 };
 

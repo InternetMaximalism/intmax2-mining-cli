@@ -1,6 +1,6 @@
 use chrono::NaiveDateTime;
 
-use super::{keys::Key, prover::Prover};
+use super::{key::Key, prover::Prover};
 use crate::{
     services::{
         assets_status::{fetch_assets_status, AssetsStatus},

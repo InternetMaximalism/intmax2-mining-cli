@@ -9,7 +9,7 @@ use crate::{
         intmax::circulation::get_circulation,
     },
     services::{assets_status::AssetsStatus, claim::MAX_CLAIMS, contracts::pretty_format_u256},
-    state::{keys::Keys, mode::RunMode, state::State},
+    state::{key::Keys, mode::RunMode, state::State},
     utils::{config::Settings, env_config::EnvConfig, errors::CLIError},
 };
 
