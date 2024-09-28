@@ -1,4 +1,3 @@
-use assets_status::fetch_assets_status;
 use claim::claim_task;
 use ethers::types::U256;
 use mining::mining_task;
@@ -26,16 +25,12 @@ pub async fn mining_loop(
     for key in mining_keys.to_keys().iter() {
         print_status(format!("Mining loop for {:?}", key.deposit_address));
         loop {
-            state.sync_trees().await?;
-            let assets_status =
-                fetch_assets_status(&state, key.deposit_address, key.deposit_private_key)
-                    .await
-                    .map_err(|e| {
-                        CLIError::NetworkError(format!(
-                            "Failed while fetching assets status for {:?}: {:?}",
-                            key.deposit_address, e
-                        ))
-                    })?;
+            let assets_status = state.sync_and_fetch_assets(key).await.map_err(|e| {
+                CLIError::NetworkError(format!(
+                    "Failed while fetching assets status for {:?}: {:?}",
+                    key.deposit_address, e
+                ))
+            })?;
 
             if assets_status.senders_deposits.len() >= mining_times as usize
                 && assets_status.pending_indices.is_empty()
@@ -55,16 +50,12 @@ pub async fn mining_loop(
                 mining_task(state, key, &assets_status, new_deposit, false, mining_uinit).await?;
 
             // print assets status after mining
-            state.sync_trees().await?;
-            let assets_status =
-                fetch_assets_status(&state, key.deposit_address, key.deposit_private_key)
-                    .await
-                    .map_err(|e| {
-                        CLIError::NetworkError(format!(
-                            "Failed while fetching assets status for {:?}: {:?}",
-                            key.deposit_address, e
-                        ))
-                    })?;
+            let assets_status = state.sync_and_fetch_assets(key).await.map_err(|e| {
+                CLIError::NetworkError(format!(
+                    "Failed while fetching assets status for {:?}: {:?}",
+                    key.deposit_address, e
+                ))
+            })?;
             print_assets_status(&assets_status);
 
             if cooldown {
@@ -82,16 +73,12 @@ pub async fn exit_loop(state: &mut State, mining_keys: &Keys) -> anyhow::Result<
     for key in mining_keys.to_keys().iter() {
         print_status(format!("Exit loop for {:?}", key.deposit_address));
         loop {
-            state.sync_trees().await?;
-            let assets_status =
-                fetch_assets_status(&state, key.deposit_address, key.deposit_private_key)
-                    .await
-                    .map_err(|e| {
-                        CLIError::NetworkError(format!(
-                            "Failed while fetching assets status for {:?}: {:?}",
-                            key.deposit_address, e
-                        ))
-                    })?;
+            let assets_status = state.sync_and_fetch_assets(key).await.map_err(|e| {
+                CLIError::NetworkError(format!(
+                    "Failed while fetching assets status for {:?}: {:?}",
+                    key.deposit_address, e
+                ))
+            })?;
 
             if assets_status.pending_indices.is_empty()
                 && assets_status.rejected_indices.is_empty()
@@ -117,16 +104,12 @@ pub async fn claim_loop(state: &mut State, keys: &Keys) -> anyhow::Result<()> {
     for key in keys.to_keys().iter() {
         print_status(format!("Claim loop for {:?}", key.deposit_address));
         loop {
-            state.sync_trees().await?;
-            let assets_status =
-                fetch_assets_status(&state, key.deposit_address, key.deposit_private_key)
-                    .await
-                    .map_err(|e| {
-                        CLIError::NetworkError(format!(
-                            "Failed while fetching assets status for {:?}: {:?}",
-                            key.deposit_address, e
-                        ))
-                    })?;
+            let assets_status = state.sync_and_fetch_assets(key).await.map_err(|e| {
+                CLIError::NetworkError(format!(
+                    "Failed while fetching assets status for {:?}: {:?}",
+                    key.deposit_address, e
+                ))
+            })?;
 
             if assets_status.not_claimed_indices.is_empty() {
                 print_status(format!(

@@ -8,11 +8,7 @@ use crate::{
         },
         intmax::circulation::get_circulation,
     },
-    services::{
-        assets_status::{fetch_assets_status, AssetsStatus},
-        claim::MAX_CLAIMS,
-        contracts::pretty_format_u256,
-    },
+    services::{assets_status::AssetsStatus, claim::MAX_CLAIMS, contracts::pretty_format_u256},
     state::{keys::Keys, mode::RunMode, state::State},
     utils::{config::Settings, env_config::EnvConfig, errors::CLIError},
 };
@@ -24,31 +20,19 @@ pub async fn balance_validation(
     keys: &Keys,
 ) -> anyhow::Result<()> {
     if mode == RunMode::Mining {
-        for (&deposit_private_key, &deposit_address) in keys
-            .deposit_private_keys
-            .iter()
-            .zip(keys.deposit_addresses.iter())
-        {
-            state.sync_trees().await?;
-            let assets_status =
-                fetch_assets_status(state, deposit_address, deposit_private_key).await?;
+        for key in keys.to_keys().iter() {
+            let assets_status = state.sync_and_fetch_assets(key).await?;
             validate_deposit_address_balance(
                 &assets_status,
-                deposit_address,
+                key.deposit_address,
                 config.mining_unit,
                 config.mining_times,
             )
             .await?;
         }
     } else if mode == RunMode::Claim {
-        for (&deposit_private_key, &deposit_address) in keys
-            .deposit_private_keys
-            .iter()
-            .zip(keys.deposit_addresses.iter())
-        {
-            state.sync_trees().await?;
-            let assets_status =
-                fetch_assets_status(state, deposit_address, deposit_private_key).await?;
+        for key in keys.to_keys().iter() {
+            let assets_status = state.sync_and_fetch_assets(key).await?;
             validate_withdrawal_address_balance(&assets_status, keys.withdrawal_address).await?;
         }
     }
