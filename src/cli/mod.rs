@@ -1,5 +1,5 @@
 use availability::check_avaliability;
-use configure::recover_keys;
+use configure::recover_withdrawal_private_key;
 use console::{initialize_console, print_status};
 
 use crate::{
@@ -40,15 +40,15 @@ pub async fn run(mode: RunMode) -> anyhow::Result<()> {
     }
 
     let config = EnvConfig::import_from_env().map_err(|e| CLIError::EnvError(e.to_string()))?;
-    let keys = recover_keys(&config)?;
-    validate_env_config(&config, &keys).await?;
+    let withdrawal_private_key = recover_withdrawal_private_key(&config)?;
+    validate_env_config(&config).await?;
     config.export_to_env()?;
 
     let mut state = State::new();
     let prover_future = tokio::spawn(async { Prover::new() });
 
-    // valance validation
-    balance_validation::balance_validation(&mut state, mode, &config, &keys).await?;
+    // todo: print deposit address status here and get start_key_number
+    let start_key_number = 0;
 
     // wait for prover to be ready
     initialize_console();
@@ -59,10 +59,17 @@ pub async fn run(mode: RunMode) -> anyhow::Result<()> {
     // main loop
     match mode {
         RunMode::Mining => {
-            mining_loop(&mut state, &keys, config.mining_unit, config.mining_times).await?
+            mining_loop(
+                &mut state,
+                withdrawal_private_key,
+                start_key_number,
+                config.mining_unit,
+                config.mining_times,
+            )
+            .await?
         }
-        RunMode::Claim => claim_loop(&mut state, &keys).await?,
-        RunMode::Exit => exit_loop(&mut state, &keys).await?,
+        RunMode::Claim => claim_loop(&mut state, withdrawal_private_key).await?,
+        RunMode::Exit => exit_loop(&mut state, withdrawal_private_key).await?,
         _ => unreachable!(),
     }
 

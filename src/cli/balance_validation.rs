@@ -9,8 +9,7 @@ use crate::{
         intmax::circulation::get_circulation,
     },
     services::{assets_status::AssetsStatus, claim::MAX_CLAIMS, contracts::pretty_format_u256},
-    state::{mode::RunMode, state::State},
-    utils::{config::Settings, env_config::EnvConfig, errors::CLIError},
+    utils::{config::Settings, errors::CLIError},
 };
 
 pub async fn validate_deposit_address_balance(

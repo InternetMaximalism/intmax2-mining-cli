@@ -3,7 +3,6 @@ use ethers::types::{H256, U256};
 
 use crate::{
     external_api::contracts::utils::get_address,
-    state::key::Keys,
     utils::{
         encryption::{decrypt, encrypt},
         env_config::EnvConfig,
@@ -14,31 +13,26 @@ use crate::{
 
 pub async fn new_config() -> anyhow::Result<EnvConfig> {
     let rpc_url: String = input_rpc_url().await?;
-    let max_gas_price: U256 = input_max_gas_price()?;
-    let mining_unit = input_mining_unit()?;
-    let mining_times = input_mining_times()?;
-    let deposit_private_key: H256 = {
-        let deposit_private_key: String = Password::new()
-            .with_prompt(format!("Deposit private key of {}", get_network()))
-            .validate_with(|input: &String| validate_private_key_with_duplication_check(&[], input))
-            .interact()?;
-        let deposit_private_key: H256 = deposit_private_key.parse().unwrap();
-        let deposit_address = get_address(deposit_private_key);
-        println!("Deposit Address: {:?}", deposit_address);
-        deposit_private_key
-    };
-    let is_more = Confirm::new()
-        .with_prompt("Add more deposit private keys?")
-        .default(false)
+
+    let use_default = Confirm::new()
+        .with_prompt("Use default settings for gas price, mining unit and mining times?")
+        .default(true)
         .interact()?;
-    let deposit_private_keys = if is_more {
-        append_deposit_private_keys(&[deposit_private_key])?
+    // todo: elimiate code duplication for default values
+    let (max_gas_price, mining_unit, mining_times) = if use_default {
+        (
+            ethers::utils::parse_units("30", "gwei").unwrap().into(),
+            ethers::utils::parse_ether("0.1").unwrap(),
+            10,
+        )
     } else {
-        vec![deposit_private_key]
+        let max_gas_price = input_max_gas_price()?;
+        let mining_unit = input_mining_unit()?;
+        let mining_times = input_mining_times()?;
+        (max_gas_price, mining_unit, mining_times)
     };
-    let withdrawal_private_key: H256 = input_withdrawal_private_key(&deposit_private_keys)?;
-    let (encrypt, keys, encrypted_keys) =
-        input_encryption(&deposit_private_keys, withdrawal_private_key)?;
+    let withdrawal_private_key: H256 = input_withdrawal_private_key()?;
+    let (encrypt, keys, encrypted_keys) = input_encryption(withdrawal_private_key)?;
     let config = EnvConfig {
         rpc_url,
         max_gas_price,
@@ -52,8 +46,7 @@ pub async fn new_config() -> anyhow::Result<EnvConfig> {
 }
 
 pub async fn modify_config(config: &EnvConfig) -> anyhow::Result<EnvConfig> {
-    let keys = recover_keys(config)?;
-
+    let key = recover_withdrawal_private_key(config)?;
     let modify_rpc = Confirm::new()
         .with_prompt(format!("Modify RPC URL {}?", config.rpc_url))
         .default(false)
@@ -76,33 +69,15 @@ pub async fn modify_config(config: &EnvConfig) -> anyhow::Result<EnvConfig> {
         config.max_gas_price
     };
 
-    println!("Deposit Addresses:");
-    for deposit_address in keys.deposit_addresses.iter() {
-        println!("{:?}", deposit_address);
-    }
-    let append_deposit_address = Confirm::new()
-        .with_prompt("Append deposit accounts?")
-        .default(false)
-        .interact()?;
-    let deposit_private_keys = if append_deposit_address {
-        append_deposit_private_keys(&keys.deposit_private_keys)?
-    } else {
-        keys.deposit_private_keys.clone()
-    };
-
     let modify_withdrawal_address = Confirm::new()
-        .with_prompt(format!(
-            "Modify withdrawal account {:?}?",
-            keys.withdrawal_address
-        ))
+        .with_prompt(format!("Modify withdrawal account {:?}?", get_address(key)))
         .default(false)
         .interact()?;
     let withdrawal_private_key = if modify_withdrawal_address {
-        input_withdrawal_private_key(&deposit_private_keys)?
+        input_withdrawal_private_key()?
     } else {
-        keys.withdrawal_private_key
+        key
     };
-
     let modify_encryption = Confirm::new()
         .with_prompt(format!(
             "Modify encryption current={}?",
@@ -111,7 +86,7 @@ pub async fn modify_config(config: &EnvConfig) -> anyhow::Result<EnvConfig> {
         .default(false)
         .interact()?;
     let (encrypt, keys, encrypted_keys) = if modify_encryption {
-        input_encryption(&deposit_private_keys, withdrawal_private_key)?
+        input_encryption(withdrawal_private_key)?
     } else {
         (
             config.encrypt,
@@ -204,41 +179,10 @@ fn input_mining_times() -> anyhow::Result<u64> {
     Ok(mining_times)
 }
 
-fn append_deposit_private_keys(current_deposit_private_keys: &[H256]) -> anyhow::Result<Vec<H256>> {
-    let mut deposit_private_keys = current_deposit_private_keys.to_vec();
-    loop {
-        let deposit_private_key: H256 = {
-            let deposit_private_key: String = Password::new()
-                .with_prompt(format!("Deposit private key of {}", get_network()))
-                .validate_with(|input: &String| {
-                    validate_private_key_with_duplication_check(&deposit_private_keys, input)
-                })
-                .interact()?;
-            let deposit_private_key: H256 = deposit_private_key.parse().unwrap();
-            let deposit_address = get_address(deposit_private_key);
-            println!("Deposit Address: {:?}", deposit_address);
-            deposit_private_key
-        };
-        deposit_private_keys.push(deposit_private_key);
-        let is_more = Confirm::new()
-            .with_prompt("Add more deposit private keys?")
-            .default(false)
-            .interact()?;
-        if is_more {
-            continue;
-        } else {
-            break;
-        }
-    }
-    Ok(deposit_private_keys)
-}
-
-fn input_withdrawal_private_key(deposit_private_keys: &[H256]) -> anyhow::Result<H256> {
+fn input_withdrawal_private_key() -> anyhow::Result<H256> {
     let withdrawal_private_key: String = Password::new()
         .with_prompt(format!("Withdrawal private key of {}", get_network()))
-        .validate_with(|input: &String| {
-            validate_private_key_with_duplication_check(deposit_private_keys, input)
-        })
+        .validate_with(|input: &String| validate_private_key_with_duplication_check(&[], input))
         .interact()?;
     let withdrawal_private_key: H256 = withdrawal_private_key.parse().unwrap();
     let withdrawal_address = get_address(withdrawal_private_key);
@@ -247,30 +191,28 @@ fn input_withdrawal_private_key(deposit_private_keys: &[H256]) -> anyhow::Result
 }
 
 fn input_encryption(
-    deposit_private_keys: &[H256],
     withdrawal_private_key: H256,
-) -> anyhow::Result<(bool, Option<Keys>, Option<Vec<u8>>)> {
+) -> anyhow::Result<(bool, Option<H256>, Option<Vec<u8>>)> {
     let do_encrypt = Confirm::new()
         .with_prompt("Do you set password to encrypt private keys?")
         .default(true)
         .interact()?;
-    let raw_keys = Keys::new(deposit_private_keys.to_vec(), withdrawal_private_key);
-    let keys = if !do_encrypt {
-        Some(raw_keys.clone())
+    let key = if !do_encrypt {
+        Some(withdrawal_private_key)
     } else {
         None
     };
-    let encrypted_keys = if do_encrypt {
+    let encrypted_key = if do_encrypt {
         let password = Password::new()
             .with_prompt("Password to encrypt private key")
             .with_confirmation("Confirm password", "Passwords do not match")
             .interact()?;
-        let encrypted_keys = encrypt(&password, &raw_keys)?;
+        let encrypted_keys = encrypt(&password, &withdrawal_private_key)?;
         Some(encrypted_keys)
     } else {
         None
     };
-    Ok((do_encrypt, keys, encrypted_keys))
+    Ok((do_encrypt, key, encrypted_key))
 }
 
 fn validate_private_key_with_duplication_check(
@@ -292,19 +234,19 @@ fn validate_private_key_with_duplication_check(
     }
 }
 
-pub fn recover_keys(config: &EnvConfig) -> anyhow::Result<Keys> {
-    let keys = if !config.encrypt {
+pub fn recover_withdrawal_private_key(config: &EnvConfig) -> anyhow::Result<H256> {
+    let key = if !config.encrypt {
         config.withdrawal_private_key.clone().unwrap()
     } else {
         let password = Password::new().with_prompt("Password").interact()?;
-        let keys: Keys = decrypt(
+        let key: H256 = decrypt(
             &password,
             config.encrypted_withdrawal_private_key.as_ref().unwrap(),
         )
         .map_err(|_| anyhow::anyhow!("Invalid password"))?;
-        keys
+        key
     };
-    Ok(keys)
+    Ok(key)
 }
 
 #[cfg(test)]
