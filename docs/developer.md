@@ -65,15 +65,15 @@ Users utilizing the interactive mode do not need to set these environment variab
 
 ### Environment Variables
 
-| Name                     | Description                                                                                                                                                                     | Example                                             | Default Value |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- | ------------- |
-| `RPC_URL`                | Blockchain RPC URL. Alchemy's RPC is strongly recommended. Required.                                                                                                            | `https://eth-mainnet.alchemyapi.io/v2/YOUR-API-KEY` | None          |
-| `MAX_GAS_PRICE`          | Maximum gas price in GWei allowed when executing transactions.                                                                                                                  | `30`                                                | `"30"`        |
-| `MINING_UNIT`            | Amount of ETH per mining operation.                                                                                                                                             | `"0.1"` or `"1"`                                    | `"0.1"`       |
-| `MINING_TIMES`           | Number of mining operations (sets of deposit and withdrawal).                                                                                                                   | `"10"` or `"100"`                                   | `"10"`        |
-| `WITHDRAWAL_PRIVATE_KEY` | Private key of withdrawal address. Required when `ENCRYPT` is `false`.                                                                                                          | `"0x789..."`                                        | None          |
-| `ENCRYPTED_WITHDRAWAL_PRIVATE_KEY`         | Encrypted form of withdrawal private key. Required when `ENCRYPT` is `true`.                                                                           | `"e356.."`                                          | None          |
-| `ENCRYPT`                | Flag to specify whether to encrypt and store deposit private keys and withdrawal private key. Takes values "true" or "false".                                                   | `"true"` or `"false"`                               | `"true"`      |
+| Name                               | Description                                                                                                                   | Example                                             | Default Value |
+| ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- | ------------- |
+| `RPC_URL`                          | Blockchain RPC URL. Alchemy's RPC is strongly recommended. Required.                                                          | `https://eth-mainnet.alchemyapi.io/v2/YOUR-API-KEY` | None          |
+| `MAX_GAS_PRICE`                    | Maximum gas price in GWei allowed when executing transactions.                                                                | `30`                                                | `"30"`        |
+| `MINING_UNIT`                      | Amount of ETH per mining operation.                                                                                           | `"0.1"` or `"1"`                                    | `"0.1"`       |
+| `MINING_TIMES`                     | Number of mining operations (sets of deposit and withdrawal).                                                                 | `"10"` or `"100"`                                   | `"10"`        |
+| `WITHDRAWAL_PRIVATE_KEY`           | Private key of withdrawal address. Required when `ENCRYPT` is `false`.                                                        | `"0x789..."`                                        | None          |
+| `ENCRYPTED_WITHDRAWAL_PRIVATE_KEY` | Encrypted form of withdrawal private key. Required when `ENCRYPT` is `true`.                                                  | `"e356.."`                                          | None          |
+| `ENCRYPT`                          | Flag to specify whether to encrypt and store deposit private keys and withdrawal private key. Takes values "true" or "false". | `"true"` or `"false"`                               | `"true"`      |
 
 ### Commands
 
@@ -88,3 +88,7 @@ Users utilizing the interactive mode do not need to set these environment variab
 3. `mining-cli exit`
 
    - Withdraws all balances currently in the simplified intmax2 and cancels pending deposits.
+
+4. `mining-cli export`
+
+   - Exports the all deposit private keys.
