@@ -17,7 +17,6 @@ pub mod export_deposit_accounts;
 pub mod interactive;
 
 pub async fn run(mode: RunMode) -> Result<(), CLIError> {
-    println!("Welcome to the INTMAX mining CLI!. Mode: {:?}", mode);
     check_avaliability()
         .await
         .map_err(|e| CLIError::VersionError(e.to_string()))?;

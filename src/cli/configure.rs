@@ -9,7 +9,7 @@ use crate::{
         config::Settings,
         encryption::{decrypt, encrypt},
         env_config::EnvConfig,
-        env_validation::validate_rpc_url,
+        env_validation::{get_allowed_mining_times, validate_rpc_url},
         network::{get_network, Network},
     },
 };
@@ -223,17 +223,16 @@ fn input_mining_unit() -> anyhow::Result<U256> {
 }
 
 fn input_mining_times() -> anyhow::Result<u64> {
-    let items = vec!["10 times", "100 times"];
+    let items: Vec<String> = get_allowed_mining_times()
+        .into_iter()
+        .map(|x| format!("{} times", x))
+        .collect();
     let selection = Select::new()
         .with_prompt("Choose mining times (number of deposits)")
         .items(&items)
         .default(0)
         .interact()?;
-    let mining_times = match selection {
-        0 => 10,
-        1 => 100,
-        _ => unreachable!(),
-    };
+    let mining_times = get_allowed_mining_times()[selection];
     Ok(mining_times)
 }
 
@@ -324,10 +323,5 @@ mod tests {
     async fn test_modify_config() {
         let config = EnvConfig::load_from_file(Network::Localnet).unwrap();
         modify_config(&config).await.unwrap();
-    }
-
-    #[tokio::test]
-    async fn test_confirm() {
-        Confirm::new().with_prompt("ADD").interact().unwrap();
     }
 }

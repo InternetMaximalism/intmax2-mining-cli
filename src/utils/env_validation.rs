@@ -1,6 +1,14 @@
 use super::{config::Settings, env_config::EnvConfig, network::is_testnet};
 use ethers::{providers::Middleware as _, types::U256};
 
+pub fn get_allowed_mining_times() -> Vec<u64> {
+    if is_testnet() {
+        vec![1, 5, 10, 100]
+    } else {
+        vec![10, 100]
+    }
+}
+
 pub async fn validate_env_config(env: &EnvConfig) -> anyhow::Result<()> {
     validate_rpc_url(&env.rpc_url).await?;
     validate_mining_unit(env.mining_unit)?;
@@ -18,15 +26,11 @@ fn validate_mining_unit(mining_unit: U256) -> anyhow::Result<()> {
 }
 
 fn validate_mining_times(mining_times: u64) -> anyhow::Result<()> {
-    let allowed_values = if is_testnet() {
-        vec![1, 5, 10, 100]
-    } else {
-        vec![10, 100]
-    };
-    if !allowed_values.contains(&mining_times) {
+    let allowed_mining_times = get_allowed_mining_times();
+    if !allowed_mining_times.contains(&mining_times) {
         anyhow::bail!(
             "MINING_TIMES environment variable must be one of {:?}",
-            allowed_values
+            allowed_mining_times
         );
     }
     Ok(())

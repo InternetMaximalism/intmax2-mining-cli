@@ -111,7 +111,7 @@ pub async fn claim_loop(state: &mut State, withdrawal_private_key: H256) -> anyh
             return Ok(());
         }
         print_status(format!(
-            "Claim for deposit address {} {:?}",
+            "Claim for deposit address #{} {:?}",
             key_number, key.deposit_address
         ));
         let assets_status = state.sync_and_fetch_assets(&key).await?;

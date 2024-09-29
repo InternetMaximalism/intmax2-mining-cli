@@ -29,7 +29,7 @@ fn get_log_file_path() -> PathBuf {
         .join("logs")
         .join(format!(
             "{}.log",
-            chrono::Local::now().format("%Y-%m-%d-%H-%M-%S")
+            chrono::Local::now().format("%Y-%m-%d-%H:%M:%S")
         ))
 }
 
