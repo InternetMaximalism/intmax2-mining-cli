@@ -12,7 +12,7 @@ gnark_get_proof_cooldown_in_sec = 15
 [blockchain]
 chain_id = 17000
 int1_address = "0x50f8A0956B1c41fA7884637ecf8322aba7e02369"
-minter_address = "0x8fFe60b2d9dF36f40776E8F0bfBE750C370033FF"
+minter_address = "0xDb3b66830b42dF8bB0316D783Ba4Ff5A9C212D51"
 token_address = "0x78801e4e578860bbcd72A7c79aA363D762d52351"
 single_deposit_gas = 88000
 single_claim_gas = 600000
