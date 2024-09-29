@@ -127,7 +127,7 @@ Select `holesky (testnet)`.
    <div align="center"><img src="../assets/instruction/t2.png" width="600" alt="Mining CLI"></div>
 
 4. **Claim Process**:
-   The Claim process will start. This process continues until there are no more ITX tokens available to claim.
+   The Claim process will start. This process continues until there are no more ITX tokens available to claim. The ITX tokens will be sent to the withdrawal address.
 
 ### Exporting Deposit Private Keys
 
