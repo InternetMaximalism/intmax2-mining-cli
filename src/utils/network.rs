@@ -1,11 +1,19 @@
-use std::{env, fmt::Display};
+use std::{env, fmt::Display, str::FromStr};
 
-#[derive(PartialEq)]
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Copy, Clone, Serialize, Deserialize, PartialEq)]
 pub enum Network {
     Localnet,
     Sepolia,
     Holesky,
     Mainnet,
+}
+
+impl Default for Network {
+    fn default() -> Self {
+        Network::Holesky
+    }
 }
 
 impl Display for Network {
@@ -19,13 +27,28 @@ impl Display for Network {
     }
 }
 
-pub fn get_network() -> Network {
-    let network = env::var("NETWORK").unwrap_or_else(|_| "sepolia".to_string());
-    match network.as_str() {
-        "localnet" => Network::Localnet,
-        "sepolia" => Network::Sepolia,
-        "holesky" => Network::Holesky,
-        "mainnet" => Network::Mainnet,
-        _ => panic!("Invalid NETWORK environment variable"),
+impl FromStr for Network {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "localnet" => Ok(Network::Localnet),
+            "sepolia" => Ok(Network::Sepolia),
+            "holesky" => Ok(Network::Holesky),
+            "mainnet" => Ok(Network::Mainnet),
+            _ => Err(()),
+        }
     }
 }
+
+pub fn get_network() -> Network {
+    let network = env::var("NETWORK").unwrap_or_else(|_| Network::default().to_string());
+    Network::from_str(&network).expect("Invalid network")
+}
+
+pub fn is_testnet() -> bool {
+    get_network() != Network::Mainnet
+}
+
+#[cfg(test)]
+mod tests {}

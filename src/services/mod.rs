@@ -3,7 +3,7 @@ use crate::{
         balance_validation::{
             validate_deposit_address_balance, validate_withdrawal_address_balance,
         },
-        console::{print_assets_status, print_status},
+        console::{print_assets_status, print_log, print_status},
     },
     state::{key::Key, state::State},
     utils::config::Settings,
@@ -30,7 +30,7 @@ pub async fn mining_loop(
     let mut key_number = start_key_number;
     loop {
         let key = Key::new(withdrawal_private_key, key_number);
-        print_status(format!(
+        print_log(format!(
             "Mining using deposit address #{} {:?}",
             key_number, key.deposit_address
         ));
@@ -49,8 +49,8 @@ pub async fn mining_loop(
                 && assets_status.rejected_indices.is_empty()
                 && assets_status.not_withdrawn_indices.is_empty()
             {
-                print_status(format!(
-                    "Max deposits {} reached for {:?}. Please use another deposit address.",
+                print_log(format!(
+                    "Max deposits {} reached for {:?}.",
                     mining_times, key.deposit_address
                 ));
                 key_number += 1;

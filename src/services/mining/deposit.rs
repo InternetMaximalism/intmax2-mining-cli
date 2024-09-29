@@ -4,6 +4,7 @@ use intmax2_zkp::{
 };
 
 use crate::{
+    cli::console::print_log,
     external_api::contracts::{int1::get_int1_contract_with_signer, utils::get_account_nonce},
     services::utils::{await_until_low_gas_price, handle_contract_call},
     state::{key::Key, state::State},
@@ -29,7 +30,8 @@ pub async fn deposit_task(_state: &State, key: &Key, mining_unit: U256) -> anyho
         .value(mining_unit);
     tx.tx.set_nonce(nonce);
 
-    handle_contract_call(tx, deposit_address, "deposit", "deposit").await?;
+    let tx_hash = handle_contract_call(tx, deposit_address, "deposit", "deposit").await?;
+    print_log(format!("Deposited with tx hash {:?}", tx_hash));
     Ok(())
 }
 

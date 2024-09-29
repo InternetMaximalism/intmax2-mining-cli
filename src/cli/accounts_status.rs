@@ -10,6 +10,7 @@ use crate::{
     },
     services::utils::{is_address_used, pretty_format_u256},
     state::{key::Key, state::State},
+    utils::network::get_network,
 };
 
 /// Prints the status of the accounts
@@ -19,6 +20,7 @@ pub async fn accounts_status(
     mining_times: u64,
     withdrawal_private_key: H256,
 ) -> anyhow::Result<u64> {
+    println!("Network: {}", get_network());
     let withdrawal_address = get_address(withdrawal_private_key);
     let withdrawal_balance = get_balance(withdrawal_address).await?;
     let withdrawal_token_balance = get_token_balance(withdrawal_address).await?;

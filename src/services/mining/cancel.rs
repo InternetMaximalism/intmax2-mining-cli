@@ -1,6 +1,7 @@
 use intmax2_zkp::ethereum_types::u32limb_trait::U32LimbTrait as _;
 
 use crate::{
+    cli::console::print_log,
     external_api::contracts::{
         events::Deposited,
         int1::{get_int1_contract_with_signer, int_1},
@@ -20,6 +21,10 @@ pub async fn cancel_task(_state: &State, key: &Key, event: Deposited) -> anyhow:
     await_until_low_gas_price().await?;
     let int1 = get_int1_contract_with_signer(key.deposit_private_key).await?;
     let tx = int1.cancel_deposit(event.deposit_id.into(), deposit.clone());
-    handle_contract_call(tx, deposit_address, "deposit", "cancel").await?;
+    let tx_hash = handle_contract_call(tx, deposit_address, "deposit", "cancel").await?;
+    print_log(format!(
+        "Cancelled deposit id {:?} with tx hash {:?}",
+        event.deposit_id, tx_hash,
+    ));
     Ok(())
 }

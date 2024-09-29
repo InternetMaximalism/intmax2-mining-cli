@@ -9,7 +9,7 @@ use log::info;
 use mining_circuit_v1::claim::{claim_circuit::ClaimPublicInputs, mining_claim::MiningClaim};
 
 use crate::{
-    cli::console::print_status,
+    cli::console::{print_log, print_status},
     external_api::contracts::{
         minter::{get_minter_contract_with_signer, minter_v1},
         utils::get_wallet,
@@ -48,6 +48,7 @@ pub async fn claim_tokens(
     let minter = get_minter_contract_with_signer(claim_key).await?;
     let tx = minter.claim_tokens(mint_claims.clone(), pis.clone(), proof.clone());
     info!("Calling claim_tokens: tx {:?}", tx);
-    handle_contract_call(tx, claim_address, "claim", "claim").await?;
+    let tx_hash = handle_contract_call(tx, claim_address, "claim", "claim").await?;
+    print_log(format!("Claimed with tx hash: {:?}", tx_hash));
     Ok(())
 }

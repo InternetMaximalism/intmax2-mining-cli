@@ -4,7 +4,7 @@ use ethers::{
     middleware::SignerMiddleware,
     providers::{Http, Middleware, Provider},
     signers::Wallet,
-    types::{Address, U256},
+    types::{Address, H256, U256},
 };
 
 use crate::{
@@ -21,7 +21,7 @@ pub async fn handle_contract_call<S: ToString>(
     from_address: Address,
     from_name: S,
     tx_name: S,
-) -> anyhow::Result<()> {
+) -> anyhow::Result<H256> {
     loop {
         let result = tx.send().await;
         match result {
@@ -38,7 +38,7 @@ pub async fn handle_contract_call<S: ToString>(
                     "{} tx failed",
                     from_name.to_string()
                 );
-                return Ok(());
+                return Ok(tx_receipt.transaction_hash);
             }
             Err(e) => {
                 let error_message = e.to_string();

@@ -23,7 +23,7 @@ pub async fn mining_task(
     mining_unit: U256,
 ) -> anyhow::Result<bool> {
     // cancel pending deposits
-    if !assets_status.pending_indices.is_empty() && cancel_pending_deposits {
+    if cancel_pending_deposits {
         for &index in assets_status.pending_indices.iter() {
             let event = assets_status.senders_deposits[index].clone();
             cancel_task(state, key, event).await.map_err(|e| {
@@ -33,16 +33,14 @@ pub async fn mining_task(
     }
 
     // cancel rejected deposits
-    if !assets_status.rejected_indices.is_empty() {
-        for &index in assets_status.rejected_indices.iter() {
-            let event = assets_status.senders_deposits[index].clone();
-            cancel_task(state, key, event).await.map_err(|e| {
-                CLIError::InternalError(format!("Failed to cancel a rejected deposit: {:#}", e))
-            })?;
-        }
+    for &index in assets_status.rejected_indices.iter() {
+        let event = assets_status.senders_deposits[index].clone();
+        cancel_task(state, key, event).await.map_err(|e| {
+            CLIError::InternalError(format!("Failed to cancel a rejected deposit: {:#}", e))
+        })?;
     }
 
-    // withdraw
+    // withdrawal
     if !assets_status.not_withdrawn_indices.is_empty() {
         for &index in assets_status.not_withdrawn_indices.iter() {
             let event = assets_status.senders_deposits[index].clone();
@@ -50,6 +48,7 @@ pub async fn mining_task(
                 .await
                 .map_err(|e| CLIError::InternalError(format!("Failed to withdrawal: {:#}", e)))?;
         }
+        // return true to cooldown after withdrawal
         return Ok(true);
     }
 

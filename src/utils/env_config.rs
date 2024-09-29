@@ -1,25 +1,25 @@
-use std::{env, io::BufReader, path::PathBuf};
+use std::{env, io::BufReader, path::PathBuf, str::FromStr as _};
 
 use ethers::types::{H256, U256};
 use serde::{Deserialize, Serialize};
 
-use crate::utils::network::get_network;
-
 use super::{
     config::Settings,
     file::{create_file_with_content, get_project_root, DATA_DIR},
+    network::Network,
 };
 
-fn env_config_path() -> PathBuf {
+fn env_config_path(network: Network) -> PathBuf {
     get_project_root()
         .unwrap()
         .join(DATA_DIR)
-        .join(format!("env.{}.json", get_network()))
+        .join(format!("env.{}.json", network))
 }
 
 // Structure for setting and getting env
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct EnvConfig {
+    pub network: Network,
     pub rpc_url: String,
     pub max_gas_price: U256,
     pub encrypt: bool,
@@ -30,8 +30,8 @@ pub struct EnvConfig {
 }
 
 impl EnvConfig {
-    pub fn load_from_file() -> anyhow::Result<Self> {
-        let file = std::fs::File::open(&env_config_path())?;
+    pub fn load_from_file(network: Network) -> anyhow::Result<Self> {
+        let file = std::fs::File::open(&env_config_path(network))?;
         let reader = BufReader::new(file);
         let config: EnvConfig = serde_json::from_reader(reader)?;
         Ok(config)
@@ -39,12 +39,13 @@ impl EnvConfig {
 
     pub fn save_to_file(&self) -> anyhow::Result<()> {
         let input = serde_json::to_vec_pretty(self)?;
-        create_file_with_content(&env_config_path(), &input)?;
+        create_file_with_content(&env_config_path(self.network), &input)?;
         Ok(())
     }
 
     pub fn export_to_env(&self) -> anyhow::Result<()> {
         let config_string = self.to_string()?;
+        env::set_var("NETWORK", &config_string.network);
         env::set_var("RPC_URL", &config_string.rpc_url);
         env::set_var("MAX_GAS_PRICE", &config_string.max_gas_price);
         env::set_var("ENCRYPT", &config_string.encrypt);
@@ -66,6 +67,7 @@ impl EnvConfig {
 
     // import env config from env. Only checks format of env, not the correctness of the values
     pub fn import_from_env() -> anyhow::Result<Self> {
+        let network = env::var("NETWORK").unwrap_or(Network::default().to_string());
         let default_env = Settings::load()?.env;
         let rpc_url = env::var("RPC_URL")
             .map_err(|_| anyhow::Error::msg("RPC_URL environment variable is not set"))?;
@@ -77,6 +79,7 @@ impl EnvConfig {
         let mining_times =
             env::var("MINING_TIMES").unwrap_or(default_env.default_mining_times.to_string());
         let config_string = EnvConfigString {
+            network,
             rpc_url,
             max_gas_price,
             encrypt,
@@ -90,6 +93,7 @@ impl EnvConfig {
     }
 
     fn to_string(&self) -> anyhow::Result<EnvConfigString> {
+        let network = format!("{}", self.network);
         let max_gas_price = ethers::utils::format_units(self.max_gas_price, "gwei").unwrap();
         let encrypt = if self.withdrawal_private_key.is_some() {
             "false".to_string()
@@ -106,6 +110,7 @@ impl EnvConfig {
         let mining_unit = ethers::utils::format_units(self.mining_unit, "ether").unwrap();
         let mining_times = self.mining_times.to_string();
         Ok(EnvConfigString {
+            network,
             rpc_url: self.rpc_url.clone(),
             max_gas_price,
             encrypt,
@@ -117,6 +122,8 @@ impl EnvConfig {
     }
 
     fn from_string(value: &EnvConfigString) -> anyhow::Result<Self> {
+        let network =
+            Network::from_str(&value.network).map_err(|_| anyhow::anyhow!("Invalid network"))?;
         let max_gas_price: U256 = ethers::utils::parse_units(value.max_gas_price.clone(), "gwei")
             .map_err(|_| anyhow::anyhow!("failed to parse MAX_GAS_PRICE"))?
             .into();
@@ -164,6 +171,7 @@ impl EnvConfig {
             .map_err(|_| anyhow::anyhow!("failed to parse MINING_TIMES"))?;
 
         Ok(EnvConfig {
+            network,
             rpc_url: value.rpc_url.clone(),
             max_gas_price,
             encrypt,
@@ -178,6 +186,7 @@ impl EnvConfig {
 // string version of EnvConfig
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 struct EnvConfigString {
+    network: String,
     rpc_url: String,
     max_gas_price: String,
     encrypt: String,
@@ -191,6 +200,8 @@ struct EnvConfigString {
 mod tests {
     use ethers::{types::U256, utils::format_units};
 
+    use crate::utils::network::Network;
+
     #[test]
     fn load_env_test() {
         dotenv::dotenv().ok();
@@ -201,6 +212,7 @@ mod tests {
     #[test]
     fn test_env_config_string_conversion() {
         let env_config = super::EnvConfig {
+            network: Network::Localnet,
             rpc_url: "http://localhost:8545".to_string(),
             max_gas_price: 30_000_000_000u64.into(),
             encrypt: false,
@@ -217,6 +229,7 @@ mod tests {
     #[test]
     fn test_export_and_import_config() {
         let env_config = super::EnvConfig {
+            network: Network::Localnet,
             rpc_url: "http://localhost:8545".to_string(),
             max_gas_price: 30_000_000_000u64.into(),
             encrypt: false,

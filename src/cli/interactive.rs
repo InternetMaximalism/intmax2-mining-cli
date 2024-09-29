@@ -1,13 +1,14 @@
 use console::style;
 use dialoguer::Select;
 
-use crate::{state::mode::RunMode, utils::env_config::EnvConfig};
+use crate::{cli::configure::select_network, state::mode::RunMode, utils::env_config::EnvConfig};
 
 use super::configure::{modify_config, new_config};
 
 pub async fn interactive() -> anyhow::Result<RunMode> {
-    let is_file_exists = EnvConfig::load_from_file().is_ok();
+    let network = select_network()?;
 
+    let is_file_exists = EnvConfig::load_from_file(network).is_ok();
     if is_file_exists {
         let items = vec![
             format!(
@@ -32,10 +33,10 @@ pub async fn interactive() -> anyhow::Result<RunMode> {
             .default(0)
             .interact()?;
         let config = match selection {
-            0 => EnvConfig::load_from_file()?,
-            1 => new_config().await?,
+            0 => EnvConfig::load_from_file(network)?,
+            1 => new_config(network).await?,
             2 => {
-                let config = EnvConfig::load_from_file()?;
+                let config = EnvConfig::load_from_file(network)?;
                 modify_config(&config).await?
             }
             _ => unreachable!(),
@@ -44,7 +45,7 @@ pub async fn interactive() -> anyhow::Result<RunMode> {
         config.export_to_env()?;
     } else {
         println!("Config file not found. Creating a new one.");
-        let config = new_config().await?;
+        let config = new_config(network).await?;
         config.save_to_file()?;
         config.export_to_env()?;
     };

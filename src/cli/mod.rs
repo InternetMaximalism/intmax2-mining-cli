@@ -1,14 +1,11 @@
 use availability::check_avaliability;
-use configure::{recover_withdrawal_private_key, select_network};
+use configure::recover_withdrawal_private_key;
 use console::{initialize_console, print_status};
 
 use crate::{
     services::{claim_loop, exit_loop, mining_loop},
     state::{mode::RunMode, prover::Prover, state::State},
-    utils::{
-        env_config::EnvConfig, env_validation::validate_env_config, errors::CLIError,
-        network::get_network,
-    },
+    utils::{env_config::EnvConfig, env_validation::validate_env_config, errors::CLIError},
 };
 
 pub mod accounts_status;
@@ -20,17 +17,10 @@ pub mod export_deposit_accounts;
 pub mod interactive;
 
 pub async fn run(mode: RunMode) -> Result<(), CLIError> {
-    select_network().map_err(|e| CLIError::InternalError(e.to_string()))?;
-
-    println!(
-        "Welcome to the INTMAX mining CLI!. Network: {}, Mode: {:?}",
-        get_network(),
-        mode
-    );
+    println!("Welcome to the INTMAX mining CLI!. Mode: {:?}", mode);
     check_avaliability()
         .await
         .map_err(|e| CLIError::VersionError(e.to_string()))?;
-
     let mode = if mode == RunMode::Interactive {
         interactive::interactive()
             .await
@@ -38,16 +28,6 @@ pub async fn run(mode: RunMode) -> Result<(), CLIError> {
     } else {
         mode.clone()
     };
-
-    // export env config
-    match EnvConfig::load_from_file() {
-        Ok(config) => {
-            config
-                .export_to_env()
-                .map_err(|e| CLIError::EnvError(e.to_string()))?;
-        }
-        Err(_) => {}
-    }
 
     let config = EnvConfig::import_from_env().map_err(|e| CLIError::EnvError(e.to_string()))?;
     let withdrawal_private_key = recover_withdrawal_private_key(&config)

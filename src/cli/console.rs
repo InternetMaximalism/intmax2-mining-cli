@@ -23,6 +23,20 @@ pub fn print_status<S: ToString>(message: S) {
     info!("{}", message.to_string());
 }
 
+// similar to print_status but not will be overwritten
+pub fn print_log<S: ToString>(message: S) {
+    let term = Term::stdout();
+    term.clear_last_lines(2).unwrap();
+    let colored_message = format!(
+        "{} {}",
+        style(format!("{}:", chrono::Local::now().format("%H:%M:%S"))).dim(),
+        style(message.to_string()).blue()
+    );
+    term.write_line(&colored_message).unwrap();
+    initialize_console();
+    info!("{}", message.to_string());
+}
+
 pub fn print_warning<S: ToString>(message: S) {
     let term = Term::stdout();
     term.clear_last_lines(2).unwrap();
@@ -38,16 +52,14 @@ pub fn print_warning<S: ToString>(message: S) {
 }
 
 pub fn print_assets_status(assets_status: &crate::services::assets_status::AssetsStatus) {
-    print_status(format!(
-        "Deposits: {} (success: {} pending: {} rejected: {} cancelled: {}) Withdrawn: {} Eligible: {} (claimed: {})",
+    print_log(format!(
+        "Deposits: {} (success: {} pending: {} rejected: {} cancelled: {}) Withdrawn: {}",
         assets_status.senders_deposits.len(),
         assets_status.contained_indices.len(),
         assets_status.pending_indices.len(),
         assets_status.rejected_indices.len(),
         assets_status.cancelled_indices.len(),
         assets_status.withdrawn_indices.len(),
-        assets_status.eligible_indices.len(),
-        assets_status.claimed_indices.len(),
     ));
 }
 

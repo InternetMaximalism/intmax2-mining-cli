@@ -1,4 +1,4 @@
-use std::env;
+use std::str::FromStr;
 
 use dialoguer::{Confirm, Input, Password, Select};
 use ethers::types::{H256, U256};
@@ -10,11 +10,11 @@ use crate::{
         encryption::{decrypt, encrypt},
         env_config::EnvConfig,
         env_validation::validate_rpc_url,
-        network::get_network,
+        network::{get_network, Network},
     },
 };
 
-pub fn select_network() -> anyhow::Result<String> {
+pub fn select_network() -> anyhow::Result<Network> {
     let items = vec!["mainnet", "holesky (testnet)"];
     let selection = Select::new()
         .with_prompt("Choose network")
@@ -26,11 +26,10 @@ pub fn select_network() -> anyhow::Result<String> {
         1 => "holesky",
         _ => unreachable!(),
     };
-    env::set_var("NETWORK", network);
-    Ok(network.to_string())
+    Network::from_str(network).map_err(|_| anyhow::anyhow!("Invalid network"))
 }
 
-pub async fn new_config() -> anyhow::Result<EnvConfig> {
+pub async fn new_config(network: Network) -> anyhow::Result<EnvConfig> {
     let rpc_url: String = input_rpc_url().await?;
     let default_env = Settings::load()?.env;
     let use_default = Confirm::new()
@@ -54,6 +53,7 @@ pub async fn new_config() -> anyhow::Result<EnvConfig> {
     let withdrawal_private_key: H256 = input_withdrawal_private_key()?;
     let (encrypt, keys, encrypted_keys) = input_encryption(withdrawal_private_key)?;
     let config = EnvConfig {
+        network,
         rpc_url,
         max_gas_price,
         encrypt,
@@ -115,6 +115,7 @@ pub async fn modify_config(config: &EnvConfig) -> anyhow::Result<EnvConfig> {
         )
     };
     let config = EnvConfig {
+        network: config.network,
         rpc_url,
         max_gas_price,
         encrypt,
@@ -312,12 +313,16 @@ mod tests {
 
     #[tokio::test]
     async fn test_new_config() {
-        new_config().await.unwrap().save_to_file().unwrap();
+        new_config(Network::Localnet)
+            .await
+            .unwrap()
+            .save_to_file()
+            .unwrap();
     }
 
     #[tokio::test]
     async fn test_modify_config() {
-        let config = EnvConfig::load_from_file().unwrap();
+        let config = EnvConfig::load_from_file(Network::Localnet).unwrap();
         modify_config(&config).await.unwrap();
     }
 

@@ -27,17 +27,23 @@ fn get_log_file_path() -> PathBuf {
         .unwrap()
         .join(DATA_DIR)
         .join("logs")
-        .join(format!("{}.log", chrono::Utc::now().to_rfc3339()))
+        .join(format!(
+            "{}.log",
+            chrono::Local::now().format("%Y-%m-%d-%H-%M-%S")
+        ))
 }
 
 #[tokio::main]
 async fn main() {
-    dotenv().ok();
     let mode = Args::parse().command.unwrap_or(RunMode::Interactive);
+    // load the .env file if not in interactive mode
+    if mode != RunMode::Interactive {
+        dotenv().ok();
+    }
 
     // test loading the setting
     get_project_root().expect("Failed to get project root: cannot find mining-cli-root");
-    
+
     create_file_with_content(&get_log_file_path(), &[]).expect("Failed to create log file");
     let log_file = File::create(get_log_file_path()).unwrap();
     WriteLogger::init(LevelFilter::Info, Config::default(), log_file).unwrap();
