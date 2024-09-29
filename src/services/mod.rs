@@ -77,9 +77,10 @@ pub async fn exit_loop(state: &mut State, withdrawal_private_key: H256) -> anyho
     loop {
         let key = Key::new(withdrawal_private_key, key_number);
         if !is_address_used(key.deposit_address).await {
+            print_status("exit loop finished".to_string());
             return Ok(());
         }
-        print_status(format!(
+        print_log(format!(
             "Exit for deposit address #{} {:?}",
             key_number, key.deposit_address
         ));
@@ -108,9 +109,10 @@ pub async fn claim_loop(state: &mut State, withdrawal_private_key: H256) -> anyh
     loop {
         let key = Key::new(withdrawal_private_key, key_number);
         if !is_address_used(key.deposit_address).await {
+            print_status("claim loop finished".to_string());
             return Ok(());
         }
-        print_status(format!(
+        print_log(format!(
             "Claim for deposit address #{} {:?}",
             key_number, key.deposit_address
         ));

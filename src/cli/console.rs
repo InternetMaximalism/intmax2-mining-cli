@@ -52,7 +52,7 @@ pub fn print_warning<S: ToString>(message: S) {
 }
 
 pub fn print_assets_status(assets_status: &crate::services::assets_status::AssetsStatus) {
-    print_log(format!(
+    print_status(format!(
         "Deposits: {} (success: {} pending: {} rejected: {} cancelled: {}) Withdrawn: {}",
         assets_status.senders_deposits.len(),
         assets_status.contained_indices.len(),

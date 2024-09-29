@@ -8,13 +8,14 @@ use crate::{
     },
     utils::{
         bin_parser::{BinDepositTree, BinEligibleTree, DepositTreeInfo, EligibleTreeInfo},
+        config::Settings,
         deposit_hash_tree::DepositHashTree,
         eligible_tree_with_map::EligibleTreeWithMap,
     },
 };
 
 use anyhow::ensure;
-use chrono::{Duration, NaiveDateTime, Utc};
+use chrono::{NaiveDateTime, Utc};
 use log::{info, warn};
 use tokio::time::sleep;
 
@@ -27,7 +28,10 @@ pub async fn sync_trees(
     eligible_tree: &mut EligibleTreeWithMap,
 ) -> anyhow::Result<()> {
     let now = Utc::now().naive_utc();
-    if now.signed_duration_since(*last_update) <= Duration::hours(24) {
+    let sync_tree_data_interval_in_sec = Settings::load()?.api.sync_tree_data_interval_in_sec;
+    if now.signed_duration_since(*last_update)
+        <= chrono::Duration::seconds(sync_tree_data_interval_in_sec as i64)
+    {
         // sync deposit tree only
         *last_deposit_block_number =
             sync_to_latest_deposit_tree(deposit_hash_tree, *last_deposit_block_number).await?;
@@ -40,7 +44,7 @@ pub async fn sync_trees(
     let mut try_number = 0;
     loop {
         if try_number > MAX_TRY_FETCH_TREE {
-            anyhow::bail!("exceeed MAX_TRY_FETCH_TREE");
+            anyhow::bail!("Exceeded MAX_TRY_FETCH_TREE");
         }
         let result = fetch_latest_tree_from_github(*last_update).await?;
         if let Some((bin_deposit_tree, bin_eligible_tree, new_last_update)) = result {

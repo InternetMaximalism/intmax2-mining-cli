@@ -30,6 +30,7 @@ pub struct Api {
     pub tree_data_repository: String,
     pub tree_data_directory: String,
     pub tree_data_branch: String,
+    pub sync_tree_data_interval_in_sec: u64,
     pub gnark_get_proof_cooldown_in_sec: u64,
     pub withdrawal_server_url: String,
 }

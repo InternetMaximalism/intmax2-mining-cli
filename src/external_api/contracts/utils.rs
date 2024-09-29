@@ -20,7 +20,8 @@ fn get_rpc_url() -> anyhow::Result<String> {
 
 async fn get_provider() -> anyhow::Result<Provider<Http>> {
     let rpc_url = get_rpc_url()?;
-    let provider = Provider::<Http>::try_from(rpc_url)?;
+    let provider = Provider::<Http>::try_from(rpc_url)
+        .map_err(|_| CLIError::NetworkError("Failed to connect RPC endpoint".to_string()))?;
     Ok(provider)
 }
 
