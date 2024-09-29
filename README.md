@@ -1,20 +1,10 @@
 # v1-mining-cli
 
-> **⚠️ Pre-release Sepolia Testnet Version**
->
-> This CLI tool currently operates on Sepolia testnet only. Key differences from future Mainnet:
->
-> - Mining: Every few minutes (Mainnet: hours)
-> - Claims: Daily at 00:00 UTC, with a 1-day delay (Mainnet: weekly on Mondays at 00:00 UTC, with a 1-week delay)
-> - Tokens: Test tokens (Mainnet: ITX tokens)
->
-> "Mainnet" references below refer to Sepolia testnet in this version.
-
 A CLI tool for automatic mining of ITX tokens.
 
 ## Overview
 
-v1-mining-cli is a tool that allows users to mine ITX tokens by participating in a simplified version of intmax2. By utilizing a simplified version of intmax2 that focuses on deposit and private withdrawal functions, users can contribute to enhancing Ethereum's privacy while earning rewards in ITX tokens.
+v1-mining-cli is a tool that allows users to mine ITX tokens by participating in a simplified version of Intmax2. By utilizing a simplified version of Intmax2 that focuses on deposit and private withdrawal functions, users can contribute to enhancing Ethereum's privacy while earning rewards in ITX tokens.
 
 ### Minimum Requirements
 

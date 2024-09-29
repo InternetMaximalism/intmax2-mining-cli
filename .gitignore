@@ -1,6 +1,10 @@
+.DS_Store
+
 data/
 target/
 .env
 *.zip
 
-.DS_Store
+# for internal test config files
+config.sepolia.toml
+config.localnet.toml
