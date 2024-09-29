@@ -133,11 +133,20 @@ Select `holesky (testnet)`.
 
 You can see the private keys of the deposit addresses. This is useful when you want to retrieve the balance of the deposit addresses.
 
-1. **Select Mode**:
-   Select `Export` mode.
+1. **Select Network**:
+Select `holesky (testnet)`.
+   <div align="center">
+     <img src="../assets/instruction/s1.png" width="600" alt="Mining CLI"></div>
 
+2. **Continue the process**:
+   Select `Continue` to proceed with the previous settings.
+
+<div align="center"><img src="../assets/instruction/t1.png" width="600" alt="Mining CLI"></div>
+
+3. **Select Mode**:
+   Select `Export` mode.
    <div align="center"><img src="../assets/instruction/t2.png" width="600" alt="Mining CLI"></div>
 
-2. **Export**:
+4. **Export**:
    The CLI will display the private keys of the deposit addresses. Please save them in a secure place.
    <div align="center"><img src="../assets/instruction/t3.png" width="600" alt="Mining CLI"></div>
