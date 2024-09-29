@@ -62,7 +62,7 @@ The status message components are:
 ## FAQs
 
 Q: Can I lose my mining funds?<br>
-A: Your funds are safe as long as you don't lose your deposit private key.
+A: Your funds are safe as long as you don't lose your withdrawal private key.
 
 Q: Is this process self-custodial?<br>
 A: Yes, but the contract is currently upgradable. The intmax team plans to relinquish this ability soon.
