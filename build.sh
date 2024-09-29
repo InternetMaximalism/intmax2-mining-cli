@@ -4,6 +4,7 @@ set -e  # Exit on error
 
 # Get the project name from Cargo.toml
 PROJECT_NAME=$(grep '^name' Cargo.toml | sed 's/name[[:space:]]*=[[:space:]]*//' | sed 's/"//g' | tr -d '[:space:]')
+RELEASE_DIR="release/"
 
 # Function to build and create ZIP for each target
 build_and_zip() {
@@ -29,14 +30,15 @@ build_and_zip() {
     cp -R docs "${temp_dir}/" || echo "Warning: 'docs' directory not found"
     cp .env.example "${temp_dir}/" || echo "Warning: '.env.example' file not found"
     cp mining-cli-root "${temp_dir}/" || echo "Warning: 'mining-cli-root' file not found"
-    cp config.sepolia.toml "${temp_dir}/" || echo "Warning: 'config.sepolia.toml' file not found"
+    cp config.mainnet.toml "${temp_dir}/" || echo "Warning: 'config.mainnet.toml' file not found"
+    cp config.holesky.toml "${temp_dir}/" || echo "Warning: 'config.holesky.toml' file not found"
     cp README.md "${temp_dir}/" || echo "Warning: 'README.md' file not found"
     
     # Create the ZIP file
     (cd "${temp_dir}" && zip -r "${zip_name}" .)
     
     # Move the ZIP file to the project root
-    mv "${temp_dir}/${zip_name}" .
+    mv "${temp_dir}/${zip_name}" "${RELEASE_DIR}"
     
     # Remove the temporary directory
     rm -rf "${temp_dir}"

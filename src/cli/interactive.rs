@@ -1,4 +1,4 @@
-use console::style;
+use console::{style, Term};
 use dialoguer::Select;
 
 use crate::{cli::configure::select_network, state::mode::RunMode, utils::env_config::EnvConfig};
@@ -72,6 +72,8 @@ pub async fn interactive() -> anyhow::Result<RunMode> {
             style("export deposit private keys").dim()
         ),
     ];
+    let term = Term::stdout();
+    term.clear_screen()?;
     let mode = Select::new()
         .with_prompt("Select mode")
         .items(&items)

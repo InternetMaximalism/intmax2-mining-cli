@@ -151,7 +151,7 @@ async fn input_rpc_url() -> anyhow::Result<String> {
 }
 
 async fn input_alchemy_url() -> anyhow::Result<String> {
-    let alchemy_api_key: String = Input::new().with_prompt("Alchemy API Key").interact()?;
+    let alchemy_api_key: String = Password::new().with_prompt("Alchemy API Key").interact()?;
     let alchemy_url = format!(
         "https://eth-{}.g.alchemy.com/v2/{}",
         get_network(),
@@ -161,7 +161,9 @@ async fn input_alchemy_url() -> anyhow::Result<String> {
 }
 
 async fn input_infura_url() -> anyhow::Result<String> {
-    let infura_project_id: String = Input::new().with_prompt("Infura Project ID").interact()?;
+    let infura_project_id: String = Password::new()
+        .with_prompt("Infura Project ID")
+        .interact()?;
     let infura_url = format!(
         "https://{}.infura.io/v3/{}",
         get_network(),
@@ -193,7 +195,7 @@ fn input_max_gas_price() -> anyhow::Result<U256> {
             let result = ethers::utils::parse_units(max_gas_price, "gwei");
             if let Ok(x) = result {
                 if x > ethers::utils::parse_units("210", "gwei").unwrap() {
-                    return Err("Gas price too high");
+                    return Err("Gas price too high (>210 GWei)");
                 }
                 Ok(())
             } else {
