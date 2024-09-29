@@ -1,127 +1,143 @@
 ## Quick Start Guide
 
+This guide explains how to start mining on the holesky testnet using the intmax2 mining CLI.
+
 ## Prerequisites
 
 Before you begin, please ensure you have the following:
 
-- **Ethereum (ETH)**: A minimum of 1 ETH plus additional ETH for deposit fees.
-- **RPC URL**: We recommend using Alchemy's free plan. Sign up at [https://www.alchemy.com/](https://www.alchemy.com/)
-- **Deposit Private Key**: The private key of the address you'll use to deposit ETH.
+- **Ethereum (ETH)**: A minimum of 0.5 ETH plus additional ETH for gas fees.
+- **RPC URL**: We recommend using Alchemy's free plan. Please refer to the [How to get your Alchemy API key](./alchemy.md) guide to obtain your API key.
 - **Withdrawal Private Key**: The private key of the address you'll use to withdraw ETH and receive ITX tokens.
 
-## Installation and Setup
+## Download the CLI
 
 1. Navigate to the [Releases](https://github.com/InternetMaximalism/intmax2-mining-cli/releases) page of this repository.
 2. Download the ZIP file appropriate for your operating system.
-3. Extract the contents of the ZIP file to your desired location.
-
-## Running the Application
-
-1. Locate the extracted files and double-click on the executable file to launch the application.
-2. Follow the CLI prompts to input the required information:
-
-   - RPC URL
-   - Deposit Private Key
-   - Withdrawal Private Key
-   - Other configuration options (as needed)
-
-3. The application will guide you through the setup process and initiate the mining operation.
+3. Extract the contents of the ZIP file.
 
 ## Step-by-Step Instructions
 
-### Mining
+### Starting the Mining Process
 
-1. **Extract the ZIP file**: Extract the downloaded ZIP file to an appropriate location.
+1.  **Lauchining the CLI** Double-click on the mining-cli shown in this image to launch.
 
-2. **Launch the Application**: Double-click on the executable file to open the CLI.
-   Double-click on the mining-cli shown in this image to launch.
-
-   <div align="center">
-     <img src="../assets/screenshots/Screenshot1.png" width="600" alt="Mining CLI"></div>
+    <div align="center">
+      <img src="../assets/instruction/extract.png" width="600" alt="Mining CLI"></div>
 
 > NOTICE: If you're using a Mac, you may see a message saying "Cannot be opened because the developer cannot be verified" as shown in the image. In that case, you need to change your Mac's security settings by referring to this link: https://support.apple.com/en/guide/mac-help/mh40616/mac
 
    <div align="center">
-     <img src="../assets/screenshots/cannot_be_verified.png" width="200" alt="Mining CLI"></div>
+     <img src="../assets/instruction/mac0.png" width="200" alt="Mining CLI"></div>
 
-3. **Enter Required Information**: Follow the prompts to enter the necessary information, such as the RPC URL, deposit private key, and withdrawal private key.
-
-You can use default values for the following. If you don't enter anything and just press Enter in response to the question, the default value will be used.
-
-- Mining unit: The amount of ETH to send in one deposit. The default is 0.1 ETH.
-- Mining times: Specifies how many times to mine. The default is 10 times.
-- Max gas price: The maximum gas price allowed when executing transactions. The default is 30 GWei. We recommend setting a larger value when running in environments with high gas prices, such as testnets.
+2. **Select Network**:
+When you double-click the CLI, you'll see a screen like this:
 
    <div align="center">
-     <img src="../assets/screenshots/Screenshot2.png" width="600" alt="Mining CLI"></div>
+     <img src="../assets/instruction/s1.png" width="600" alt="Mining CLI"></div>
 
-1. **Enter password for private keys**
-Set whether to encrypt and store your previously entered deposit private keys and withdrawal private key. Choose 'y' if you want to encrypt. We recommend encryption. Please enter a password of at least 12 characters.
+You can move the cursor with the arrow keys and confirm with Enter key.
+For this time, select `holesky (testnet)`.
 
-   <div align="center">
-     <img src="../assets/screenshots/Screenshot3.png" width="600" alt="Mining CLI"></div>
+3. **Enter Alchemy API key**: Select `Alchemy` and enter your API key which you obtained from [How to get your Alchemy API key](./alchemy.md) guide.
 
-NOTICE: If you forget your password, you won't be able to recover your deposit private keys or withdrawal private key. Make sure to backup your deposit private keys and withdrawal private key.
+<div align="center"><img src="../assets/instruction/s3.png" width="600" alt="Mining CLI"></div>
 
-5. **Mode Selection**:
-   Choose from the following modes:
+1. **Configure settings for the mining process**: Set `max gas price`, `mining unit`, and `mining times`. You can use the default values by pressing Enter or pressing `y`. You can also set your own values by pressing `n`, then entering the desired values. We recommend using the default values.
 
-- **Mining**: performs mining by repeatedly executing deposits and withdrawals
+<div align="center"><img src="../assets/instruction/s4.png" width="600" alt="Mining CLI"></div>
+
+Here is the explanation of each setting:
+
+- **Max Gas Price**: The maximum gas price allowed when executing transactions. Setting a higher value will cause undesirable funds loss.
+- **Mining Unit**: The amount of ETH to send in one deposit. The default is 0.1 ETH.
+- **Mining Times**: Specifies how many times to mine. The default is 10 times (for mainnet), 5 times (for testnet).
+
+5. **Enter Withdrawal Private Key**: Enter the private key of the address you'll use to withdraw ETH and receive ITX tokens.
+
+<div align="center"><img src="../assets/instruction/s5.png" width="600" alt="Mining CLI"></div>
+
+After entering the withdrawal private key, the address will be displayed. Confirm that the address is correct.
+
+6. **Choose whether to encrypt the private key**: Choose whether to encrypt the private key. Because the withdrawal private key will be stored in local storage, we highly recommend encrypting it. Press `y` or Enter to encrypt the private key, or `n` to store it in plain text.
+
+<div align="center"><img src="../assets/instruction/s6.png" width="600" alt="Mining CLI"></div>
+
+7. **Enter a password for the private key**: If you choose to encrypt the private key, you'll be asked to enter a password. Please enter a password of at least 12 characters.
+
+<div align="center"><img src="../assets/instruction/s7.png" width="600" alt="Mining CLI"></div>
+
+8. **Select Mode**: Choose from the following modes using the arrows key: `Mining`, `Claim`, `Exit` or `Export`. For this time, select `Mining`.
+
+<div align="center"><img src="../assets/instruction/s8.png" width="600" alt="Mining CLI"></div>
+
+Here is the explanation of each mode:
+
+- **Start Mining**: performs mining by repeatedly executing deposits and withdrawals
 - **Claim**: claims available ITX tokens
-- **Exit**: withdraws all balances currently and cancels pending deposits
+- **Exit**: withdraws all balances in intmax2 and cancels pending deposits
+- **Export**: exports the private key of the deposit addresses.
 
-  For this time, please select Mining.
+For this time, please select Mining.
 
-<div align="center">
-     <img src="../assets/screenshots/Screenshot4.png" width="600" alt="Mining CLI"></div>
-
-6. **Start Mining**:
+1. **Deposit ETH to your deposit address**:
 
 The mining process will begin.
 
-<div align="center">
-     <img src="../assets/screenshots/Screenshot5.png" width="600" alt="Mining CLI"></div>
+<div align="center"><img src="../assets/instruction/s9.png" width="600" alt="Mining CLI"></div>
 
-However, the process will pause if the balance of the deposit address is insufficient or if the network's gas price is higher than the max gas price setting.
+The CLI will generate a deposit address and display it. In the first time, the deposit account does not have any balance. CLI will display the required amount of ETH to deposit (equals to `(mining unit)*(mining times) + (gas fees for deposits)`). Please send the required amount of ETH to the deposit address.
 
-In the former case, please send ETH to the deposit address. In the latter case, wait until the network's gas price drops or change the max gas price value.
+<div align="center"><img src="../assets/instruction/s10.png" width="600" alt="Mining CLI"></div>
 
-The mining process can be interrupted at any time with `Ctrl + c`. If you interrupt the mining process, the balance may remain in intmax2.
-If you want to withdraw only the remaining balance in intmax2 without making a new deposit, select the `exit` mode to withdraw the balance. If you want to resume the mining process, run it again in `mining` mode.
+10. **Mining Process**:
 
-The `mining` process automatically ends when it completes the set number of `mining times`.
+CLI automatically deposits and withdraws ETH.
 
-7. **Using a new deposit address**:
-   Since the number of times you can mine with one deposit address is limited, you need to use a new deposit address to continue mining.
+<div align="center"><img src="../assets/instruction/s12.png" width="600" alt="Mining CLI"></div>
 
-Restart the CLI and select Modify. Press Enter until you see "Append deposit accounts?".
-When "Append deposit accounts?" is displayed, enter 'y'.
+The mining process will pause if
 
-<div align="center">
-     <img src="../assets/screenshots/Screenshot8.png" width="600" alt="Mining CLI"></div>
+- the balance of the deposit address is insufficient: please send ETH to the deposit address
+- the network's gas price is higher than the max gas price setting: wait until the network's gas price drops or change the `max gas price` value.
+- the number of `mining times` is reached: CLI will generate a new deposit address. Please send ETH to the new deposit address.
 
-Enter a new deposit private key.
+11. **Stop and Resume process**:
+
+You can safely close the CLI window or press `ctrl + c` to stop the mining process. When you restart the CLI, you can resume the mining process by selecting `Mining` mode.
+
+NOTE: If you stop the mining process when there is a balance in the intmax2, you can withdraw the balance by running in `Exit` mode, or you can continue the mining process by running in `Mining` mode.
 
 ### Claiming ITX Tokens
 
-The deposits eligible for ITX tokens are confirmed at UTC 0:00 on the Monday two weeks after mining. After that, you can select the Claim mode to claim ITX tokens.
+The deposits eligible for ITX tokens are confirmed at UTC 0:00 on the Monday two weeks after mining. After that, you claim ITX tokens.
 
-1. **Launch the CLI**
-   When you double-click the CLI, you'll see a screen like this:
-
-<div align="center">
-     <img src="../assets/screenshots/Screenshot9.png" width="600" alt="Mining CLI"></div>
-
-Here, select Continue.
-
-2. **Mode Selection**:
-   Select Claim mode.
-
+1. **Select Network**:
+Select `holesky (testnet)`.
    <div align="center">
-     <img src="../assets/screenshots/Screenshot4.png" width="600" alt="Mining CLI"></div>
+     <img src="../assets/instruction/s1.png" width="600" alt="Mining CLI"></div>
 
-3. **Claim Process**
-   The Claim process will start. This process continues until there are no more ITX tokens available to claim.
+2. **Continue the process**:
+   Select `Continue` to proceed with the previous settings.
 
-<div align="center">
-     <img src="../assets/screenshots/Screenshot10.png" width="600" alt="Mining CLI"></div>
+<div align="center"><img src="../assets/instruction/t1.png" width="600" alt="Mining CLI"></div>
+
+3. **Select Mode**:
+   Select `Claim` mode. Then you will be asked password to decrypt the private key.
+   <div align="center"><img src="../assets/instruction/t2.png" width="600" alt="Mining CLI"></div>
+
+4. **Claim Process**:
+   The Claim process will start. This process continues until there are no more ITX tokens available to claim. The ITX tokens will be sent to the withdrawal address.
+
+### Exporting Deposit Private Keys
+
+You can see the private keys of the deposit addresses. This is useful when you want to retrieve the balance of the deposit addresses.
+
+1. **Select Mode**:
+   Select `Export` mode.
+
+   <div align="center"><img src="../assets/instruction/t2.png" width="600" alt="Mining CLI"></div>
+
+2. **Export**:
+   The CLI will display the private keys of the deposit addresses. Please save them in a secure place.
+   <div align="center"><img src="../assets/instruction/t3.png" width="600" alt="Mining CLI"></div>
