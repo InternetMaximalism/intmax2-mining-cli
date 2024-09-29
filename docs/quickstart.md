@@ -36,14 +36,14 @@ When you double-click the CLI, you'll see a screen like this:
    <div align="center">
      <img src="../assets/instruction/s1.png" width="600" alt="Mining CLI"></div>
 
-You can move the cursor with the arrow keys and confirm with Enter key.
+You can move the cursor with the arrow keys and confirm with `Enter`.
 For this time, select `holesky (testnet)`.
 
-3. **Enter Alchemy API key**: Select `Alchemy` and enter your API key which you obtained from [How to get your Alchemy API key](./alchemy.md) guide.
+3. **Enter Alchemy API key**: Select `Alchemy` and enter your API key which you obtained from [How to get your Alchemy API key](./alchemy.md) guide. Your API key will not be displayed. Press `Enter` after pasting it.
 
 <div align="center"><img src="../assets/instruction/s3.png" width="600" alt="Mining CLI"></div>
 
-1. **Configure settings for the mining process**: Set `max gas price`, `mining unit`, and `mining times`. You can use the default values by pressing Enter or pressing `y`. You can also set your own values by pressing `n`, then entering the desired values. We recommend using the default values.
+4. **Configure settings for the mining process**: Set `max gas price`, `mining unit`, and `mining times`. You can use the default values by pressing `Enter` or pressing `y`. You can also set your own values by pressing `n`, then entering the desired values. We recommend using the default values.
 
 <div align="center"><img src="../assets/instruction/s4.png" width="600" alt="Mining CLI"></div>
 
@@ -53,17 +53,17 @@ Here is the explanation of each setting:
 - **Mining Unit**: The amount of ETH to send in one deposit. The default is 0.1 ETH.
 - **Mining Times**: Specifies how many times to mine. The default is 10 times (for mainnet), 5 times (for testnet).
 
-5. **Enter Withdrawal Private Key**: Enter the private key of the address you'll use to withdraw ETH and receive ITX tokens.
+1. **Enter Withdrawal Private Key**: Enter the private key of the address you'll use to withdraw ETH and receive ITX tokens. Your withdrawal private key will not be displayed. Press `Enter` after pasting it.
 
 <div align="center"><img src="../assets/instruction/s5.png" width="600" alt="Mining CLI"></div>
 
 After entering the withdrawal private key, the address will be displayed. Confirm that the address is correct.
 
-6. **Choose whether to encrypt the private key**: Choose whether to encrypt the private key. Because the withdrawal private key will be stored in local storage, we highly recommend encrypting it. Press `y` or Enter to encrypt the private key, or `n` to store it in plain text.
+6. **Choose whether to encrypt the private key**: Choose whether to encrypt the private key. Because the withdrawal private key will be stored in local storage, we highly recommend encrypting it. Press `y` or `Enter` to encrypt the private key, or `n` to store it in plain text.
 
 <div align="center"><img src="../assets/instruction/s6.png" width="600" alt="Mining CLI"></div>
 
-7. **Enter a password for the private key**: If you choose to encrypt the private key, you'll be asked to enter a password. Please enter a password of at least 12 characters.
+1. **Enter a password for the private key**: If you choose to encrypt the private key, you'll be asked to enter a password. Please enter a password of at least 12 characters.
 
 <div align="center"><img src="../assets/instruction/s7.png" width="600" alt="Mining CLI"></div>
 

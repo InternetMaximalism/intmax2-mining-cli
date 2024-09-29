@@ -1,3 +1,5 @@
+use std::env;
+
 use console::{style, Term};
 use dialoguer::Select;
 
@@ -7,6 +9,7 @@ use super::configure::{modify_config, new_config};
 
 pub async fn interactive() -> anyhow::Result<RunMode> {
     let network = select_network()?;
+    env::set_var("NETWORK", network.to_string());
 
     let is_file_exists = EnvConfig::load_from_file(network).is_ok();
     if is_file_exists {
