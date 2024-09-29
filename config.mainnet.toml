@@ -1,20 +1,20 @@
 [api]
-availability_server_url = "https://stage.v1.mining-gateway.intmax.xyz/v1/availability"
-withdrawal_gnark_prover_url = "https://stage.v1.mining-gateway.intmax.xyz/v1/gnark-withdraw-circuit"
-claim_gnark_prover_url = "https://stage.v1.mining-gateway.intmax.xyz/v1/gnark-claim-circuit"
-withdrawal_server_url="https://stage.v1.mining-gateway.intmax.xyz/v1/withdrawal/submit-proof"
-circulation_server_url="https://stage.v1.mining-gateway.intmax.xyz/v1/mining"
-tree_data_repository="InternetMaximalism/intmax2-v1-mining-mock"
-tree_data_directory="stage-data"
+availability_server_url = "https://v1.mining-gateway.intmax.xyz/v1/availability"
+withdrawal_gnark_prover_url = "https://v1.mining-gateway.intmax.xyz/v1/gnark-withdraw-circuit"
+claim_gnark_prover_url = "https://v1.mining-gateway.intmax.xyz/v1/gnark-claim-circuit"
+withdrawal_server_url="https://v1.mining-gateway.intmax.xyz/v1/withdrawal/submit-proof"
+circulation_server_url="https://v1.mining-gateway.intmax.xyz/v1/mining"
+tree_data_repository="InternetMaximalism/intmax2-mining"
+tree_data_directory="data"
 tree_data_branch="main"
 sync_tree_data_interval_in_sec = 3600 # 60 minutes
 gnark_get_proof_cooldown_in_sec = 15
 
 [blockchain]
 chain_id = 1
-int1_address = "0x7559F5355Ab5595f9398009bF01c85F959d94F40"
-minter_address = "0x0A628b7c91B39a42830f6Df84F8e5fa70cDDe3F9"
-token_address = "0x40FD30D54bFc29989636A25A4407d38e1e92c900"
+int1_address = "0x0Ac498bCA32B00E2584171844fb9A5943398D9c1"
+minter_address = "0x38DE07d2526Ae929f1903E5F109B70C50e12A8E0"
+token_address = "0xe24e207c6156241cAfb41D025B3b5F0677114C81"
 single_deposit_gas = 88000
 single_claim_gas = 600000
 
@@ -25,6 +25,6 @@ loop_cooldown_in_sec = 10
 high_gas_retry_inverval_in_sec = 10
 
 [env]
-default_max_gas_price ="200"
+default_max_gas_price ="30"
 default_mining_times="10"
 default_mining_unit="0.1"
