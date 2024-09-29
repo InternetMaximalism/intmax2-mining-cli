@@ -53,7 +53,7 @@ Here is the explanation of each setting:
 - **Mining Unit**: The amount of ETH to send in one deposit. The default is 0.1 ETH.
 - **Mining Times**: Specifies how many times to mine. The default is 10 times (for mainnet), 5 times (for testnet).
 
-1. **Enter Withdrawal Private Key**: Enter the private key of the address you'll use to withdraw ETH and receive ITX tokens. Your withdrawal private key will not be displayed. Press `Enter` after pasting it.
+5. **Enter Withdrawal Private Key**: Enter the private key of the address you'll use to withdraw ETH and receive ITX tokens. Your withdrawal private key will not be displayed. Press `Enter` after pasting it.
 
 <div align="center"><img src="../assets/instruction/s5.png" width="600" alt="Mining CLI"></div>
 
