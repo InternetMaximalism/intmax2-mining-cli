@@ -16,7 +16,7 @@ serde = {version="1.0.210", features = ["derive"]}
 serde_json = "1.0.128"
 config = "0.13"
 reqwest = { version = "0.11", features = ["json"] }
-ethers = "1.0"
+ethers = "2.0"
 tokio = { version = "1", features = ["full"] }
 rpassword = "5.0"
 aes-gcm = "0.9"

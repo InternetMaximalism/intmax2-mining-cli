@@ -53,7 +53,7 @@ pub async fn get_client_with_signer(
 pub async fn get_wallet(private_key: H256) -> anyhow::Result<Wallet<SigningKey>> {
     info!("Getting wallet");
     let settings = crate::utils::config::Settings::load()?;
-    let key = SecretKey::from_be_bytes(private_key.as_bytes()).unwrap();
+    let key = SecretKey::from_bytes(private_key.as_bytes().into()).unwrap();
     let wallet = Wallet::from(key).with_chain_id(settings.blockchain.chain_id);
     Ok(wallet)
 }
