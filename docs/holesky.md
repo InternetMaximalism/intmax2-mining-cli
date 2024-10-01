@@ -18,10 +18,10 @@
   <img src="../assets/holesky/m3.png" width="600" alt="Mining CLI"></div>
 
 4. Add the following information:
-   - Network Name: Holesky
-   - Network RPC URL: https:///1rpc.io/holesky
-   - Chain ID: 17000
-   - Currency Symbol: ETH
+   - Network Name: `Holesky`
+   - Network RPC URL: `https://1rpc.io/holesky`
+   - Chain ID: `17000`
+   - Currency Symbol: `ETH`
 
 <div align="center">
     <img src="../assets/holesky/m4.png" width="600" alt="Mining CLI"></div>
@@ -43,10 +43,10 @@
   <img src="../assets/holesky/i2.png" width="600" alt="Mining CLI"></div>
 
 3. Add the following information:
-   - Network Name: Holesky
-   - Network RPC URL: https:///1rpc.io/holesky
-   - Chain ID: 17000
-   - Currency Symbol: ETH
+   - Network Name: `Holesky`
+   - Network RPC URL: `https://1rpc.io/holesky`
+   - Chain ID: `17000`
+   - Currency Symbol: `ETH`
 
 <div align="center">
     <img src="../assets/holesky/i3.png" width="600" alt="Mining CLI"></div>
