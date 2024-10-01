@@ -6,7 +6,7 @@ This guide explains how to start mining on the holesky testnet using the intmax2
 
 Before you begin, please ensure you have the following:
 
-- **Ethereum (ETH)**: A minimum of 0.5 ETH (for testnet, 1 ETH for mainnet) plus additional ETH for gas fees. You can obtain testnet ETH from <a href="https://cloud.google.com/application/web3/faucet/ethereum/holesky" target="_blank">Google Cloud Web3 Faucet</a>.
+- **Ethereum (ETH)**: A minimum of 0.5 ETH (for testnet, 1 ETH for mainnet) plus additional ETH for gas fees. Please refer to the [How to use Holesky testnet](https://docs.google.com/presentation/d/1bqjl4MhvMRVXU_dO14QAY4NZw6_ic6-smna_nsHfARk/edit#slide=id.g30698e4fbd7_0_41) guide to obtain testnet ETH.
 - **Alchemy API key**: Please refer to the [How to get your Alchemy API key](./alchemy.md) guide to obtain your API key.
 - **Withdrawal Private Key**: The private key of the address you'll use to withdraw ETH and receive ITX tokens.
 
