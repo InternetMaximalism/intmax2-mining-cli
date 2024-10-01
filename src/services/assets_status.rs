@@ -145,6 +145,12 @@ impl AssetsStatus {
             .map(|&index| self.senders_deposits[index].clone())
             .collect()
     }
+
+    pub fn can_skip_mining(&self, mining_times: u64) -> bool {
+        let income = self.senders_deposits.len();
+        let outcome = self.withdrawn_indices.len() + self.cancelled_indices.len();
+        self.senders_deposits.len() >= mining_times as usize && income == outcome
+    }
 }
 
 #[cfg(test)]

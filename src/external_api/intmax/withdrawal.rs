@@ -6,19 +6,18 @@ use intmax2_zkp::ethereum_types::u32limb_trait::U32LimbTrait;
 use log::info;
 use mining_circuit_v1::withdrawal::simple_withraw_circuit::SimpleWithdrawalPublicInputs;
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
 use std::str::FromStr;
 
 use crate::{
     external_api::contracts::int1::{get_int1_contract_with_signer, int_1},
     utils::{
         config::Settings,
-        errors::CLIError,
         network::{get_network, Network},
+        retry::with_retry,
     },
 };
 
-use super::IntmaxErrorResponse;
+use super::error::{IntmaxError, IntmaxErrorResponse};
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -43,11 +42,11 @@ enum SumbitWithdrawalResponse {
 pub async fn submit_withdrawal(
     pis: SimpleWithdrawalPublicInputs,
     proof: &str,
-) -> anyhow::Result<H256> {
-    info!("Submitting withdrawal {:?} proof {}", pis, proof);
-    let settings = Settings::load()?;
+) -> Result<H256, IntmaxError> {
+    info!("submit_withdrawal with args {:?} proof {}", pis, proof);
+    let settings = Settings::load().unwrap();
     let tx_hash = if get_network() == Network::Localnet {
-        let tx_hash = localnet_withdrawal(pis, proof).await?;
+        let tx_hash = localnet_withdrawal(pis, proof).await.unwrap();
         tx_hash
     } else {
         let input = SubmitWithdrawalInput {
@@ -58,20 +57,26 @@ pub async fn submit_withdrawal(
             "Submitting withdrawal to {}, body: {:?}",
             settings.api.withdrawal_server_url, input
         );
-        let response = reqwest::Client::new()
-            .post(settings.api.withdrawal_server_url)
-            .json(&input)
-            .send()
-            .await
-            .map_err(|e| CLIError::NetworkError(e.to_string()))?;
-        let response: Value = response.json().await?;
-        info!("submitting withdrawal response: {}", response);
-        let response: SumbitWithdrawalResponse = serde_json::from_value(response)?;
+        let response = with_retry(|| async {
+            reqwest::Client::new()
+                .post(settings.api.withdrawal_server_url.clone())
+                .json(&input)
+                .send()
+                .await
+        })
+        .await
+        .map_err(|_| {
+            IntmaxError::NetworkError("failed to request withdrawal server".to_string())
+        })?;
+        let response: SumbitWithdrawalResponse = response.json().await.map_err(|e| {
+            IntmaxError::SerializeError(format!("failed to parse response: {}", e.to_string()))
+        })?;
         match response {
-            SumbitWithdrawalResponse::Sucess(success) => H256::from_str(&success.transaction_hash)?,
-            SumbitWithdrawalResponse::Error(error) => {
-                return Err(anyhow::anyhow!("Error submitting withdrawal: {:?}", error));
-            }
+            SumbitWithdrawalResponse::Sucess(success) => H256::from_str(&success.transaction_hash)
+                .map_err(|_| {
+                    IntmaxError::SerializeError("failed to parse transaction hash".to_string())
+                })?,
+            SumbitWithdrawalResponse::Error(error) => Err(IntmaxError::ServerError(error))?,
         }
     };
     Ok(tx_hash)

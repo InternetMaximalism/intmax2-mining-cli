@@ -50,10 +50,9 @@ pub async fn run(mode: RunMode) -> Result<(), CLIError> {
     let mut state = State::new();
     let prover_future = tokio::spawn(async { Prover::new() });
 
-    let start_key_number =
-        accounts_status::accounts_status(&mut state, config.mining_times, withdrawal_private_key)
-            .await
-            .map_err(|e| CLIError::InternalError(e.to_string()))?;
+    accounts_status::accounts_status(&mut state, config.mining_times, withdrawal_private_key)
+        .await
+        .map_err(|e| CLIError::InternalError(e.to_string()))?;
 
     // wait for prover to be ready
     initialize_console();
@@ -68,7 +67,6 @@ pub async fn run(mode: RunMode) -> Result<(), CLIError> {
             mining_loop(
                 &mut state,
                 withdrawal_private_key,
-                start_key_number,
                 config.mining_unit,
                 config.mining_times,
             )

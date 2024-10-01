@@ -19,7 +19,7 @@ pub async fn accounts_status(
     state: &mut State,
     mining_times: u64,
     withdrawal_private_key: H256,
-) -> anyhow::Result<u64> {
+) -> anyhow::Result<()> {
     println!("Network: {}", get_network());
     let withdrawal_address = get_address(withdrawal_private_key);
     let withdrawal_balance = get_balance(withdrawal_address).await?;
@@ -32,11 +32,10 @@ pub async fn accounts_status(
     );
 
     let mut key_number = 0;
-    let mut start_mining_key_number = 0;
     loop {
         let key = Key::new(withdrawal_private_key, key_number);
         if !is_address_used(key.deposit_address).await {
-            return Ok(start_mining_key_number);
+            return Ok(());
         }
         let assets_status = state.sync_and_fetch_assets(&key).await?;
         let is_qualified = !get_circulation(key.deposit_address).await?.is_excluded;
@@ -52,9 +51,6 @@ pub async fn accounts_status(
             assets_status.claimed_indices.len(),
             assets_status.eligible_indices.len(),
         );
-        if assets_status.senders_deposits.len() >= mining_times as usize {
-            start_mining_key_number += 1;
-        }
         key_number += 1;
     }
 }

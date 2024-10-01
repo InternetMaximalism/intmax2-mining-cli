@@ -23,11 +23,10 @@ pub mod utils;
 pub async fn mining_loop(
     state: &mut State,
     withdrawal_private_key: H256,
-    start_key_number: u64,
     mining_unit: U256,
     mining_times: u64,
 ) -> anyhow::Result<()> {
-    let mut key_number = start_key_number;
+    let mut key_number = 0;
     loop {
         let key = Key::new(withdrawal_private_key, key_number);
         print_log(format!(
@@ -44,11 +43,7 @@ pub async fn mining_loop(
         .await?;
         loop {
             let assets_status = state.sync_and_fetch_assets(&key).await?;
-            if assets_status.senders_deposits.len() >= mining_times as usize
-                && assets_status.pending_indices.is_empty()
-                && assets_status.rejected_indices.is_empty()
-                && assets_status.not_withdrawn_indices.is_empty()
-            {
+            if assets_status.can_skip_mining(mining_times) {
                 print_log(format!(
                     "Max deposits {} reached for {:?}.",
                     mining_times, key.deposit_address

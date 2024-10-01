@@ -1,9 +1,9 @@
 use log::info;
 use serde::{Deserialize, Serialize};
 
-use crate::utils::{config::Settings, errors::CLIError};
+use crate::utils::{config::Settings, retry::with_retry};
 
-use super::IntmaxErrorResponse;
+use super::error::{IntmaxError, IntmaxErrorResponse};
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -19,25 +19,26 @@ enum AvaliabilityServerResponse {
     Error(IntmaxErrorResponse),
 }
 
-pub async fn get_availability() -> anyhow::Result<AvaliabilityServerSuccessResponse> {
+pub async fn get_availability() -> Result<AvaliabilityServerSuccessResponse, IntmaxError> {
     info!("get_availability");
     let version = env!("CARGO_PKG_VERSION");
-    let settings = Settings::load()?;
-    let response = reqwest::get(format!(
-        "{}?version={}",
-        settings.api.availability_server_url, version,
-    ))
+    let settings = Settings::load().unwrap();
+    let response = with_retry(|| async {
+        reqwest::get(format!(
+            "{}?version={}",
+            settings.api.availability_server_url, version,
+        ))
+        .await
+    })
     .await
-    .map_err(|e| CLIError::NetworkError(e.to_string()))?;
-    let response_json: AvaliabilityServerResponse = response.json().await?;
+    .map_err(|_| IntmaxError::NetworkError("failed to request availability server".to_string()))?;
+    let response_json: AvaliabilityServerResponse = response
+        .json()
+        .await
+        .map_err(|e| IntmaxError::SerializeError(e.to_string()))?;
     match response_json {
         AvaliabilityServerResponse::Success(success) => Ok(success),
-        AvaliabilityServerResponse::Error(error) => {
-            if error.code == "FORBIDDEN" {
-                anyhow::bail!("{}", error.message)
-            }
-            anyhow::bail!("Availability server error: {:?}", error)
-        }
+        AvaliabilityServerResponse::Error(error) => Err(IntmaxError::ServerError(error)),
     }
 }
 

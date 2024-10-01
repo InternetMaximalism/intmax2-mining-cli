@@ -10,9 +10,9 @@ use plonky2::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::utils::{config::Settings, errors::CLIError};
+use crate::utils::{config::Settings, retry::with_retry};
 
-use super::IntmaxErrorResponse;
+use super::error::{IntmaxError, IntmaxErrorResponse};
 
 type F = GoldilocksField;
 type C = PoseidonBN128GoldilocksConfig;
@@ -76,39 +76,49 @@ pub async fn gnark_start_prove(
     base_url: &str,
     address: Address,
     plonky2_proof: ProofWithPublicInputs<F, C, D>,
-) -> anyhow::Result<GnarkStartProofSucessResponse> {
+) -> Result<GnarkStartProofSucessResponse, IntmaxError> {
     info!(
-        "Starting gnark proof for address: {}, pis: {:?}",
+        "gnark_start_prove with args address: {}, pis: {:?}",
         address, plonky2_proof.public_inputs
     );
     let input = GnarkStartProofInput::new(address, plonky2_proof);
-    let response = reqwest::Client::new()
-        .post(format!("{}/start-proof", base_url))
-        .json(&input)
-        .send()
-        .await
-        .map_err(|e| CLIError::NetworkError(e.to_string()))?;
-    let output: GnarkStartProofResponse = response.json().await.unwrap();
+    let response = with_retry(|| async {
+        reqwest::Client::new()
+            .post(format!("{}/start-proof", base_url))
+            .json(&input)
+            .send()
+            .await
+    })
+    .await
+    .map_err(|_| IntmaxError::NetworkError("failed to request gnark server".to_string()))?;
+    let output: GnarkStartProofResponse = response.json().await.map_err(|e| {
+        IntmaxError::SerializeError(format!("failed to parse response: {}", e.to_string()))
+    })?;
     match output {
         GnarkStartProofResponse::Success(success) => Ok(success),
-        GnarkStartProofResponse::Error(error) => anyhow::bail!("Gnark prover error: {:?}", error),
+        GnarkStartProofResponse::Error(error) => Err(IntmaxError::ServerError(error)),
     }
 }
 
 pub async fn gnark_get_proof(
     base_url: &str,
     job_id: &str,
-) -> anyhow::Result<GnarkGetProofSucessResponse> {
-    info!("Getting gnark proof for job_id: {}", job_id);
-    let response = reqwest::Client::new()
-        .get(format!("{}/get-proof?jobId={}", base_url, job_id))
-        .send()
-        .await
-        .map_err(|e| CLIError::NetworkError(e.to_string()))?;
-    let output: GnarkGetProofResponse = response.json().await?;
+) -> Result<GnarkGetProofSucessResponse, IntmaxError> {
+    info!("gnark_get_proof with arg job_id: {}", job_id);
+    let response = with_retry(|| async {
+        reqwest::Client::new()
+            .get(format!("{}/get-proof?jobId={}", base_url, job_id))
+            .send()
+            .await
+    })
+    .await
+    .map_err(|_| IntmaxError::NetworkError("failed to request gnark server".to_string()))?;
+    let output: GnarkGetProofResponse = response.json().await.map_err(|e| {
+        IntmaxError::SerializeError(format!("failed to parse response: {}", e.to_string()))
+    })?;
     match output {
         GnarkGetProofResponse::Success(success) => Ok(success),
-        GnarkGetProofResponse::Error(error) => anyhow::bail!("Gnark prover error: {:?}", error),
+        GnarkGetProofResponse::Error(error) => Err(IntmaxError::ServerError(error)),
     }
 }
 
@@ -116,17 +126,21 @@ pub async fn fetch_gnark_proof(
     base_url: &str,
     job_id: &str,
     start_query_time: u64,
-) -> anyhow::Result<GnarkProof> {
-    info!("Fetching gnark proof for job_id: {}", job_id);
-    let cooldown = Settings::load()?.api.gnark_get_proof_cooldown_in_sec;
+) -> Result<GnarkProof, IntmaxError> {
+    info!("fetch_gnark_proof for job_id: {}", job_id);
+    let cooldown = Settings::load()
+        .unwrap()
+        .api
+        .gnark_get_proof_cooldown_in_sec;
     sleep_until(start_query_time).await;
-
     loop {
         let output = gnark_get_proof(base_url, job_id).await?;
         if output.status == "done" {
             return Ok(output.result.unwrap());
         } else if output.status == "error" {
-            anyhow::bail!("Gnark prover error: {:?}", output);
+            return Err(IntmaxError::InternalError(
+                "gnark server returned error".to_string(),
+            ));
         }
         tokio::time::sleep(tokio::time::Duration::from_secs(cooldown)).await;
     }
