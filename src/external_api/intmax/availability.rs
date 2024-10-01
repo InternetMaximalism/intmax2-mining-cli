@@ -20,7 +20,7 @@ enum AvaliabilityServerResponse {
 }
 
 pub async fn get_availability() -> anyhow::Result<AvaliabilityServerSuccessResponse> {
-    info!("Getting availability");
+    info!("get_availability");
     let version = env!("CARGO_PKG_VERSION");
     let settings = Settings::load()?;
     let response = reqwest::get(format!(

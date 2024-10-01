@@ -5,7 +5,9 @@ use ethers::{
 };
 use log::info;
 
-use super::utils::get_client;
+use crate::utils::retry::with_retry;
+
+use super::{error::BlockchainError, utils::get_client};
 
 abigen!(
     IERC20,
@@ -21,17 +23,21 @@ abigen!(
         ]"#,
 );
 
-pub async fn get_token_contract() -> anyhow::Result<IERC20<Provider<Http>>> {
-    info!("Getting token contract");
-    let settings = crate::utils::config::Settings::load()?;
+pub async fn get_token_contract() -> Result<IERC20<Provider<Http>>, BlockchainError> {
+    let settings = crate::utils::config::Settings::load().unwrap();
     let client = get_client().await?;
-    let token_address: Address = settings.blockchain.token_address.parse()?;
+    let token_address: Address = settings.blockchain.token_address.parse().unwrap();
     let contract = IERC20::new(token_address, client);
     Ok(contract)
 }
 
-pub async fn get_token_balance(address: Address) -> anyhow::Result<U256> {
+pub async fn get_token_balance(address: Address) -> Result<U256, BlockchainError> {
+    info!("get_token_balance");
     let contract = get_token_contract().await?;
-    let balance = contract.balance_of(address).call().await?;
+    let balance = with_retry(|| async { contract.balance_of(address).call().await })
+        .await
+        .map_err(|_| {
+            BlockchainError::NetworkError("failed to call balance_of in token".to_string())
+        })?;
     Ok(balance)
 }

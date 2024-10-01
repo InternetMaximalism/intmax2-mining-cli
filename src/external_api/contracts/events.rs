@@ -5,7 +5,10 @@ use intmax2_zkp::{
 };
 use log::info;
 
+use crate::utils::retry::with_retry;
+
 use super::{
+    error::BlockchainError,
     int1::get_int1_contract,
     utils::{get_client, u256_as_bytes_be},
 };
@@ -30,25 +33,29 @@ impl Deposited {
     }
 }
 
-pub async fn get_deposited_event_by_sender(sender: Address) -> anyhow::Result<Vec<Deposited>> {
-    info!("Getting deposit event by sender");
+pub async fn get_deposited_event_by_sender(
+    sender: Address,
+) -> Result<Vec<Deposited>, BlockchainError> {
+    info!("get_deposited_event_by_sender");
     let int1 = get_int1_contract().await?;
-    let events = int1
-        .deposited_filter()
-        .from_block(0)
-        .topic2(sender)
-        .query_with_meta()
-        .await?;
+    let events = with_retry(|| async {
+        int1.deposited_filter()
+            .from_block(0)
+            .topic2(sender)
+            .query_with_meta()
+            .await
+    })
+    .await
+    .map_err(|_| BlockchainError::NetworkError("failed to get deposited event".to_string()))?;
     let client = get_client().await?;
-
     let mut deposited_events = Vec::new();
     for (event, meta) in events {
         // get tx_nonce  because it is needed for getting deposit salt
         let tx_hash = meta.transaction_hash;
-        let tx = client
-            .get_transaction(tx_hash)
-            .await?
-            .expect("tx not found");
+        let tx = with_retry(|| async { client.get_transaction(tx_hash).await })
+            .await
+            .map_err(|_| BlockchainError::TxNotFound(tx_hash.to_string()))?
+            .expect("tx not found"); // this should not happen
         let tx_nonce = tx.nonce.as_u64();
         deposited_events.push(Deposited {
             deposit_id: event.deposit_id.try_into().unwrap(),
@@ -72,13 +79,18 @@ pub struct DepositLeafInserted {
 
 pub async fn get_deposit_leaf_inserted_event(
     from_block: u64,
-) -> anyhow::Result<Vec<DepositLeafInserted>> {
+) -> Result<Vec<DepositLeafInserted>, BlockchainError> {
     let int1 = get_int1_contract().await?;
-    let events = int1
-        .deposit_leaf_inserted_filter()
-        .from_block(from_block)
-        .query_with_meta()
-        .await?;
+    let events = with_retry(|| async {
+        int1.deposit_leaf_inserted_filter()
+            .from_block(from_block)
+            .query_with_meta()
+            .await
+    })
+    .await
+    .map_err(|_| {
+        BlockchainError::NetworkError("failed to get deposit leaf inserted event".to_string())
+    })?;
     let mut events: Vec<DepositLeafInserted> = events
         .into_iter()
         .map(|(event, meta)| DepositLeafInserted {

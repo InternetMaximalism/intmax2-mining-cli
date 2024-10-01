@@ -9,41 +9,52 @@ use ethers::{
     types::{Address, H256, U256},
 };
 use intmax2_zkp::ethereum_types::{bytes32::Bytes32, u32limb_trait::U32LimbTrait};
-use log::info;
 
-use super::utils::{get_client, get_client_with_signer};
+use crate::utils::retry::with_retry;
+
+use super::{
+    error::BlockchainError,
+    utils::{get_client, get_client_with_signer},
+};
 
 abigen!(Int1, "abi/Int1.json",);
 
-pub async fn get_int1_contract() -> anyhow::Result<int_1::Int1<Provider<Http>>> {
-    info!("Getting int1 contract");
-    let settings = crate::utils::config::Settings::load()?;
+pub async fn get_int1_contract() -> Result<int_1::Int1<Provider<Http>>, BlockchainError> {
+    let settings = crate::utils::config::Settings::load().unwrap();
+    let int1_address: Address = settings.blockchain.int1_address.parse().unwrap();
     let client = get_client().await?;
-    let int1_address: Address = settings.blockchain.int1_address.parse()?;
     let contract = Int1::new(int1_address, client);
     Ok(contract)
 }
 
 pub async fn get_int1_contract_with_signer(
     private_key: H256,
-) -> anyhow::Result<int_1::Int1<SignerMiddleware<Provider<Http>, Wallet<SigningKey>>>> {
-    let settings = crate::utils::config::Settings::load()?;
+) -> Result<int_1::Int1<SignerMiddleware<Provider<Http>, Wallet<SigningKey>>>, BlockchainError> {
+    let settings = crate::utils::config::Settings::load().unwrap();
     let client = get_client_with_signer(private_key).await?;
-    let int1_address: Address = settings.blockchain.int1_address.parse()?;
+    let int1_address: Address = settings.blockchain.int1_address.parse().unwrap();
     let contract = Int1::new(int1_address, Arc::new(client));
     Ok(contract)
 }
 
-pub async fn get_deposit_root() -> anyhow::Result<Bytes32> {
+pub async fn get_deposit_root() -> Result<Bytes32, BlockchainError> {
     let int1 = get_int1_contract().await?;
-    let root = int1.get_deposit_root().call().await?;
+    let root = with_retry(|| async { int1.get_deposit_root().call().await })
+        .await
+        .map_err(|_| {
+            BlockchainError::NetworkError("failed to call get_deposit_root in int1".to_string())
+        })?;
     Ok(Bytes32::from_bytes_be(&root))
 }
 
-pub async fn get_deposit_root_exits(root: Bytes32) -> anyhow::Result<bool> {
+pub async fn get_deposit_root_exits(root: Bytes32) -> Result<bool, BlockchainError> {
     let int1 = get_int1_contract().await?;
     let root: [u8; 32] = root.to_bytes_be().try_into().unwrap();
-    let block_number: U256 = int1.deposit_roots(root).call().await?;
+    let block_number: U256 = with_retry(|| async { int1.deposit_roots(root).call().await })
+        .await
+        .map_err(|_| {
+            BlockchainError::NetworkError("failed to call deposit_roots in int1".to_string())
+        })?;
     Ok(block_number != 0.into())
 }
 
@@ -54,12 +65,17 @@ pub struct DepositData {
     pub is_rejected: bool,
 }
 
-pub async fn get_deposit_data(deposit_id: u64) -> anyhow::Result<DepositData> {
+pub async fn get_deposit_data(deposit_id: u64) -> Result<DepositData, BlockchainError> {
     let int1 = get_int1_contract().await?;
-    let data = int1
-        .get_deposit_data(ethers::types::U256::from(deposit_id))
-        .call()
-        .await?;
+    let data = with_retry(|| async {
+        int1.get_deposit_data(ethers::types::U256::from(deposit_id))
+            .call()
+            .await
+    })
+    .await
+    .map_err(|_| {
+        BlockchainError::NetworkError("failed to call get_deposit_data in int1".to_string())
+    })?;
     let data = DepositData {
         deposit_hash: Bytes32::from_bytes_be(&data.deposit_hash),
         sender: data.sender,
@@ -68,16 +84,26 @@ pub async fn get_deposit_data(deposit_id: u64) -> anyhow::Result<DepositData> {
     Ok(data)
 }
 
-pub async fn get_withdrawal_nullifier_exists(nullifier: Bytes32) -> anyhow::Result<bool> {
+pub async fn get_withdrawal_nullifier_exists(nullifier: Bytes32) -> Result<bool, BlockchainError> {
     let int1 = get_int1_contract().await?;
     let nullifier: [u8; 32] = nullifier.to_bytes_be().try_into().unwrap();
-    let block_number = int1.nullifiers(nullifier).call().await?;
+    let block_number = with_retry(|| async { int1.nullifiers(nullifier).call().await })
+        .await
+        .map_err(|_| {
+            BlockchainError::NetworkError("failed to call nullifiers in int1".to_string())
+        })?;
     let exists = block_number != 0.into();
     Ok(exists)
 }
 
-pub async fn get_last_processed_deposit_id() -> anyhow::Result<u64> {
+pub async fn get_last_processed_deposit_id() -> Result<u64, BlockchainError> {
     let int1 = get_int1_contract().await?;
-    let id = int1.get_last_processed_deposit_id().call().await?;
+    let id = with_retry(|| async { int1.get_last_processed_deposit_id().call().await })
+        .await
+        .map_err(|_| {
+            BlockchainError::NetworkError(
+                "failed to call get_last_processed_deposit_id in int1".to_string(),
+            )
+        })?;
     Ok(id.as_u64())
 }
