@@ -1,9 +1,28 @@
-use crate::external_api::intmax::availability::get_availability;
+use anyhow::bail;
+
+use crate::external_api::intmax::{availability::get_availability, error::IntmaxError};
+
+use super::console::print_error;
 
 pub async fn check_avaliability() -> anyhow::Result<()> {
-    let output = get_availability().await?;
-    if !output.is_available {
-        anyhow::bail!(output.message);
+    match get_availability().await {
+        Ok(output) => {
+            if !output.is_available {
+                print_error(&output.message);
+                bail!("CLI is not available");
+            }
+            Ok(())
+        }
+        Err(e) => match e {
+            IntmaxError::ServerError(intmax_error_response) => {
+                if intmax_error_response.code == "FORBIDDEN" {
+                    print_error(&intmax_error_response.message);
+                    bail!("CLI is not available");
+                } else {
+                    bail!(intmax_error_response.message);
+                }
+            }
+            _ => Err(e.into()),
+        },
     }
-    Ok(())
 }
