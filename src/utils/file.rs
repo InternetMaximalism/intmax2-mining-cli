@@ -1,12 +1,11 @@
 use std::{
-    env, fs,
+    env,
+    fs::{self, File},
     io::Write as _,
     path::{Path, PathBuf},
 };
 
-use anyhow::bail;
-
-use super::errors::CLIError;
+use anyhow::{bail, Context as _};
 
 pub const DATA_DIR: &str = "data";
 const PROJECT_ROOT_FILE: &str = "mining-cli-root";
