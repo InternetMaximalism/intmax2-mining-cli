@@ -26,13 +26,7 @@ build_and_zip() {
     cp "target/${target}/release/${binary_name}" "${temp_dir}/"
     
     # Copy additional files and directories
-    cp -R assets "${temp_dir}/" || echo "Warning: 'assets' directory not found"
-    cp -R docs "${temp_dir}/" || echo "Warning: 'docs' directory not found"
-    cp .env.example "${temp_dir}/" || echo "Warning: '.env.example' file not found"
-    cp mining-cli-root "${temp_dir}/" || echo "Warning: 'mining-cli-root' file not found"
-    cp config.mainnet.toml "${temp_dir}/" || echo "Warning: 'config.mainnet.toml' file not found"
-    cp config.holesky.toml "${temp_dir}/" || echo "Warning: 'config.holesky.toml' file not found"
-    cp README.md "${temp_dir}/" || echo "Warning: 'README.md' file not found"
+    # cp README.md "${temp_dir}/" || echo "Warning: 'README.md' file not found"
     
     # Create the ZIP file
     (cd "${temp_dir}" && zip -r "${zip_name}" .)
