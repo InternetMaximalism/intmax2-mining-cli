@@ -58,6 +58,15 @@
 
 ## Get testnet ETH
 
-You can access the link below to receive the Holesky Faucet. You can receive 1 ETH (on the Holesky network) once a day with a single Google account.
+You can access the link below to receive the Holesky **Faucet**. You can receive 1 ETH (on the Holesky network) once a day with a single Google account.
 
 [https://cloud.google.com/application/web3/faucet/ethereum/holesky](https://cloud.google.com/application/web3/faucet/ethereum/holesky)
+
+<details>
+<summary>What is a faucet?</summary>
+
+A faucet is an application that dispenses free tokens on a testnet (a blockchain network used for development and testing). These tokens allow you to experiment with the testnet, such as deploying smart contracts or debugging transactions. The Google Cloud faucet provides web3 developers with free tokens for deploying, testing, and optimizing smart contracts on popular testnets like Holesky and Sepolia.
+
+It's important to remember that testnet tokens have no real-world value and cannot be sold or used on the main blockchain network (like Ethereum mainnet).
+
+</details>
