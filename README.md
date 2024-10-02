@@ -6,6 +6,8 @@ A CLI tool for automatic mining of ITX tokens.
 
 mining-cli is a tool that allows users to mine ITX tokens by participating in a simplified version of Intmax2. By utilizing a simplified version of Intmax2 that focuses on deposit and private withdrawal functions, users can contribute to enhancing Ethereum's privacy while earning rewards in ITX tokens.
 
+For more information on mining, please refer to [this article](https://hackmd.io/zNLtkMXXSCernbkTf1BTrQ).
+
 ### Minimum Requirements
 
 - Memory: 8GB or more
