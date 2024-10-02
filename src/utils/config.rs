@@ -5,12 +5,12 @@ use serde::Deserialize;
 
 use crate::utils::network::get_network;
 
-use super::{errors::CLIError, file::get_project_root};
+use super::{errors::CLIError, file::get_data_path};
 
 fn config_path() -> PathBuf {
-    let mut path = get_project_root().unwrap();
-    path.push(format!("config.{}.toml", get_network()));
-    path
+    get_data_path()
+        .unwrap()
+        .join(format!("config.{}.toml", get_network()))
 }
 
 #[derive(Clone, Debug, Deserialize)]

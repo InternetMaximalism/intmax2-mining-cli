@@ -1,14 +1,16 @@
 use std::{
-    env,
     fs::{self, File},
     io::Write as _,
     path::{Path, PathBuf},
 };
 
-use anyhow::{bail, Context as _};
+use anyhow::Context as _;
 
-pub const DATA_DIR: &str = "data";
-const PROJECT_ROOT_FILE: &str = "mining-cli-root";
+pub fn get_data_path() -> anyhow::Result<PathBuf> {
+    let home_dir =
+        dirs::home_dir().ok_or_else(|| anyhow::anyhow!("Failed to get home directory"))?;
+    Ok(home_dir.join(".mining-cli"))
+}
 
 pub fn create_file_with_content(path: &Path, content: &[u8]) -> anyhow::Result<()> {
     if let Some(parent) = path.parent() {
@@ -24,20 +26,6 @@ pub fn create_file_with_content(path: &Path, content: &[u8]) -> anyhow::Result<(
     Ok(())
 }
 
-pub fn get_project_root() -> anyhow::Result<PathBuf> {
-    let current_dir = env::current_dir()?;
-    if current_dir.join(PROJECT_ROOT_FILE).exists() {
-        return Ok(current_dir);
-    }
-    let mut path = env::current_exe()?;
-    while !path.join(PROJECT_ROOT_FILE).exists() {
-        if !path.pop() {
-            bail!("Could not find project root");
-        }
-    }
-    Ok(path)
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -51,11 +39,5 @@ mod tests {
         let read_content = fs::read(path).unwrap();
         assert_eq!(content, read_content.as_slice());
         fs::remove_file(path).unwrap();
-    }
-
-    #[test]
-    fn test_get_project_root() {
-        let path = get_project_root().unwrap();
-        assert!(path.join(PROJECT_ROOT_FILE).exists());
     }
 }

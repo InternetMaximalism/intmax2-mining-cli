@@ -4,7 +4,7 @@ use dotenv::dotenv;
 use simplelog::{Config, LevelFilter, WriteLogger};
 use state::mode::RunMode;
 use std::{fs::File, path::PathBuf};
-use utils::file::{create_file_with_content, get_project_root, DATA_DIR};
+use utils::file::{create_file_with_content, get_data_path};
 
 pub mod cli;
 pub mod external_api;
@@ -21,15 +21,11 @@ struct Args {
     command: Option<RunMode>,
 }
 
-fn get_log_file_path() -> PathBuf {
-    get_project_root()
-        .unwrap()
-        .join(DATA_DIR)
-        .join("logs")
-        .join(format!(
-            "{}.log",
-            chrono::Local::now().format("%Y-%m-%d-%H-%M-%S")
-        ))
+fn get_log_file_path() -> anyhow::Result<PathBuf> {
+    Ok(get_data_path()?.join("logs").join(format!(
+        "{}.log",
+        chrono::Local::now().format("%Y-%m-%d-%H-%M-%S")
+    )))
 }
 
 #[tokio::main]
@@ -41,12 +37,9 @@ async fn main() {
     if !is_interactive {
         dotenv().ok();
     }
-
-    // test loading the setting
-    get_project_root().expect("Failed to get project root: cannot find mining-cli-root");
-
-    create_file_with_content(&get_log_file_path(), &[]).expect("Failed to create log file");
-    let log_file = File::create(get_log_file_path()).unwrap();
+    let log_file_path = get_log_file_path().expect("Failed to get log file path");
+    create_file_with_content(&log_file_path, &[]).expect("Failed to create log file");
+    let log_file = File::create(log_file_path).unwrap();
     WriteLogger::init(LevelFilter::Info, Config::default(), log_file).unwrap();
 
     // run the CLI

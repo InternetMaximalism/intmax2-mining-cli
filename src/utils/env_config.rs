@@ -5,14 +5,13 @@ use serde::{Deserialize, Serialize};
 
 use super::{
     config::Settings,
-    file::{create_file_with_content, get_project_root, DATA_DIR},
+    file::{create_file_with_content, get_data_path},
     network::Network,
 };
 
 fn env_config_path(network: Network) -> PathBuf {
-    get_project_root()
+    get_data_path()
         .unwrap()
-        .join(DATA_DIR)
         .join(format!("env.{}.json", network))
 }
 
