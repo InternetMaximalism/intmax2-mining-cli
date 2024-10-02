@@ -13,10 +13,15 @@ const PROJECT_ROOT_FILE: &str = "mining-cli-root";
 
 pub fn create_file_with_content(path: &Path, content: &[u8]) -> anyhow::Result<()> {
     if let Some(parent) = path.parent() {
-        fs::create_dir_all(parent).map_err(|e| CLIError::IoError(e))?;
+        fs::create_dir_all(parent)
+            .with_context(|| format!("Failed to create directory: {:?}", parent))?;
     }
-    let mut file = fs::File::create(path)?;
-    file.write_all(content)?;
+
+    let mut file =
+        File::create(path).with_context(|| format!("Failed to create file: {:?}", path))?;
+
+    file.write_all(content)
+        .with_context(|| format!("Failed to write content to file: {:?}", path))?;
     Ok(())
 }
 
