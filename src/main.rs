@@ -35,9 +35,11 @@ fn get_log_file_path() -> PathBuf {
 
 #[tokio::main]
 async fn main() {
-    let mode = Args::parse().command.unwrap_or(RunMode::Interactive);
+    let mode = Args::parse().command;
+    let is_interactive = mode.is_none();
+
     // load the .env file if not in interactive mode
-    if mode != RunMode::Interactive {
+    if !is_interactive {
         dotenv().ok();
     }
 

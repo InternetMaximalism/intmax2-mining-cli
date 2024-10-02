@@ -8,7 +8,6 @@ pub enum RunMode {
     Claim,       // only claim
     Exit,        // only withdraw or cancel pending deposits
     Export,      // export the deposit addresses
-    Interactive, // interactive mode
 }
 
 impl Display for RunMode {
@@ -18,7 +17,6 @@ impl Display for RunMode {
             RunMode::Claim => write!(f, "Claim"),
             RunMode::Exit => write!(f, "Exit"),
             RunMode::Export => write!(f, "Export"),
-            RunMode::Interactive => write!(f, "Interactive"),
         }
     }
 }

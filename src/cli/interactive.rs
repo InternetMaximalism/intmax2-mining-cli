@@ -52,7 +52,14 @@ pub async fn interactive() -> anyhow::Result<RunMode> {
         config.save_to_file()?;
         config.export_to_env()?;
     };
-    println!("Press Ctrl + c to stop the process");
+    println!("Press ctrl + c to stop the process");
+
+    let mode = select_mode()?;
+
+    Ok(mode)
+}
+
+pub fn select_mode() -> anyhow::Result<RunMode> {
     let items = [
         format!(
             "{} {}",

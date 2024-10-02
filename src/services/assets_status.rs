@@ -1,6 +1,6 @@
-use ethers::types::{Address, H256};
+use ethers::types::{Address, H256, U256};
 use intmax2_zkp::{
-    common::deposit::get_pubkey_salt_hash, ethereum_types::u256::U256,
+    common::deposit::get_pubkey_salt_hash, ethereum_types::u32limb_trait::U32LimbTrait,
     utils::leafable::Leafable as _,
 };
 use log::warn;
@@ -31,6 +31,7 @@ pub struct AssetsStatus {
     pub eligible_indices: Vec<usize>,      // Positions in senders_deposits that are eligible
     pub claimed_indices: Vec<usize>,       // Positions in senders_deposits that are claimed
     pub not_claimed_indices: Vec<usize>, // Positions in senders_deposits that are eligible but not claimed
+    pub claimable_amount: U256,          // Total amount of not claimed tokens
 }
 
 pub async fn fetch_assets_status(
@@ -82,7 +83,8 @@ pub async fn fetch_assets_status(
     for &index in contained_indices.iter() {
         let event = &senders_deposits[index];
         let salt = derive_salt_from_private_key_nonce(deposit_private_key, event.tx_nonce);
-        let nullifier = get_pubkey_salt_hash(U256::default(), salt);
+        let nullifier =
+            get_pubkey_salt_hash(intmax2_zkp::ethereum_types::u256::U256::default(), salt);
         let is_exists = get_withdrawal_nullifier_exists(nullifier).await?;
         if is_exists {
             withdrawn_indices.push(index);
@@ -92,19 +94,23 @@ pub async fn fetch_assets_status(
     }
 
     let mut eligible_indices = Vec::new();
+    let mut eligible_amounts = Vec::new();
     for &index in &contained_indices {
         let event = &senders_deposits[index];
         let deposit_index = state
             .deposit_hash_tree
             .get_index(event.deposit().hash())
             .unwrap();
-        if state.eligible_tree.get_leaf_index(deposit_index).is_some() {
-            eligible_indices.push(index);
+        if let Some(leaf_index) = state.eligible_tree.get_leaf_index(deposit_index) {
+            let leaf = state.eligible_tree.tree.get_leaf(leaf_index as usize);
+            eligible_amounts.push(leaf.amount);
+            eligible_indices.push(index as usize);
         }
     }
 
     let mut claimed_indices = Vec::new();
     let mut not_claimed_indices = Vec::new();
+    let mut claimable_amount = U256::zero();
     for &index in &eligible_indices {
         let event = &senders_deposits[index];
         let salt = derive_salt_from_private_key_nonce(deposit_private_key, event.tx_nonce);
@@ -114,6 +120,8 @@ pub async fn fetch_assets_status(
             claimed_indices.push(index);
         } else {
             not_claimed_indices.push(index);
+            let eligible_amount = U256::from_big_endian(&eligible_amounts[index].to_bytes_be());
+            claimable_amount += eligible_amount;
         }
     }
 
@@ -128,6 +136,7 @@ pub async fn fetch_assets_status(
         eligible_indices,
         claimed_indices,
         not_claimed_indices,
+        claimable_amount,
     })
 }
 

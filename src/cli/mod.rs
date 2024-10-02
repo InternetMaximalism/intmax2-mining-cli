@@ -1,6 +1,8 @@
 use availability::check_avaliability;
 use configure::recover_withdrawal_private_key;
 use console::{initialize_console, print_status};
+use interactive::select_mode;
+use tokio::task::JoinHandle;
 
 use crate::{
     services::{claim_loop, exit_loop, mining_loop},
@@ -16,12 +18,14 @@ pub mod console;
 pub mod export_deposit_accounts;
 pub mod interactive;
 
-pub async fn run(mode: RunMode) -> anyhow::Result<()> {
+pub async fn run(mode: Option<RunMode>) -> anyhow::Result<()> {
+    let is_interactive = mode.is_none();
+
     check_avaliability().await?;
-    let mode = if mode == RunMode::Interactive {
+    let mut mode = if is_interactive {
         interactive::interactive().await?
     } else {
-        mode.clone()
+        mode.unwrap()
     };
 
     let config = EnvConfig::import_from_env()?;
@@ -30,42 +34,56 @@ pub async fn run(mode: RunMode) -> anyhow::Result<()> {
     validate_env_config(&config).await?;
     config.export_to_env()?;
 
-    // for export mode, we only need to export the deposit accounts and exit
-    if mode == RunMode::Export {
-        export_deposit_accounts::export_deposit_accounts(withdrawal_private_key).await?;
-        return Ok(());
-    }
-
     let mut state = State::new();
     let prover_future = tokio::spawn(async { Prover::new() });
 
     accounts_status::accounts_status(&mut state, config.mining_times, withdrawal_private_key)
         .await?;
 
-    // wait for prover to be ready
     initialize_console();
-    print_status("Waiting for prover to be ready");
-    let prover = prover_future.await?;
-    state.prover = Some(prover);
+    wait_for_prover(&mut state, prover_future).await?;
 
-    match mode {
-        RunMode::Mining => {
-            mining_loop(
-                &mut state,
-                withdrawal_private_key,
-                config.mining_unit,
-                config.mining_times,
-            )
-            .await?;
+    loop {
+        match mode {
+            RunMode::Mining => {
+                mining_loop(
+                    &mut state,
+                    withdrawal_private_key,
+                    config.mining_unit,
+                    config.mining_times,
+                )
+                .await?;
+            }
+            RunMode::Claim => {
+                claim_loop(&mut state, withdrawal_private_key).await?;
+                press_any_key_to_continue().await;
+            }
+            RunMode::Exit => {
+                exit_loop(&mut state, withdrawal_private_key).await?;
+                press_any_key_to_continue().await;
+            }
+            RunMode::Export => {
+                export_deposit_accounts::export_deposit_accounts(withdrawal_private_key).await?;
+                press_any_key_to_continue().await;
+            }
+        };
+        if !is_interactive {
+            // if not in interactive mode, we only run once
+            break;
         }
-        RunMode::Claim => {
-            claim_loop(&mut state, withdrawal_private_key).await?;
-        }
-        RunMode::Exit => {
-            exit_loop(&mut state, withdrawal_private_key).await?;
-        }
-        _ => unreachable!(),
+        mode = select_mode()?;
     }
-
     Ok(())
+}
+
+async fn wait_for_prover(state: &mut State, handle: JoinHandle<Prover>) -> anyhow::Result<()> {
+    print_status("Waiting for prover to be ready");
+    let prover = handle.await?;
+    state.prover = Some(prover);
+    Ok(())
+}
+
+async fn press_any_key_to_continue() {
+    println!("Press any key to continue...");
+    let _ = tokio::io::AsyncReadExt::read(&mut tokio::io::stdin(), &mut [0u8]).await;
 }

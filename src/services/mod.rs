@@ -46,8 +46,7 @@ pub async fn mining_loop(
             if assets_status.can_skip_mining(mining_times) {
                 print_log(format!(
                     "Max deposits {} reached for #{} {:?}.",
-                    key_number,
-                    mining_times, key.deposit_address
+                    mining_times, key_number, key.deposit_address
                 ));
                 key_number += 1;
                 break;
@@ -88,8 +87,7 @@ pub async fn exit_loop(state: &mut State, withdrawal_private_key: H256) -> anyho
             {
                 print_status(format!(
                     "All deposits are withdrawn for #{}. {:?}",
-                    key_number,
-                    key.deposit_address,
+                    key_number, key.deposit_address,
                 ));
                 key_number += 1;
                 break;

@@ -5,12 +5,14 @@ use mining_circuit_v1::claim::claim_inner_circuit::ClaimInnerValue;
 use plonky2::{field::goldilocks_field::GoldilocksField, plonk::proof::ProofWithPublicInputs};
 use serde::{Deserialize, Serialize};
 
-use crate::utils::file::{create_file_with_content, get_project_root};
+use crate::utils::file::{create_file_with_content, get_project_root, DATA_DIR};
 
 fn claim_temp_path() -> PathBuf {
     get_project_root()
         .unwrap()
-        .join("data / temp / claim_temp.json")
+        .join(DATA_DIR)
+        .join("temp")
+        .join("claim_temp.json")
 }
 
 type F = GoldilocksField;
