@@ -1,6 +1,6 @@
 use std::{env, io::BufReader, path::PathBuf, str::FromStr as _};
 
-use ethers::types::{H256, U256};
+use ethers::types::{Address, H256, U256};
 use serde::{Deserialize, Serialize};
 
 use super::{
@@ -23,6 +23,7 @@ pub struct EnvConfig {
     pub rpc_url: String,
     pub max_gas_price: U256,
     pub encrypt: bool,
+    pub withdrawal_address: Address,
     pub withdrawal_private_key: Option<H256>,
     pub encrypted_withdrawal_private_key: Option<Vec<u8>>,
     pub mining_unit: U256,
@@ -48,6 +49,7 @@ impl EnvConfig {
         env::set_var("NETWORK", &config_string.network);
         env::set_var("RPC_URL", &config_string.rpc_url);
         env::set_var("MAX_GAS_PRICE", &config_string.max_gas_price);
+        env::set_var("WITHDRAWAL_ADDRESS", &config_string.withdrawal_address);
         env::set_var("ENCRYPT", &config_string.encrypt);
         if self.encrypt {
             env::set_var(
@@ -72,6 +74,9 @@ impl EnvConfig {
         let rpc_url = env::var("RPC_URL")
             .map_err(|_| anyhow::Error::msg("RPC_URL environment variable is not set"))?;
         let max_gas_price = env::var("MAX_GAS_PRICE").unwrap_or(default_env.default_max_gas_price);
+        let withdrawal_address = env::var("WITHDRAWAL_ADDRESS").map_err(|_| {
+            anyhow::Error::msg("WITHDRAWAL_ADDRESS environment variable is not set")
+        })?;
         let encrypt = env::var("ENCRYPT").unwrap_or("true".to_string());
         let withdrawal_private_key = env::var("WITHDRAWAL_PRIVATE_KEY").ok();
         let encrypted_withdrawal_private_key = env::var("ENCRYPTED_WITHDRAWAL_PRIVATE_KEY").ok();
@@ -83,6 +88,7 @@ impl EnvConfig {
             rpc_url,
             max_gas_price,
             encrypt,
+            withdrawal_address,
             withdrawal_private_key,
             encrypted_withdrawal_private_key,
             mining_unit,
@@ -102,6 +108,7 @@ impl EnvConfig {
         } else {
             anyhow::bail!("Both keys and encrypted_keys are not set in the configuration file. Please set one of them.");
         };
+        let withdrawal_address = format!("{:?}", self.withdrawal_address);
         let withdrawal_private_key = self.withdrawal_private_key.map(|key| format!("{:?}", key));
         let encrypted_withdrawal_private_key = self
             .encrypted_withdrawal_private_key
@@ -114,6 +121,7 @@ impl EnvConfig {
             rpc_url: self.rpc_url.clone(),
             max_gas_price,
             encrypt,
+            withdrawal_address,
             withdrawal_private_key,
             encrypted_withdrawal_private_key,
             mining_unit,
@@ -140,6 +148,10 @@ impl EnvConfig {
         } else if encrypt && value.encrypted_withdrawal_private_key.is_none() {
             anyhow::bail!("ENCRYPTED_WITHDRAWAL_PRIVATE_KEY is not set.");
         }
+        let withdrawal_address: Address = value
+            .withdrawal_address
+            .parse()
+            .map_err(|_| anyhow::anyhow!("failed to parse WITHDRAWAL_ADDRESS"))?;
 
         let withdrawal_private_key = if !encrypt {
             let withdrawal_private_key: H256 = value
@@ -175,6 +187,7 @@ impl EnvConfig {
             rpc_url: value.rpc_url.clone(),
             max_gas_price,
             encrypt,
+            withdrawal_address,
             withdrawal_private_key,
             encrypted_withdrawal_private_key,
             mining_unit,
@@ -190,6 +203,7 @@ struct EnvConfigString {
     rpc_url: String,
     max_gas_price: String,
     encrypt: String,
+    withdrawal_address: String,
     withdrawal_private_key: Option<String>,
     encrypted_withdrawal_private_key: Option<String>,
     mining_unit: String,
@@ -200,7 +214,7 @@ struct EnvConfigString {
 mod tests {
     use ethers::{types::U256, utils::format_units};
 
-    use crate::utils::network::Network;
+    use crate::{external_api::contracts::utils::get_address, utils::network::Network};
 
     #[test]
     fn load_env_test() {
@@ -211,12 +225,15 @@ mod tests {
 
     #[test]
     fn test_env_config_string_conversion() {
+        let key = ethers::types::H256::random();
+        let address = get_address(key);
         let env_config = super::EnvConfig {
             network: Network::Localnet,
             rpc_url: "http://localhost:8545".to_string(),
             max_gas_price: 30_000_000_000u64.into(),
             encrypt: false,
-            withdrawal_private_key: Some(ethers::types::H256::random()),
+            withdrawal_address: address,
+            withdrawal_private_key: Some(key),
             encrypted_withdrawal_private_key: None,
             mining_unit: 100_000_000_000_000_000u128.into(),
             mining_times: 10,
@@ -228,12 +245,15 @@ mod tests {
 
     #[test]
     fn test_export_and_import_config() {
+        let key = ethers::types::H256::random();
+        let address = get_address(key);
         let env_config = super::EnvConfig {
             network: Network::Localnet,
             rpc_url: "http://localhost:8545".to_string(),
             max_gas_price: 30_000_000_000u64.into(),
+            withdrawal_address: address,
             encrypt: false,
-            withdrawal_private_key: Some(ethers::types::H256::random()),
+            withdrawal_private_key: Some(key),
             encrypted_withdrawal_private_key: None,
             mining_unit: 100_000_000_000_000_000u128.into(),
             mining_times: 10,

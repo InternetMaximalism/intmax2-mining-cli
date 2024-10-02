@@ -5,6 +5,7 @@ use interactive::select_mode;
 use tokio::task::JoinHandle;
 
 use crate::{
+    external_api::contracts::utils::get_address,
     services::{claim_loop, exit_loop, mining_loop},
     state::{mode::RunMode, prover::Prover, state::State},
     utils::{env_config::EnvConfig, env_validation::validate_env_config},
@@ -30,6 +31,9 @@ pub async fn run(mode: Option<RunMode>) -> anyhow::Result<()> {
 
     let config = EnvConfig::import_from_env()?;
     let withdrawal_private_key = recover_withdrawal_private_key(&config)?;
+    if config.withdrawal_address != get_address(withdrawal_private_key) {
+        anyhow::bail!("Withdrawal address does not match the address derived from the private key");
+    }
 
     validate_env_config(&config).await?;
     config.export_to_env()?;

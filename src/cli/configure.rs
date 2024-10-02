@@ -51,12 +51,14 @@ pub async fn new_config(network: Network) -> anyhow::Result<EnvConfig> {
         (max_gas_price, mining_unit, mining_times)
     };
     let withdrawal_private_key: H256 = input_withdrawal_private_key()?;
+    let withdrawal_address = get_address(withdrawal_private_key);
     let (encrypt, keys, encrypted_keys) = input_encryption(withdrawal_private_key)?;
     let config = EnvConfig {
         network,
         rpc_url,
         max_gas_price,
         encrypt,
+        withdrawal_address,
         withdrawal_private_key: keys,
         encrypted_withdrawal_private_key: encrypted_keys,
         mining_unit,
@@ -98,6 +100,7 @@ pub async fn modify_config(config: &EnvConfig) -> anyhow::Result<EnvConfig> {
     } else {
         key
     };
+    let withdrawal_address = get_address(withdrawal_private_key);
     let modify_encryption = Confirm::new()
         .with_prompt(format!(
             "Modify encryption current={}?",
@@ -119,6 +122,7 @@ pub async fn modify_config(config: &EnvConfig) -> anyhow::Result<EnvConfig> {
         rpc_url,
         max_gas_price,
         encrypt,
+        withdrawal_address,
         withdrawal_private_key: keys,
         encrypted_withdrawal_private_key: encrypted_keys,
         mining_unit: config.mining_unit,

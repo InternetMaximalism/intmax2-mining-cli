@@ -1,9 +1,15 @@
-use std::env;
+use std::{collections::HashMap, env};
 
 use console::{style, Term};
 use dialoguer::Select;
+use ethers::types::Address;
+use strum::IntoEnumIterator;
 
-use crate::{cli::configure::select_network, state::mode::RunMode, utils::env_config::EnvConfig};
+use crate::{
+    cli::configure::select_network,
+    state::mode::RunMode,
+    utils::{env_config::EnvConfig, network::Network},
+};
 
 use super::configure::{modify_config, new_config};
 
@@ -52,6 +58,8 @@ pub async fn interactive() -> anyhow::Result<RunMode> {
         config.save_to_file()?;
         config.export_to_env()?;
     };
+    address_duplication_check()?;
+
     println!("Press ctrl + c to stop the process");
 
     let mode = select_mode()?;
@@ -97,4 +105,25 @@ pub fn select_mode() -> anyhow::Result<RunMode> {
         _ => unreachable!(),
     };
     Ok(mode)
+}
+
+fn address_duplication_check() -> anyhow::Result<()> {
+    let mut address_to_network = HashMap::<Address, Network>::new();
+    for network in Network::iter() {
+        let config = EnvConfig::load_from_file(network).ok();
+        if let Some(config) = config {
+            if address_to_network.get(&config.withdrawal_address).is_some() {
+                anyhow::bail!(
+                    "Withdrawal address {} is duplicated on {} and {}. Please use a different address.",
+                    config.withdrawal_address,
+                    address_to_network.get(&config.withdrawal_address).unwrap(),
+                    network
+                );
+            } else {
+                address_to_network.insert(config.withdrawal_address, network);
+            }
+        }
+    }
+
+    Ok(())
 }

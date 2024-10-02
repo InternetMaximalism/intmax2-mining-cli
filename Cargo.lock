@@ -2528,6 +2528,8 @@ dependencies = [
  "serde_json",
  "sha3",
  "simplelog",
+ "strum",
+ "strum_macros",
  "thiserror",
  "tokio",
 ]

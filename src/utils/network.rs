@@ -1,8 +1,9 @@
 use std::{env, fmt::Display, str::FromStr};
 
 use serde::{Deserialize, Serialize};
+use strum::EnumIter;
 
-#[derive(Debug, Copy, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Copy, Clone, Serialize, Deserialize, PartialEq, EnumIter)]
 pub enum Network {
     Localnet,
     Sepolia,
