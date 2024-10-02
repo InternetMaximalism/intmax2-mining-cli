@@ -28,7 +28,7 @@ fn get_log_file_path() -> PathBuf {
         .join(DATA_DIR)
         .join("logs")
         .join(format!(
-            "{}.log",
+            "{}.txt",
             chrono::Local::now().format("%Y-%m-%d-%H:%M:%S")
         ))
 }
