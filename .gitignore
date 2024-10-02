@@ -7,5 +7,5 @@ target/
 *.zip
 
 # for internal test config files
-config.sepolia.toml
-config.localnet.toml
+config/config.sepolia.toml
+config/config.localnet.toml
