@@ -41,6 +41,7 @@ pub async fn get_deposited_event_by_sender(
     let events = with_retry(|| async {
         int1.deposited_filter()
             .from_block(0)
+            .address(int1.address().into())
             .topic2(sender)
             .query_with_meta()
             .await
@@ -83,6 +84,7 @@ pub async fn get_deposit_leaf_inserted_event(
     let int1 = get_int1_contract().await?;
     let events = with_retry(|| async {
         int1.deposit_leaf_inserted_filter()
+            .address(int1.address().into())
             .from_block(from_block)
             .query_with_meta()
             .await
