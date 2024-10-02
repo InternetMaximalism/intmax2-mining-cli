@@ -1,0 +1,30 @@
+[api]
+availability_server_url = "https://holesky.v1.mining-gateway.intmax.xyz/v1/availability"
+withdrawal_gnark_prover_url = "https://holesky.v1.mining-gateway.intmax.xyz/v1/gnark-withdraw-circuit"
+claim_gnark_prover_url = "https://holesky.v1.mining-gateway.intmax.xyz/v1/gnark-claim-circuit"
+withdrawal_server_url="https://holesky.v1.mining-gateway.intmax.xyz/v1/withdrawal/submit-proof"
+circulation_server_url="https://holesky.v1.mining-gateway.intmax.xyz/v1/mining"
+tree_data_repository="InternetMaximalism/intmax2-v1-mining-mock"
+tree_data_directory="holesky-data"
+tree_data_branch="main"
+sync_tree_data_interval_in_sec = 3600
+gnark_get_proof_cooldown_in_sec = 15
+
+[blockchain]
+chain_id = 17000
+int1_address = "0x50f8A0956B1c41fA7884637ecf8322aba7e02369"
+minter_address = "0xDb3b66830b42dF8bB0316D783Ba4Ff5A9C212D51"
+token_address = "0x78801e4e578860bbcd72A7c79aA363D762d52351"
+single_deposit_gas = 88000
+single_claim_gas = 600000
+
+[service]
+repository_url = "https://github.com/InternetMaximalism/intmax2-mining-cli"
+mining_max_cooldown_in_sec = 20 
+loop_cooldown_in_sec = 10
+high_gas_retry_inverval_in_sec = 10
+
+[env]
+default_max_gas_price ="100"
+default_mining_times="5"
+default_mining_unit="0.1"

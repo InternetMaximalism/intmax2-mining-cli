@@ -12,6 +12,13 @@ pub fn get_data_path() -> anyhow::Result<PathBuf> {
     Ok(home_dir.join(".mining-cli"))
 }
 
+pub fn create_data_dir() -> anyhow::Result<()> {
+    let data_path = get_data_path()?;
+    fs::create_dir_all(&data_path)
+        .with_context(|| format!("Failed to create directory: {:?}", data_path))?;
+    Ok(())
+}
+
 pub fn create_file_with_content(path: &Path, content: &[u8]) -> anyhow::Result<()> {
     if let Some(parent) = path.parent() {
         fs::create_dir_all(parent)
