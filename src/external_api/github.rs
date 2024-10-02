@@ -7,10 +7,14 @@ use regex::Regex;
 use reqwest::{self, Client};
 use serde_json::Value;
 
-use crate::utils::{
-    bin_parser::{BinDepositTree, BinEligibleTree},
-    config::Settings,
-    file::{create_data_dir, get_data_path},
+use crate::{
+    constants::{CONFIG_BRANCH, CONFIG_PATH, CONFIG_REPO},
+    utils::{
+        bin_parser::{BinDepositTree, BinEligibleTree},
+        config::Settings,
+        file::{create_data_dir, get_data_path},
+        retry::with_retry,
+    },
 };
 
 pub async fn fetch_latest_tree_from_github(
@@ -102,33 +106,28 @@ pub async fn fetch_config_file_from_github() -> anyhow::Result<()> {
     create_data_dir()?;
 
     let client = Client::new();
-    let repo_owner = "InternetMaximalism";
-    let repo_name = "intmax2-mining-cli";
-    let config_path = "config";
     let files_to_download = vec!["config.holesky.toml", "config.mainnet.toml"];
 
     for file_name in files_to_download {
         let file_url = format!(
-            "https://raw.githubusercontent.com/{}/{}/upgradable/{}/{}",
-            repo_owner, repo_name, config_path, file_name
+            "https://raw.githubusercontent.com/{}/{}/{}/{}",
+            CONFIG_REPO, CONFIG_BRANCH, CONFIG_PATH, file_name
         );
 
-        let content = client
-            .get(&file_url)
-            .send()
+        let content = with_retry(|| async { client.get(&file_url).send().await })
             .await
-            .context(format!("Failed to download file: {}", file_name))?
+            .context(format!(
+                "Failed to fetch config file from GitHub: {}",
+                file_name
+            ))?;
+        let content = content
             .bytes()
             .await
-            .context(format!("Failed to read content of file: {}", file_name))?;
-
+            .context("Failed to read response body")?;
         let file_path = get_data_path()?.join(file_name);
         fs::write(&file_path, content).context(format!("Failed to write file: {}", file_name))?;
-
-        println!("Downloaded: {}", file_path.display());
+        info!("Downloaded: {}", file_path.display());
     }
-
-    println!("All files have been downloaded to ./mining-cli");
     Ok(())
 }
 
@@ -151,5 +150,10 @@ mod tests {
             NaiveDateTime::parse_from_str("2999-12-31 23:59:59", "%Y-%m-%d %H:%M:%S").unwrap();
         let result = fetch_latest_tree_from_github(last_update).await.unwrap();
         assert!(result.is_none());
+    }
+
+    #[tokio::test]
+    async fn test_fetch_config_file_from_github() {
+        fetch_config_file_from_github().await.unwrap();
     }
 }

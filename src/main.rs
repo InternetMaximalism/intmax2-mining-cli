@@ -1,12 +1,14 @@
 use clap::{arg, command, Parser};
 use cli::{console::print_error, run};
 use dotenv::dotenv;
+use external_api::github::fetch_config_file_from_github;
 use simplelog::{Config, LevelFilter, WriteLogger};
 use state::mode::RunMode;
 use std::{fs::File, path::PathBuf};
 use utils::file::{create_file_with_content, get_data_path};
 
 pub mod cli;
+pub mod constants;
 pub mod external_api;
 pub mod services;
 pub mod state;
@@ -41,6 +43,10 @@ async fn main() {
     create_file_with_content(&log_file_path, &[]).expect("Failed to create log file");
     let log_file = File::create(log_file_path).unwrap();
     WriteLogger::init(LevelFilter::Info, Config::default(), log_file).unwrap();
+
+    fetch_config_file_from_github()
+        .await
+        .expect("Failed to fetch config file from GitHub");
 
     // run the CLI
     match run(mode).await {
