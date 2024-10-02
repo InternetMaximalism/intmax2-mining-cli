@@ -6,8 +6,11 @@ set -e  # Exit on error
 PROJECT_NAME=$(grep '^name' Cargo.toml | sed 's/name[[:space:]]*=[[:space:]]*//' | sed 's/"//g' | tr -d '[:space:]')
 RELEASE_DIR="release/"
 
-# Function to build and create ZIP for each target
-build_and_zip() {
+# Create release directory if it doesn't exist
+mkdir -p "${RELEASE_DIR}"
+
+# Function to build and copy binary for each target
+build_and_copy() {
   local target=$1
   local extension=$2
   
@@ -15,41 +18,24 @@ build_and_zip() {
   cargo build --release --target $target
 
   local binary_name="${PROJECT_NAME}${extension}"
-  local zip_name="${PROJECT_NAME}-${target}.zip"
+  local output_name="${PROJECT_NAME}-${target}${extension}"
 
-  echo "Creating ZIP for $target..."
+  echo "Copying binary for $target..."
   if [ -f "target/${target}/release/${binary_name}" ]; then
-    # Create a temporary directory
-    local temp_dir=$(mktemp -d)
-    
-    # Copy the binary
-    cp "target/${target}/release/${binary_name}" "${temp_dir}/"
-    
-    # Copy additional files and directories
-    # cp README.md "${temp_dir}/" || echo "Warning: 'README.md' file not found"
-    
-    # Create the ZIP file
-    (cd "${temp_dir}" && zip -r "${zip_name}" .)
-    
-    # Move the ZIP file to the project root
-    mv "${temp_dir}/${zip_name}" "${RELEASE_DIR}"
-    
-    # Remove the temporary directory
-    rm -rf "${temp_dir}"
-    
-    echo "Created ${zip_name}"
+    cp "target/${target}/release/${binary_name}" "${RELEASE_DIR}${output_name}"
+    echo "Created ${output_name}"
   else
     echo "Error: Binary not found for ${target}"
     return 1
   fi
 }
 
-# Build and create ZIP for each target platform
-build_and_zip "x86_64-apple-darwin" ""  # Intel Mac
-build_and_zip "aarch64-apple-darwin" ""  # Apple Silicon Mac
-# build_and_zip "x86_64-unknown-linux-gnu" ""  # Linux
-build_and_zip "x86_64-pc-windows-gnu" ".exe"  # Windows
+# Build and copy binary for each target platform
+build_and_copy "x86_64-apple-darwin" ""  # Intel Mac
+build_and_copy "aarch64-apple-darwin" ""  # Apple Silicon Mac
+# build_and_copy "x86_64-unknown-linux-gnu" ""  # Linux
+build_and_copy "x86_64-pc-windows-gnu" ".exe"  # Windows
 
-echo "Build and ZIP process completed."
-echo "Created ZIP files:"
-ls -l *.zip
+echo "Build and copy process completed."
+echo "Created binaries:"
+ls -l ${RELEASE_DIR}

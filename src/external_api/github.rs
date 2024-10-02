@@ -8,7 +8,7 @@ use reqwest::{self, Client};
 use serde_json::Value;
 
 use crate::{
-    constants::{CONFIG_BRANCH, CONFIG_PATH, CONFIG_REPO},
+    constants::{CONFIG_BRANCH, CONFIG_PATH, REPO_NAME, REPO_OWNER},
     utils::{
         bin_parser::{BinDepositTree, BinEligibleTree},
         config::Settings,
@@ -110,8 +110,8 @@ pub async fn fetch_config_file_from_github() -> anyhow::Result<()> {
 
     for file_name in files_to_download {
         let file_url = format!(
-            "https://raw.githubusercontent.com/{}/{}/{}/{}",
-            CONFIG_REPO, CONFIG_BRANCH, CONFIG_PATH, file_name
+            "https://raw.githubusercontent.com/{}/{}/{}/{}/{}",
+            REPO_OWNER, REPO_NAME, CONFIG_BRANCH, CONFIG_PATH, file_name
         );
 
         let content = with_retry(|| async { client.get(&file_url).send().await })
