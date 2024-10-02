@@ -1,7 +1,6 @@
 use clap::{arg, command, Parser};
 use cli::{console::print_error, run};
 use dotenv::dotenv;
-use log::error;
 use simplelog::{Config, LevelFilter, WriteLogger};
 use state::mode::RunMode;
 use std::{fs::File, path::PathBuf};
@@ -54,7 +53,6 @@ async fn main() {
     match run(mode).await {
         Ok(_) => {}
         Err(e) => {
-            error!("{:#}", e);
             print_error(format!("{}", e.to_string()));
         }
     }
