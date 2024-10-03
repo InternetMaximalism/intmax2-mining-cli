@@ -14,6 +14,7 @@ use mining::mining_task;
 use rand::Rng as _;
 use utils::is_address_used;
 
+pub mod balance_transfer;
 pub mod assets_status;
 pub mod claim;
 pub mod mining;

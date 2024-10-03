@@ -42,8 +42,12 @@ pub async fn run(mode: Option<RunMode>) -> anyhow::Result<()> {
     config.export_to_env()?;
 
     let mut state = State::new();
-    accounts_status::accounts_status(&mut state, config.mining_times, withdrawal_private_key)
-        .await?;
+
+    // prints the status of the accounts if mutable mode
+    if mode == RunMode::Mining || mode == RunMode::Claim || mode == RunMode::Exit {
+        accounts_status::accounts_status(&mut state, config.mining_times, withdrawal_private_key)
+            .await?;
+    }
 
     initialize_console();
     loop {
