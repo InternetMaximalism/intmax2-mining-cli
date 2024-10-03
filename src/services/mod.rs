@@ -3,8 +3,9 @@ use crate::{
         balance_validation::{
             validate_deposit_address_balance, validate_withdrawal_address_balance,
         },
-        console::{print_assets_status, print_log, print_status},
+        console::{print_assets_status, print_log, print_status, print_warning},
     },
+    external_api::intmax::circulation::get_circulation,
     state::{key::Key, state::State},
     utils::config::Settings,
 };
@@ -14,8 +15,8 @@ use mining::mining_task;
 use rand::Rng as _;
 use utils::is_address_used;
 
-pub mod balance_transfer;
 pub mod assets_status;
+pub mod balance_transfer;
 pub mod claim;
 pub mod mining;
 pub mod sync;
@@ -44,19 +45,39 @@ pub async fn mining_loop(
         .await?;
         loop {
             let assets_status = state.sync_and_fetch_assets(&key).await?;
-            if assets_status.can_skip_mining(mining_times) {
+            let is_qualified = !get_circulation(key.deposit_address).await?.is_excluded;
+            let will_deposit = assets_status.senders_deposits.len() < mining_times as usize
+                && assets_status.pending_indices.is_empty()
+                && is_qualified;
+
+            // skip deposit address if no remaining deposits, and will not deposit
+            if assets_status.no_remaining() && !will_deposit {
+                if !is_qualified {
+                    print_warning(format!(
+                        "Deposit address #{} {:?}: is not qualified for mining. For more information, please refer to the documentation.",
+                        key_number, key.deposit_address,
+                    ));
+                }
                 print_log(format!(
-                    "Max deposits {} reached for #{} {:?}.",
-                    mining_times, key_number, key.deposit_address
+                    "Deposit address #{} {:?}: Qualified: {}. Deposits {}/{}. Cancelled {}. Skipping...",
+                    key_number,
+                    key.deposit_address,
+                    assets_status.senders_deposits.len(),
+                    mining_times,
+                    assets_status.cancelled_indices.len(),
+                    is_qualified
                 ));
-                key_number += 1;
                 break;
             }
-            let new_deposit = (assets_status.senders_deposits.len() < mining_times as usize) // deposit only if less than max deposits
-            && (assets_status.pending_indices.is_empty()); // deposit only if no pending deposits
-            let cooldown =
-                mining_task(state, &key, &assets_status, new_deposit, false, mining_unit).await?;
-
+            let cooldown = mining_task(
+                state,
+                &key,
+                &assets_status,
+                will_deposit,
+                false,
+                mining_unit,
+            )
+            .await?;
             // print assets status after mining
             let assets_status = state.sync_and_fetch_assets(&key).await?;
             print_assets_status(&assets_status);
@@ -65,6 +86,7 @@ pub async fn mining_loop(
             }
             common_loop_cool_down().await;
         }
+        key_number += 1;
     }
 }
 

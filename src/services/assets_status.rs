@@ -155,10 +155,10 @@ impl AssetsStatus {
             .collect()
     }
 
-    pub fn can_skip_mining(&self, mining_times: u64) -> bool {
+    pub fn no_remaining(&self) -> bool {
         let income = self.senders_deposits.len();
         let outcome = self.withdrawn_indices.len() + self.cancelled_indices.len();
-        self.senders_deposits.len() >= mining_times as usize && income == outcome
+        income == outcome
     }
 }
 

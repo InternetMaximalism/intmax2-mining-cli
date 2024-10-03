@@ -4,6 +4,7 @@ use ethers::types::U256;
 use withdrawal::withdrawal_task;
 
 use crate::{
+    cli::console::print_warning,
     state::{key::Key, state::State},
     utils::errors::CLIError,
 };
@@ -34,6 +35,10 @@ pub async fn mining_task(
 
     // cancel rejected deposits
     for &index in assets_status.rejected_indices.iter() {
+        print_warning(format!(
+            "Deposit address {:?} is rejected because of AML check. For more information, please refer to the documentation.",
+         key.deposit_address
+        ));
         let event = assets_status.senders_deposits[index].clone();
         cancel_task(state, key, event).await.map_err(|e| {
             CLIError::InternalError(format!("Failed to cancel a rejected deposit: {:#}", e))
