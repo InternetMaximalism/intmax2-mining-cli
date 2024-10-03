@@ -7,7 +7,7 @@ pub fn update() -> anyhow::Result<()> {
         .repo_owner(REPO_OWNER)
         .repo_name(REPO_NAME)
         .bin_name("mining-cli")
-        .show_output(false)
+        .show_output(true)
         .current_version(cargo_crate_version!())
         .build()?
         .update()?;

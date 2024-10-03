@@ -5,10 +5,7 @@ use external_api::github::fetch_config_file_from_github;
 use simplelog::{Config, LevelFilter, WriteLogger};
 use state::mode::RunMode;
 use std::{fs::File, path::PathBuf};
-use utils::{
-    file::{create_file_with_content, get_data_path},
-    update,
-};
+use utils::file::{create_file_with_content, get_data_path};
 
 pub mod cli;
 pub mod constants;

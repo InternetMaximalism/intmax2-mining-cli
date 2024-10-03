@@ -89,6 +89,11 @@ pub fn select_mode() -> anyhow::Result<RunMode> {
             style("Export:").bold(),
             style("export deposit private keys").dim()
         ),
+        format!(
+            "{} {}",
+            style("Check Update:").bold(),
+            style("check for updates of this CLI").dim()
+        ),
     ];
     let term = Term::stdout();
     term.clear_screen()?;
@@ -102,6 +107,7 @@ pub fn select_mode() -> anyhow::Result<RunMode> {
         1 => RunMode::Claim,
         2 => RunMode::Exit,
         3 => RunMode::Export,
+        4 => RunMode::CheckUpdate,
         _ => unreachable!(),
     };
     Ok(mode)

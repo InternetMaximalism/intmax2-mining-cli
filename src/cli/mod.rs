@@ -8,7 +8,7 @@ use crate::{
     external_api::contracts::utils::get_address,
     services::{claim_loop, exit_loop, mining_loop},
     state::{mode::RunMode, prover::Prover, state::State},
-    utils::{env_config::EnvConfig, env_validation::validate_env_config},
+    utils::{env_config::EnvConfig, env_validation::validate_env_config, update},
 };
 
 pub mod accounts_status;
@@ -28,6 +28,11 @@ pub async fn run(mode: Option<RunMode>) -> anyhow::Result<()> {
     } else {
         mode.unwrap()
     };
+
+    if mode == RunMode::CheckUpdate {
+        update::update()?;
+        return Ok(());
+    }
 
     let config = EnvConfig::import_from_env()?;
     let withdrawal_private_key = recover_withdrawal_private_key(&config)?;
@@ -69,6 +74,9 @@ pub async fn run(mode: Option<RunMode>) -> anyhow::Result<()> {
             RunMode::Export => {
                 export_deposit_accounts::export_deposit_accounts(withdrawal_private_key).await?;
                 press_any_key_to_continue().await;
+            }
+            RunMode::CheckUpdate => {
+                unreachable!()
             }
         };
         if !is_interactive {
