@@ -120,7 +120,7 @@ Token Symbol: `DMY`
 Token Contract Address: `0xe24e207c6156241cAfb41D025B3b5F0677114C81`
 Token Symbol: `ITX`
 
-1. You can see the ITX token in your wallet.
+3. You can see the ITX token in your wallet.
 
 <div align="center">
   <img src="../assets/holesky/ti3.png" width="800" alt="Mining CLI"></div>
