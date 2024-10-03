@@ -13,7 +13,7 @@ use crate::{
 
 use super::configure::{modify_config, new_config};
 
-pub async fn interactive() -> anyhow::Result<RunMode> {
+pub async fn interactive() -> anyhow::Result<()> {
     let network = select_network()?;
     env::set_var("NETWORK", network.to_string());
 
@@ -59,12 +59,7 @@ pub async fn interactive() -> anyhow::Result<RunMode> {
         config.export_to_env()?;
     };
     address_duplication_check()?;
-
-    println!("Press ctrl + c to stop the process");
-
-    let mode = select_mode()?;
-
-    Ok(mode)
+    Ok(())
 }
 
 pub fn select_mode() -> anyhow::Result<RunMode> {
@@ -98,7 +93,7 @@ pub fn select_mode() -> anyhow::Result<RunMode> {
     let term = Term::stdout();
     term.clear_screen()?;
     let mode = Select::new()
-        .with_prompt("Select mode")
+        .with_prompt("Select mode (press ctrl+c to abort)")
         .items(&items)
         .default(0)
         .interact()?;

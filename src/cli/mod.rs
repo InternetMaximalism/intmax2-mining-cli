@@ -2,7 +2,6 @@ use availability::check_avaliability;
 use configure::recover_withdrawal_private_key;
 use console::{initialize_console, print_status};
 use interactive::select_mode;
-use tokio::task::JoinHandle;
 
 use crate::{
     external_api::contracts::utils::get_address,
@@ -23,16 +22,15 @@ pub async fn run(mode: Option<RunMode>) -> anyhow::Result<()> {
     let is_interactive = mode.is_none();
 
     check_avaliability().await?;
+    if is_interactive {
+        interactive::interactive().await?;
+    }
+
     let mut mode = if is_interactive {
-        interactive::interactive().await?
+        select_mode()?
     } else {
         mode.unwrap()
     };
-
-    if mode == RunMode::CheckUpdate {
-        update::update()?;
-        return Ok(());
-    }
 
     let config = EnvConfig::import_from_env()?;
     let withdrawal_private_key = recover_withdrawal_private_key(&config)?;
@@ -44,17 +42,14 @@ pub async fn run(mode: Option<RunMode>) -> anyhow::Result<()> {
     config.export_to_env()?;
 
     let mut state = State::new();
-    let prover_future = tokio::spawn(async { Prover::new() });
-
     accounts_status::accounts_status(&mut state, config.mining_times, withdrawal_private_key)
         .await?;
 
     initialize_console();
-    wait_for_prover(&mut state, prover_future).await?;
-
     loop {
         match mode {
             RunMode::Mining => {
+                initialize_prover(&mut state).await?;
                 mining_loop(
                     &mut state,
                     withdrawal_private_key,
@@ -64,10 +59,12 @@ pub async fn run(mode: Option<RunMode>) -> anyhow::Result<()> {
                 .await?;
             }
             RunMode::Claim => {
+                initialize_prover(&mut state).await?;
                 claim_loop(&mut state, withdrawal_private_key).await?;
                 press_any_key_to_continue().await;
             }
             RunMode::Exit => {
+                initialize_prover(&mut state).await?;
                 exit_loop(&mut state, withdrawal_private_key).await?;
                 press_any_key_to_continue().await;
             }
@@ -76,7 +73,8 @@ pub async fn run(mode: Option<RunMode>) -> anyhow::Result<()> {
                 press_any_key_to_continue().await;
             }
             RunMode::CheckUpdate => {
-                unreachable!()
+                update::update()?;
+                press_any_key_to_continue().await;
             }
         };
         if !is_interactive {
@@ -88,10 +86,12 @@ pub async fn run(mode: Option<RunMode>) -> anyhow::Result<()> {
     Ok(())
 }
 
-async fn wait_for_prover(state: &mut State, handle: JoinHandle<Prover>) -> anyhow::Result<()> {
-    print_status("Waiting for prover to be ready");
-    let prover = handle.await?;
-    state.prover = Some(prover);
+async fn initialize_prover(state: &mut State) -> anyhow::Result<()> {
+    if state.prover.is_none() {
+        print_status("Waiting for prover to be ready");
+        let prover = Prover::new();
+        state.prover = Some(prover);
+    }
     Ok(())
 }
 
