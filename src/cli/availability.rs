@@ -9,7 +9,14 @@ pub async fn check_avaliability() -> anyhow::Result<()> {
         Ok(output) => {
             if !output.is_available {
                 print_error(&output.message);
-                bail!("CLI is not available");
+                let do_update = dialoguer::Confirm::new()
+                    .with_prompt("Do you want to update the CLI?")
+                    .interact()?;
+                if do_update {
+                    crate::utils::update::update()?;
+                } else {
+                    bail!("CLI is not available");
+                }
             }
             Ok(())
         }

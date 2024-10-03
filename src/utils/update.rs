@@ -6,7 +6,7 @@ pub fn update() -> anyhow::Result<()> {
     let _status = self_update::backends::github::Update::configure()
         .repo_owner(REPO_OWNER)
         .repo_name(REPO_NAME)
-        .bin_name("minig-cli")
+        .bin_name("mining-cli")
         .show_output(false)
         .current_version(cargo_crate_version!())
         .build()?

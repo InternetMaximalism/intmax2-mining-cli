@@ -35,8 +35,6 @@ fn get_log_file_path() -> anyhow::Result<PathBuf> {
 
 #[tokio::main]
 async fn main() {
-    update::update().expect("Failed to update the CLI");
-
     let mode = Args::parse().command;
     let is_interactive = mode.is_none();
 
