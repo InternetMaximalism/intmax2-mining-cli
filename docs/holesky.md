@@ -70,3 +70,57 @@ A faucet is an application that dispenses free tokens on a testnet (a blockchain
 It's important to remember that testnet tokens have no real-world value and cannot be sold or used on the main blockchain network (like Ethereum mainnet).
 
 </details>
+
+## Import ITX token to your wallet
+
+### Import ITX token to your MetaMask
+
+1. Open Metamask and click “Import Tokens”
+
+<div align="center">
+  <img src="../assets/holesky/tm1.png" width="400"></div>
+
+2. Open Metamask and click “Import Tokens”
+
+**For the Holesky network**:<br>
+Token Contract Address: `0x78801e4e578860bbcd72A7c79aA363D762d52351`
+Token Symbol: `DMY`
+
+**For the mainnet**:<br>
+Token Contract Address: `0xe24e207c6156241cAfb41D025B3b5F0677114C81`
+Token Symbol: `ITX`
+
+3. Click “Next”
+
+<div align="center">
+  <img src="../assets/holesky/tm2.png" width="400"></div>
+
+4. Click “Import” and the process completed.
+
+<div align="center">
+  <img src="../assets/holesky/tm3.png" width="400"></div>
+
+### Import ITX token to your Intmax wallet
+
+1. Click "Settings".
+
+<div align="center">
+  <img src="../assets/holesky/ti1.png" width="800" alt="Mining CLI"></div>
+
+2. Click "Import Tokens"
+
+<div align="center">
+  <img src="../assets/holesky/ti2.png" width="800" alt="Mining CLI"></div>
+
+**For the Holesky network**:<br>
+Token Contract Address: `0x78801e4e578860bbcd72A7c79aA363D762d52351`
+Token Symbol: `DMY`
+
+**For the mainnet**:<br>
+Token Contract Address: `0xe24e207c6156241cAfb41D025B3b5F0677114C81`
+Token Symbol: `ITX`
+
+1. You can see the ITX token in your wallet.
+
+<div align="center">
+  <img src="../assets/holesky/ti3.png" width="800" alt="Mining CLI"></div>
