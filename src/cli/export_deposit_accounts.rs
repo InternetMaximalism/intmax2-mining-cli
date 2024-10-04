@@ -48,6 +48,10 @@ async fn transfer_instruction(
     withdrawal_private_key: H256,
     up_to_key_number: u64,
 ) -> anyhow::Result<()> {
+    let deposit_addresses = (0..up_to_key_number)
+        .map(|i| Key::new(withdrawal_private_key, i).deposit_address)
+        .collect::<Vec<Address>>();
+
     loop {
         let items = (0..up_to_key_number)
             .map(|i| {
@@ -70,6 +74,9 @@ async fn transfer_instruction(
                         if to_address == key.withdrawal_address {
                             return Err("Cannot transfer to the withdrawal address".to_string());
                         }
+                        if deposit_addresses.contains(&to_address) {
+                            return Err("Cannot transfer to a deposit address".to_string());
+                        }
                         Ok(())
                     }
                     Err(_) => Err("Invalid address".to_string()),
@@ -80,9 +87,10 @@ async fn transfer_instruction(
             .unwrap(); // safe to unwrap because of the validation
         let is_ok = Confirm::new()
             .with_prompt(format!(
-                "Are you sure to transfer ETH from #{} {:?} to {:?}",
+                "Are you sure to transfer all ETH from #{} {:?} to {:?}",
                 selected, key.deposit_address, to_address,
             ))
+            .report(false)
             .default(true)
             .interact()?;
         if !is_ok {
