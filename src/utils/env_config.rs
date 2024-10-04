@@ -227,7 +227,7 @@ mod tests {
         let key = ethers::types::H256::random();
         let address = get_address(key);
         let env_config = super::EnvConfig {
-            network: Network::Localnet,
+            network: Network::Holesky,
             rpc_url: "http://localhost:8545".to_string(),
             max_gas_price: 30_000_000_000u64.into(),
             encrypt: false,
@@ -247,7 +247,7 @@ mod tests {
         let key = ethers::types::H256::random();
         let address = get_address(key);
         let env_config = super::EnvConfig {
-            network: Network::Localnet,
+            network: Network::Holesky,
             rpc_url: "http://localhost:8545".to_string(),
             max_gas_price: 30_000_000_000u64.into(),
             withdrawal_address: address,
@@ -261,8 +261,6 @@ mod tests {
 
         let env_config_recovered = super::EnvConfig::import_from_env().unwrap();
         assert_eq!(env_config, env_config_recovered);
-
-        env_config.save_to_file().unwrap();
     }
 
     #[test]

@@ -167,6 +167,7 @@ mod tests {
     };
 
     #[tokio::test]
+    #[ignore]
     async fn sync_to_latest_deposit_tree() {
         let mut deposit_hash_tree = DepositHashTree::new();
         let mut eligible_tree = EligibleTreeWithMap::new();

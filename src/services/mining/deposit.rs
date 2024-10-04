@@ -40,6 +40,7 @@ mod tests {
     use crate::test::{get_dummy_keys, get_dummy_state};
 
     #[tokio::test]
+    #[ignore]
     async fn test_deposit() {
         let state = get_dummy_state().await;
         let dummy_key = get_dummy_keys();

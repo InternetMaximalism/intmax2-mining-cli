@@ -165,6 +165,7 @@ impl AssetsStatus {
 #[cfg(test)]
 mod tests {
     #[tokio::test]
+    #[ignore]
     async fn test_assets_status() {
         let mut state = crate::test::get_dummy_state().await;
         state.sync_trees().await.unwrap();

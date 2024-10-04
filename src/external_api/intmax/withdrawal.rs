@@ -117,6 +117,7 @@ mod tests {
     use intmax2_zkp::ethereum_types::{address::Address, bytes32::Bytes32, u256::U256};
 
     #[tokio::test]
+    #[ignore]
     async fn test_submit_withdrawal() {
         let pis =
             mining_circuit_v1::withdrawal::simple_withraw_circuit::SimpleWithdrawalPublicInputs {

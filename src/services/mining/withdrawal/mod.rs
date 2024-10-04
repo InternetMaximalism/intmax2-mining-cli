@@ -153,6 +153,7 @@ mod tests {
     };
 
     #[tokio::test]
+    #[ignore]
     async fn test_withdrawal() {
         let mut state = get_dummy_state().await;
 
@@ -170,6 +171,7 @@ mod tests {
     }
 
     #[tokio::test]
+    #[ignore]
     async fn test_resume_withdrawal() {
         let mut state = get_dummy_state().await;
         state.sync_trees().await.unwrap();

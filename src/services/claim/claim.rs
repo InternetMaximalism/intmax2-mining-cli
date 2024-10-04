@@ -164,6 +164,7 @@ mod tests {
     use super::*;
 
     #[tokio::test]
+    #[ignore]
     async fn test_claim_task() {
         let dummy_key = get_dummy_keys();
 

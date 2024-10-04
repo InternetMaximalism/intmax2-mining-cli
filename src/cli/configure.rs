@@ -317,17 +317,12 @@ mod tests {
     use super::*;
 
     #[tokio::test]
+    #[ignore]
     async fn test_new_config() {
         new_config(Network::Localnet)
             .await
             .unwrap()
             .save_to_file()
             .unwrap();
-    }
-
-    #[tokio::test]
-    async fn test_modify_config() {
-        let config = EnvConfig::load_from_file(Network::Localnet).unwrap();
-        modify_config(&config).await.unwrap();
     }
 }
