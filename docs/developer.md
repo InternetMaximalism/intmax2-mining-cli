@@ -94,3 +94,4 @@ Users utilizing the interactive mode do not need to set these environment variab
 4. `mining-cli export`
 
    - Exports the all deposit private keys.
+

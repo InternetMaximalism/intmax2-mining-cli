@@ -9,5 +9,3 @@ target/
 # for internal test config files
 config/config.sepolia.toml
 config/config.localnet.toml
-
-Dockerfile
