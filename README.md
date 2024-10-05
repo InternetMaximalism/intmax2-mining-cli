@@ -58,8 +58,24 @@ The status message components are:
 
 ## Important Notes
 
-- **Privacy is crucial**: Avoid actions that link your deposit and withdrawal addresses. If you link your deposit and withdrawal addresses, you will not be eligible for ITX rewards.
-- **Do not** directly transfer funds between your old withdrawal and new deposit addresses
+### AML Verification
+
+Money deposited into the simplified version of Intmax2 undergoes AML (Anti-Money Laundering) verification. Deposits from suspicious addresses or those made through mixing services like Tornado Cash will be rejected.
+You can recover rejected funds by launching the CLI in mining mode or exit mode.
+
+### Token Eligibility
+
+This mining is privacy mining, and addresses that compromise the privacy gained through mining **will be ineligible for mining rewards**.
+Specifically, if there are direct or indirect transfers between deposit addresses and withdrawal addresses, the deposit address used for that mining will not be eligible for rewards. You can check whether an deposit address is eligible for rewards in the "Qualified" column after selecting the mode.
+
+Here are examples of actions that would make an address **ineligible** for rewards:
+
+- From a wallet A, deposit 1.01 ETH into deposit address #0, and a total of 0.98 ETH is withdrawn to the withdrawal address before mining ends. Then, send 0.98 ETH back to wallet A.
+
+- Deposit 1.01 ETH into deposit address #0, and a total of 0.98 ETH is withdrawn to the withdrawal address before mining ends. Then, deposit this amount into deposit address #1 and mine again.
+
+
+- Deposit 1.1 ETH into deposit address #0. After mining is completed, 0.09 ETH remains in deposit address #0, which is then sent to the withdrawal address.
 
 ## FAQs
 
