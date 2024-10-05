@@ -156,6 +156,13 @@ async fn common_loop_cool_down() {
 async fn mining_cooldown() -> anyhow::Result<()> {
     let settings = Settings::load()?;
     let cooldown = rand::thread_rng().gen_range(0..settings.service.mining_max_cooldown_in_sec);
+    // print what time the next mining will start
+    let next_mining_time = chrono::Local::now() + chrono::Duration::seconds(cooldown as i64);
+    print_log(format!(
+        "Next deposit/withdrawal will start at {}. Sleeping for {} seconds...",
+        next_mining_time.format("%Y-%m-%d %H:%M:%S"),
+        cooldown
+    ));
     tokio::time::sleep(std::time::Duration::from_secs(cooldown)).await;
     Ok(())
 }
