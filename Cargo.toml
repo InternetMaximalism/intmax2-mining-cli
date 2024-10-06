@@ -1,6 +1,6 @@
 [package]
 name = "mining-cli"
-version = "1.0.10"
+version = "1.0.11"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -39,3 +39,4 @@ strum_macros = "0.26.4"
 openssl = { version = "0.10", features = ["vendored"] }
 openssl-sys = { version = "0.9", features = ["vendored"] }
 self_update = {version="0.41.0", features=["archive-zip", "compression-zip-deflate"]}
+
