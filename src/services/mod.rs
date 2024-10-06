@@ -1,5 +1,6 @@
 use crate::{
     cli::{
+        availability::check_avaliability,
         balance_validation::{
             validate_deposit_address_balance, validate_withdrawal_address_balance,
         },
@@ -30,6 +31,7 @@ pub async fn mining_loop(
 ) -> anyhow::Result<()> {
     let mut key_number = 0;
     loop {
+        check_avaliability().await?;
         let key = Key::new(withdrawal_private_key, key_number);
         print_log(format!(
             "Mining using deposit address #{} {:?}",
@@ -93,6 +95,7 @@ pub async fn mining_loop(
 pub async fn exit_loop(state: &mut State, withdrawal_private_key: H256) -> anyhow::Result<()> {
     let mut key_number = 0;
     loop {
+        check_avaliability().await?;
         let key = Key::new(withdrawal_private_key, key_number);
         if !is_address_used(key.deposit_address).await {
             print_status("exit loop finished".to_string());
@@ -125,6 +128,7 @@ pub async fn exit_loop(state: &mut State, withdrawal_private_key: H256) -> anyho
 pub async fn claim_loop(state: &mut State, withdrawal_private_key: H256) -> anyhow::Result<()> {
     let mut key_number = 0;
     loop {
+        check_avaliability().await?;
         let key = Key::new(withdrawal_private_key, key_number);
         if !is_address_used(key.deposit_address).await {
             print_status("claim loop finished".to_string());
