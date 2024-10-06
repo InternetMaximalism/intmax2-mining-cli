@@ -11,6 +11,7 @@ pub async fn check_avaliability() -> anyhow::Result<()> {
                 print_error(&output.message);
                 let do_update = dialoguer::Confirm::new()
                     .with_prompt("Do you want to update the CLI?")
+                    .default(true)
                     .interact()?;
                 if do_update {
                     crate::utils::update::update()?;
