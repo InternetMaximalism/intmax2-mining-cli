@@ -133,6 +133,9 @@ pub async fn fetch_gnark_proof(
         .api
         .gnark_get_proof_cooldown_in_sec;
     sleep_until(start_query_time).await;
+
+    let max_tries = 4;
+    let mut tries = 0;
     loop {
         let output = gnark_get_proof(base_url, job_id).await?;
         if output.status == "done" {
@@ -140,6 +143,12 @@ pub async fn fetch_gnark_proof(
         } else if output.status == "error" {
             return Err(IntmaxError::InternalError(
                 "gnark server returned error".to_string(),
+            ));
+        }
+        tries += 1;
+        if tries > max_tries {
+            return Err(IntmaxError::InternalError(
+                "gnark server did not return proof in time".to_string(),
             ));
         }
         tokio::time::sleep(tokio::time::Duration::from_secs(cooldown)).await;

@@ -8,7 +8,7 @@ tree_data_repository="InternetMaximalism/intmax2-mining"
 tree_data_directory="data"
 tree_data_branch="main"
 sync_tree_data_interval_in_sec = 3600 # 60 minutes
-gnark_get_proof_cooldown_in_sec = 15
+gnark_get_proof_cooldown_in_sec = 60
 
 [blockchain]
 chain_id = 1
