@@ -2,6 +2,9 @@
 
 This guide explains how to start mining on the holesky testnet using the intmax2 mining CLI.
 
+**Support**: please join this with an anonymous account
+https://discord.gg/d7GMpRcx
+
 ## Prerequisites
 
 Before you begin, please ensure you have the following:
