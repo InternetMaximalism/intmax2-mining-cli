@@ -5,7 +5,7 @@ This guide explains how to start mining on the Intmax network using the intmax2 
 Note: The tokens you receive through mining on the mainnet currently are disabled to be transferred to other addresses.
 
 Support: please join this with an anonymous account
-https://discord.gg/d7GMpRcx
+https://discord.gg/nByKNNhyvn
 
 ## Prerequisites
 
