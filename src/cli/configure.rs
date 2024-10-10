@@ -1,5 +1,6 @@
 use std::str::FromStr;
 
+use anyhow::bail;
 use dialoguer::{Confirm, Input, Password, Select};
 use ethers::types::{H256, U256};
 
@@ -157,24 +158,50 @@ async fn input_rpc_url() -> anyhow::Result<String> {
 
 async fn input_alchemy_url() -> anyhow::Result<String> {
     let alchemy_api_key: String = Password::new().with_prompt("Alchemy API Key").interact()?;
-    let alchemy_url = format!(
-        "https://eth-{}.g.alchemy.com/v2/{}",
-        get_network(),
-        alchemy_api_key
-    );
-    Ok(alchemy_url)
+    match get_network() {
+        Network::Localnet => bail!("Localnet is not supported"),
+        Network::Sepolia => {
+            let alchemy_url = format!("https://eth-sepolia.g.alchemy.com/v2/{}", alchemy_api_key);
+            return Ok(alchemy_url);
+        }
+        Network::Holesky => {
+            let alchemy_url = format!("https://eth-holesky.g.alchemy.com/v2/{}", alchemy_api_key);
+            return Ok(alchemy_url);
+        }
+        Network::BaseSepolia => {
+            let alchemy_url = format!("https://base-sepolia.g.alchemy.com/v2/{}", alchemy_api_key);
+            return Ok(alchemy_url);
+        }
+        Network::Mainnet => {
+            let alchemy_url = format!("https://eth-mainnet.g.alchemy.com/v2/{}", alchemy_api_key);
+            return Ok(alchemy_url);
+        }
+    }
 }
 
 async fn input_infura_url() -> anyhow::Result<String> {
     let infura_project_id: String = Password::new()
         .with_prompt("Infura Project ID")
         .interact()?;
-    let infura_url = format!(
-        "https://{}.infura.io/v3/{}",
-        get_network(),
-        infura_project_id
-    );
-    Ok(infura_url)
+    match get_network() {
+        Network::Localnet => bail!("Localnet is not supported"),
+        Network::Sepolia => {
+            let infura_url = format!("https://sepolia.infura.io/v3/{}", infura_project_id);
+            return Ok(infura_url);
+        }
+        Network::Holesky => {
+            let infura_url = format!("https://holesky.infura.io/v3/{}", infura_project_id);
+            return Ok(infura_url);
+        }
+        Network::BaseSepolia => {
+            let infura_url = format!("https://base-sepolia.infura.io/v3/{}", infura_project_id);
+            return Ok(infura_url);
+        }
+        Network::Mainnet => {
+            let infura_url = format!("https://mainnet.infura.io/v3/{}", infura_project_id);
+            return Ok(infura_url);
+        }
+    }
 }
 
 async fn input_custom_url() -> anyhow::Result<String> {
