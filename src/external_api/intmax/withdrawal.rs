@@ -127,7 +127,7 @@ pub async fn submit_withdrawal(
         tx_hash
     } else {
         let withdrawal_id = start_withdrawal(pis, proof).await?;
-        let max_try = 10;
+        let max_try = 5;
         let mut try_count = 0;
         loop {
             try_count += 1;
@@ -138,11 +138,11 @@ pub async fn submit_withdrawal(
             match status.status.as_str() {
                 "pending" => {
                     info!("withdrawal is pending");
-                    tokio::time::sleep(std::time::Duration::from_secs(20)).await;
+                    tokio::time::sleep(std::time::Duration::from_secs(60)).await;
                 }
                 "processing" => {
                     info!("withdrawal is processing");
-                    tokio::time::sleep(std::time::Duration::from_secs(20)).await;
+                    tokio::time::sleep(std::time::Duration::from_secs(60)).await;
                 }
                 "completed" => {
                     let tx_hash = H256::from_str(&status.transaction_hash.unwrap()).unwrap();
