@@ -15,7 +15,7 @@ use crate::{
 };
 
 pub fn select_network() -> anyhow::Result<Network> {
-    let items = vec!["mainnet", "holesky (testnet)"];
+    let items = vec!["mainnet", "holesky (testnet)", "base-sepolia (testnet)"];
     let selection = Select::new()
         .with_prompt("Choose network")
         .items(&items)
