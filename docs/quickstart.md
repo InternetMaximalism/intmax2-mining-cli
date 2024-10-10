@@ -2,7 +2,7 @@
 
 This guide explains how to start mining on the Intmax network using the intmax2 mining CLI. While the instructions below describe the process for the Holesky testnet, the same steps apply to the mainnet as well.
 
-Note: The tokens you receive through mining on the mainnet currently are disabled to be transferred to other addresses.
+Note: The tokens you receive through mining on the mainnet currently cannot be transferred to other addresses, but this feature will be enabled in the future.
 
 Support: please join this with an anonymous account
 https://discord.gg/nByKNNhyvn
