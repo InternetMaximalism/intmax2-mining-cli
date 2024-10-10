@@ -106,7 +106,11 @@ pub async fn fetch_config_file_from_github() -> anyhow::Result<()> {
     create_data_dir()?;
 
     let client = Client::new();
-    let files_to_download = vec!["config.holesky.toml", "config.mainnet.toml"];
+    let files_to_download = vec![
+        "config.holesky.toml",
+        "config.mainnet.toml",
+        "config.base-sepolia.toml",
+    ];
 
     for file_name in files_to_download {
         let file_url = format!(
