@@ -24,6 +24,7 @@ pub fn select_network() -> anyhow::Result<Network> {
     let network = match selection {
         0 => "mainnet",
         1 => "holesky",
+        2 => "base-sepolia",
         _ => unreachable!(),
     };
     Network::from_str(network).map_err(|_| anyhow::anyhow!("Invalid network"))
