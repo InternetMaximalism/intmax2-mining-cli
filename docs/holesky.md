@@ -142,7 +142,7 @@
 <div align="center">
     <img src="../assets/holesky/m5.png" width="600" alt="Mining CLI"></div>
 
-## Add Base Base Mainnet to your Intmax wallet
+## Add Base Mainnet to your Intmax wallet
 
 1. Click on "Settings."
 

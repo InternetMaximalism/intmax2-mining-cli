@@ -17,7 +17,7 @@ For more information on mining, please refer to [this article](https://hackmd.io
 
 You can find detailed information on how to use the CLI in the following documents:
 
-### [Quick Start For Beginners - Holesky Testnet ](docs/quickstart.md)
+### [Quick Start For Beginners - Testnet(Holesky & Base Sepolia) ](docs/quickstart.md)
 
 ### [Quick Start For Beginners - Ethereum Mainnet ](docs/mainnet-quickstart.md)
 
