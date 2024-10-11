@@ -128,21 +128,25 @@ pub async fn exit_loop(state: &mut State, withdrawal_private_key: H256) -> anyho
 pub async fn claim_loop(state: &mut State, withdrawal_private_key: H256) -> anyhow::Result<()> {
     let mut key_number = 0;
     loop {
-        check_avaliability().await?;
-        let key = Key::new(withdrawal_private_key, key_number);
-        if !is_address_used(key.deposit_address).await {
-            print_status("claim loop finished".to_string());
-            return Ok(());
+        for is_short_term in [true, false] {
+            check_avaliability().await?;
+            let key = Key::new(withdrawal_private_key, key_number);
+            if !is_address_used(key.deposit_address).await {
+                print_status("claim loop finished".to_string());
+                return Ok(());
+            }
+            print_log(format!(
+                "Claim for deposit address #{} {:?}. Term: {}",
+                key_number,
+                key.deposit_address,
+                if is_short_term { "short" } else { "long" }
+            ));
+            let assets_status = state.sync_and_fetch_assets(&key).await?;
+            validate_withdrawal_address_balance(&assets_status, key.withdrawal_address).await?;
+            let assets_status = state.sync_and_fetch_assets(&key).await?;
+            claim_task(state, &key, is_short_term, &assets_status).await?;
+            common_loop_cool_down().await;
         }
-        print_log(format!(
-            "Claim for deposit address #{} {:?}",
-            key_number, key.deposit_address
-        ));
-        let assets_status = state.sync_and_fetch_assets(&key).await?;
-        validate_withdrawal_address_balance(&assets_status, key.withdrawal_address).await?;
-        let assets_status = state.sync_and_fetch_assets(&key).await?;
-        claim_task(state, &key, todo!(), &assets_status).await?;
-        common_loop_cool_down().await;
         key_number += 1;
     }
 }
