@@ -190,11 +190,18 @@ impl AssetsStatus {
             .collect()
     }
 
-    pub fn get_not_claimed_events(&self) -> Vec<Deposited> {
-        self.short_term_not_claimed_indices
-            .iter()
-            .map(|&index| self.senders_deposits[index].clone())
-            .collect()
+    pub fn get_not_claimed_events(&self, is_short_term: bool) -> Vec<Deposited> {
+        if is_short_term {
+            self.short_term_not_claimed_indices
+                .iter()
+                .map(|&index| self.senders_deposits[index].clone())
+                .collect()
+        } else {
+            self.long_term_not_claimed_indices
+                .iter()
+                .map(|&index| self.senders_deposits[index].clone())
+                .collect()
+        }
     }
 
     pub fn no_remaining(&self) -> bool {

@@ -104,15 +104,17 @@ async fn validate_bin_deposit_tree(
 }
 
 async fn validate_bin_eligible_tree(
-    isShortTerm: bool,
+    is_short_term: bool,
     bin_eligible_tree: BinEligibleTree,
 ) -> anyhow::Result<EligibleTreeInfo> {
     let eligible_tree_info: EligibleTreeInfo = bin_eligible_tree
         .try_into()
         .map_err(|e| anyhow::anyhow!("eligible tree deseiarize error {}", e))?;
-
-    let onchain_eligible_root = crate::external_api::contracts::minter::get_eligible_root().await?;
-
+    let onchain_eligible_root = if is_short_term {
+        crate::external_api::contracts::minter::get_short_term_eligible_root().await?
+    } else {
+        crate::external_api::contracts::minter::get_long_term_eligible_root().await?
+    };
     Ok(())
 }
 

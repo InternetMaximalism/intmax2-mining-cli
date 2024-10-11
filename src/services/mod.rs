@@ -140,9 +140,8 @@ pub async fn claim_loop(state: &mut State, withdrawal_private_key: H256) -> anyh
         ));
         let assets_status = state.sync_and_fetch_assets(&key).await?;
         validate_withdrawal_address_balance(&assets_status, key.withdrawal_address).await?;
-
         let assets_status = state.sync_and_fetch_assets(&key).await?;
-        claim_task(state, &key, &assets_status).await?;
+        claim_task(state, &key, todo!(), &assets_status).await?;
         common_loop_cool_down().await;
         key_number += 1;
     }
