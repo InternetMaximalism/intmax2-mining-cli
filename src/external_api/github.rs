@@ -18,7 +18,7 @@ use crate::{
 };
 
 #[derive(Debug, thiserror::Error)]
-enum Error {
+pub enum Error {
     #[error("Failed to fetch data from GitHub")]
     NetworkError,
     #[error("Failed to deserialize data {}", _0)]
@@ -212,13 +212,13 @@ mod tests {
     #[tokio::test]
     async fn test_fetch_latest_files() {
         let last_update = NaiveDate::parse_from_str("2023-01-01", "%Y-%m-%d").unwrap();
-        let result = fetch_latest_tree_from_github(last_update).await.unwrap();
+        let _result = fetch_latest_tree_from_github(last_update).await.unwrap();
     }
 
     #[tokio::test]
     async fn test_fetch_latest_files_no_new_files() {
         let last_update = NaiveDate::parse_from_str("2999-12-31", "%Y-%m-%d").unwrap();
-        let result = fetch_latest_tree_from_github(last_update).await.unwrap();
+        let _result = fetch_latest_tree_from_github(last_update).await.unwrap();
     }
 
     #[tokio::test]
