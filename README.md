@@ -17,7 +17,9 @@ For more information on mining, please refer to [this article](https://hackmd.io
 
 You can find detailed information on how to use the CLI in the following documents:
 
-### [Quick Start For Beginners](docs/quickstart.md)
+### [Quick Start For Beginners - Holesky Testnet ](docs/quickstart.md)
+
+### [Quick Start For Beginners - Ethereum Mainnet ](docs/mainnet-quickstart.md)
 
 ### [Detailed Documents](docs/developer.md)
 
@@ -73,7 +75,6 @@ Here are examples of actions that would make an address **ineligible** for rewar
 - From a wallet A, deposit 1.01 ETH into deposit address #0, and a total of 0.98 ETH is withdrawn to the withdrawal address before mining ends. Then, send 0.98 ETH back to wallet A.
 
 - Deposit 1.01 ETH into deposit address #0, and a total of 0.98 ETH is withdrawn to the withdrawal address before mining ends. Then, deposit this amount into deposit address #1 and mine again.
-
 
 - Deposit 1.1 ETH into deposit address #0. After mining is completed, 0.09 ETH remains in deposit address #0, which is then sent to the withdrawal address.
 
