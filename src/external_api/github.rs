@@ -55,7 +55,7 @@ pub async fn fetch_latest_tree_from_github(last_update: NaiveDate) -> Result<Bin
         .json::<Vec<Value>>()
         .await
         .map_err(|e| {
-            Error::DeserializeError("failed to parse fetched files as array".to_string())
+            Error::DeserializeError(format!("failed to parse fetched files as array: {}", e))
         })?;
 
     let deposit_pattern = Regex::new(r"^\d{4}-\d{2}-\d{2}-depositTree\.txt$").unwrap();
