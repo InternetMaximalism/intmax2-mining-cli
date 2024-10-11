@@ -13,7 +13,7 @@ use crate::{
             get_deposit_data, get_last_processed_deposit_id, get_withdrawal_nullifier_exists,
             DepositData,
         },
-        minter::get_claim_nullifier_exists,
+        minter::{get_long_term_claim_nullifier_exists, get_short_term_claim_nullifier_exists},
     },
     state::state::State,
     utils::derive_key::derive_salt_from_private_key_nonce,
@@ -28,10 +28,14 @@ pub struct AssetsStatus {
     pub pending_indices: Vec<usize>,   // Positions in senders_deposits that are not analyzed yet
     pub withdrawn_indices: Vec<usize>, // Positions in senders_deposits that are withdrawn
     pub not_withdrawn_indices: Vec<usize>, // Positions in senders_deposits that are contained but not withdrawn
-    pub eligible_indices: Vec<usize>,      // Positions in senders_deposits that are eligible
-    pub claimed_indices: Vec<usize>,       // Positions in senders_deposits that are claimed
-    pub not_claimed_indices: Vec<usize>, // Positions in senders_deposits that are eligible but not claimed
-    pub claimable_amount: U256,          // Total amount of not claimed tokens
+    pub short_term_eligible_indices: Vec<usize>, // Positions in senders_deposits that are eligible
+    pub short_term_claimed_indices: Vec<usize>, // Positions in senders_deposits that are claimed
+    pub short_term_not_claimed_indices: Vec<usize>, // Positions in senders_deposits that are eligible but not claimed
+    pub short_term_claimable_amount: U256,          // Total amount of not claimed tokens
+    pub long_term_eligible_indices: Vec<usize>, // Positions in senders_deposits that are eligible
+    pub long_term_claimed_indices: Vec<usize>,  // Positions in senders_deposits that are claimed
+    pub long_term_not_claimed_indices: Vec<usize>, // Positions in senders_deposits that are eligible but not claimed
+    pub long_term_claimable_amount: U256,          // Total amount of not claimed tokens
 }
 
 pub async fn fetch_assets_status(
@@ -93,35 +97,69 @@ pub async fn fetch_assets_status(
         }
     }
 
-    let mut eligible_indices = Vec::new();
-    let mut eligible_amounts = Vec::new();
+    let mut short_term_eligible_indices = Vec::new();
+    let mut long_term_eligible_indices = Vec::new();
+    let mut short_term_eligible_amounts = Vec::new();
+    let mut long_term_eligible_amounts = Vec::new();
     for &index in &contained_indices {
         let event = &senders_deposits[index];
         let deposit_index = state
             .deposit_hash_tree
             .get_index(event.deposit().hash())
             .unwrap();
-        if let Some(leaf_index) = state.eligible_tree.get_leaf_index(deposit_index) {
-            let leaf = state.eligible_tree.tree.get_leaf(leaf_index as usize);
-            eligible_amounts.push(leaf.amount);
-            eligible_indices.push(index as usize);
+        if let Some(leaf_index) = state.short_term_eligible_tree.get_leaf_index(deposit_index) {
+            let leaf = state
+                .short_term_eligible_tree
+                .tree
+                .get_leaf(leaf_index as usize);
+            short_term_eligible_amounts.push(leaf.amount);
+            short_term_eligible_indices.push(index as usize);
+        }
+        if let Some(leaf_index) = state.long_term_eligible_tree.get_leaf_index(deposit_index) {
+            let leaf = state
+                .long_term_eligible_tree
+                .tree
+                .get_leaf(leaf_index as usize);
+            long_term_eligible_amounts.push(leaf.amount);
+            long_term_eligible_indices.push(index as usize);
         }
     }
 
-    let mut claimed_indices = Vec::new();
-    let mut not_claimed_indices = Vec::new();
-    let mut claimable_amount = U256::zero();
-    for &index in &eligible_indices {
+    let mut short_term_claimed_indices = Vec::new();
+    let mut short_term_not_claimed_indices = Vec::new();
+    let mut short_term_claimable_amount = U256::zero();
+
+    for &index in &short_term_eligible_indices {
         let event = &senders_deposits[index];
         let salt = derive_salt_from_private_key_nonce(deposit_private_key, event.tx_nonce);
         let nullifier = get_deposit_nullifier(&event.deposit(), salt);
-        let is_exists = get_claim_nullifier_exists(nullifier).await?;
+        let is_exists = get_short_term_claim_nullifier_exists(nullifier).await?;
         if is_exists {
-            claimed_indices.push(index);
+            short_term_claimed_indices.push(index);
         } else {
-            not_claimed_indices.push(index);
-            let eligible_amount = U256::from_big_endian(&eligible_amounts[index].to_bytes_be());
-            claimable_amount += eligible_amount;
+            short_term_not_claimed_indices.push(index);
+            let eligible_amount =
+                U256::from_big_endian(&short_term_eligible_amounts[index].to_bytes_be());
+            short_term_claimable_amount += eligible_amount;
+        }
+    }
+
+    let mut long_term_claimed_indices = Vec::new();
+    let mut long_term_not_claimed_indices = Vec::new();
+    let mut long_term_claimable_amount = U256::zero();
+
+    for &index in &long_term_eligible_indices {
+        let event = &senders_deposits[index];
+        let salt = derive_salt_from_private_key_nonce(deposit_private_key, event.tx_nonce);
+        let nullifier = get_deposit_nullifier(&event.deposit(), salt);
+        let is_exists = get_long_term_claim_nullifier_exists(nullifier).await?;
+        if is_exists {
+            long_term_claimed_indices.push(index);
+        } else {
+            long_term_not_claimed_indices.push(index);
+            let eligible_amount =
+                U256::from_big_endian(&long_term_eligible_amounts[index].to_bytes_be());
+            long_term_claimable_amount += eligible_amount;
         }
     }
 
@@ -133,10 +171,14 @@ pub async fn fetch_assets_status(
         pending_indices,
         withdrawn_indices,
         not_withdrawn_indices,
-        eligible_indices,
-        claimed_indices,
-        not_claimed_indices,
-        claimable_amount,
+        short_term_eligible_indices,
+        short_term_claimed_indices,
+        short_term_not_claimed_indices,
+        short_term_claimable_amount,
+        long_term_eligible_indices,
+        long_term_claimed_indices,
+        long_term_not_claimed_indices,
+        long_term_claimable_amount,
     })
 }
 
@@ -149,7 +191,7 @@ impl AssetsStatus {
     }
 
     pub fn get_not_claimed_events(&self) -> Vec<Deposited> {
-        self.not_claimed_indices
+        self.short_term_not_claimed_indices
             .iter()
             .map(|&index| self.senders_deposits[index].clone())
             .collect()

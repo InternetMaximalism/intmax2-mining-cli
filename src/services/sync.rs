@@ -25,7 +25,8 @@ pub async fn sync_trees(
     last_deposit_block_number: &mut u64,
     last_update: &mut NaiveDateTime,
     deposit_hash_tree: &mut DepositHashTree,
-    eligible_tree: &mut EligibleTreeWithMap,
+    short_term_eligible_tree: &mut EligibleTreeWithMap,
+    long_term_eligible_tree: &mut EligibleTreeWithMap,
 ) -> anyhow::Result<()> {
     let now = Utc::now().naive_utc();
     let sync_tree_data_interval_in_sec = Settings::load()?.api.sync_tree_data_interval_in_sec;
@@ -37,7 +38,7 @@ pub async fn sync_trees(
             sync_to_latest_deposit_tree(deposit_hash_tree, *last_deposit_block_number).await?;
         info!(
             "No need to fetch latest trees from GitHub, last update: {}, deposit_len: {}, eligible_len: {}, last deposit block number: {}",
-            last_update, deposit_hash_tree.tree.len(), eligible_tree.tree.len(), last_deposit_block_number
+            last_update, deposit_hash_tree.tree.len(), short_term_eligible_tree.tree.len(), last_deposit_block_number
         );
         return Ok(());
     }
@@ -54,11 +55,11 @@ pub async fn sync_trees(
                 Ok((deposit_tree_info, eligible_tree_info)) => {
                     *last_update = new_last_update;
                     *deposit_hash_tree = deposit_tree_info.tree;
-                    *eligible_tree = eligible_tree_info.tree;
+                    *short_term_eligible_tree = eligible_tree_info.tree;
 
                     info!(
                 "Fetched latest trees from GitHub, last update: {}, deposit_len: {}, deposit_root: {}, eligible_len: {}, eligible_root: {}, last deposit block number: {}",
-                last_update, deposit_hash_tree.tree.len(), deposit_hash_tree.get_root(),  eligible_tree.tree.len(),eligible_tree.get_root(), last_deposit_block_number
+                last_update, deposit_hash_tree.tree.len(), deposit_hash_tree.get_root(),  short_term_eligible_tree.tree.len(),short_term_eligible_tree.get_root(), last_deposit_block_number
             );
                     break;
                 }
@@ -78,11 +79,40 @@ pub async fn sync_trees(
             *last_update = now; // update last_update to now
             info!(
                 "No new trees found on GitHub, last update: {}, deposit_len: {}, eligible_len: {}, last deposit block number: {}",
-                last_update, deposit_hash_tree.tree.len(), eligible_tree.tree.len(), last_deposit_block_number
+                last_update, deposit_hash_tree.tree.len(), short_term_eligible_tree.tree.len(), last_deposit_block_number
             );
             break;
         }
     }
+    Ok(())
+}
+
+async fn validate_bin_deposit_tree(
+    bin_deposit_tree: BinDepositTree,
+) -> anyhow::Result<DepositTreeInfo> {
+    let deposit_tree_info: DepositTreeInfo = bin_deposit_tree
+        .try_into()
+        .map_err(|e| anyhow::anyhow!("deposit tree deseiarize error {}", e))?;
+    // check roots
+    let deposit_root_exists = get_deposit_root_exits(deposit_tree_info.root).await?;
+    ensure!(
+        deposit_root_exists,
+        "Deposit root does not exist on chain: {}",
+        deposit_tree_info.root
+    );
+    Ok(deposit_tree_info)
+}
+
+async fn validate_bin_eligible_tree(
+    isShortTerm: bool,
+    bin_eligible_tree: BinEligibleTree,
+) -> anyhow::Result<EligibleTreeInfo> {
+    let eligible_tree_info: EligibleTreeInfo = bin_eligible_tree
+        .try_into()
+        .map_err(|e| anyhow::anyhow!("eligible tree deseiarize error {}", e))?;
+
+    let onchain_eligible_root = crate::external_api::contracts::minter::get_eligible_root().await?;
+
     Ok(())
 }
 

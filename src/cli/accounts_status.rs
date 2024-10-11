@@ -53,9 +53,9 @@ pub async fn accounts_status(
             is_qualified,
             assets_status.senders_deposits.len(),
             mining_times,
-            pretty_format_u256(assets_status.claimable_amount)
+            pretty_format_u256(assets_status.short_term_claimable_amount)
         );
         key_number += 1;
-        total_claimable_amount += assets_status.claimable_amount;
+        total_claimable_amount += assets_status.short_term_claimable_amount;
     }
 }

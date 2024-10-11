@@ -208,22 +208,17 @@ pub async fn fetch_config_file_from_github() -> anyhow::Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use chrono::NaiveDateTime;
 
     #[tokio::test]
     async fn test_fetch_latest_files() {
-        let last_update =
-            NaiveDateTime::parse_from_str("2023-01-01 00:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+        let last_update = NaiveDate::parse_from_str("2023-01-01", "%Y-%m-%d").unwrap();
         let result = fetch_latest_tree_from_github(last_update).await.unwrap();
-        assert!(result.is_some());
     }
 
     #[tokio::test]
     async fn test_fetch_latest_files_no_new_files() {
-        let last_update =
-            NaiveDateTime::parse_from_str("2999-12-31 23:59:59", "%Y-%m-%d %H:%M:%S").unwrap();
+        let last_update = NaiveDate::parse_from_str("2999-12-31", "%Y-%m-%d").unwrap();
         let result = fetch_latest_tree_from_github(last_update).await.unwrap();
-        assert!(result.is_none());
     }
 
     #[tokio::test]

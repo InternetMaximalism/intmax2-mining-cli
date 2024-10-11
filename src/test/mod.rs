@@ -36,7 +36,7 @@ pub async fn get_dummy_state() -> State {
 
     let state = State {
         deposit_hash_tree: DepositHashTree::new(),
-        eligible_tree,
+        short_term_eligible_tree: eligible_tree,
         last_tree_feched_at: NaiveDateTime::default(),
         last_deposit_synced_block: 0,
         prover: None,
