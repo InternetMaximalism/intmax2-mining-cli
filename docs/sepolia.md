@@ -56,6 +56,7 @@
 <div align="center">
     <img src="../assets/holesky/i4.png" width="600" alt="Mining CLI"></div>
 
+
 ## Add Base Sepolia testnet to your MetaMask
 
 1. Open Metamask and click on the network icon in the top left corner.
@@ -112,6 +113,7 @@
 <div align="center">
     <img src="../assets/base/b4.png" width="600" alt="Mining CLI"></div>
 
+
 ## Add Base Mainnet testnet to your MetaMask
 
 1. Open Metamask and click on the network icon in the top left corner.
@@ -167,6 +169,7 @@
 
 <div align="center">
     <img src="../assets/base/b6.png" width="600" alt="Mining CLI"></div>
+
 
 ## Get testnet ETH
 
