@@ -1,14 +1,14 @@
 use ::console::{style, Term};
 use availability::check_avaliability;
 use configure::recover_withdrawal_private_key;
-use console::{initialize_console, print_status};
+use console::initialize_console;
 use ethers::types::H256;
 use mode_selection::{legacy_select_mode, select_mode};
 
 use crate::{
     external_api::contracts::utils::get_address,
     services::{claim_loop, exit_loop, mining_loop},
-    state::{mode::RunMode, prover::Prover, state::State},
+    state::{mode::RunMode, state::State},
     utils::{
         env_config::EnvConfig, env_validation::validate_env_config, network::is_mainnet, update,
     },
@@ -83,7 +83,6 @@ async fn mode_loop(
     loop {
         match mode {
             RunMode::Mining => {
-                initialize_prover(state).await?;
                 mining_loop(
                     state,
                     withdrawal_private_key,
@@ -93,12 +92,10 @@ async fn mode_loop(
                 .await?;
             }
             RunMode::Claim => {
-                initialize_prover(state).await?;
                 claim_loop(state, withdrawal_private_key).await?;
                 press_any_key_to_continue().await;
             }
             RunMode::Exit => {
-                initialize_prover(state).await?;
                 exit_loop(state, withdrawal_private_key).await?;
                 press_any_key_to_continue().await;
             }
@@ -116,15 +113,6 @@ async fn mode_loop(
             break;
         }
         *mode = select_mode()?;
-    }
-    Ok(())
-}
-
-async fn initialize_prover(state: &mut State) -> anyhow::Result<()> {
-    if state.prover.is_none() {
-        print_status("Waiting for prover to be ready");
-        let prover = Prover::new();
-        state.prover = Some(prover);
     }
     Ok(())
 }

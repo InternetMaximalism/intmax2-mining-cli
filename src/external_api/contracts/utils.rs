@@ -5,7 +5,7 @@ use ethers::{
     middleware::SignerMiddleware,
     providers::{Http, Middleware, Provider},
     signers::{LocalWallet, Signer, Wallet},
-    types::{Address, H256, U256},
+    types::{Address, Block, H256, U256},
     utils::hex::ToHex,
 };
 use log::info;
@@ -114,6 +114,15 @@ pub async fn get_tx_receipt(
         tokio::time::sleep(std::time::Duration::from_secs(10)).await;
         loop_count += 1;
     }
+}
+
+pub async fn get_block(block_number: u64) -> Result<Option<Block<H256>>, BlockchainError> {
+    info!("get_block");
+    let client = get_client().await.unwrap();
+    let block = with_retry(|| async { client.get_block(block_number).await })
+        .await
+        .map_err(|_| BlockchainError::NetworkError("failed to get block".to_string()))?;
+    Ok(block)
 }
 
 pub fn u256_as_bytes_be(u256: ethers::types::U256) -> [u8; 32] {

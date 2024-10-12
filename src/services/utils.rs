@@ -10,6 +10,7 @@ use ethers::{
 use crate::{
     cli::console::{print_status, print_warning},
     external_api::contracts::utils::{get_account_nonce, get_balance, get_client, get_gas_price},
+    state::{prover::Prover, state::State},
     utils::{config::Settings, env_config::EnvConfig},
 };
 
@@ -115,6 +116,15 @@ pub async fn await_until_low_gas_price() -> anyhow::Result<()> {
             high_gas_retry_inverval_in_sec,
         ))
         .await;
+    }
+    Ok(())
+}
+
+pub async fn initialize_prover(state: &mut State) -> anyhow::Result<()> {
+    if state.prover.is_none() {
+        print_status("Waiting for prover to be ready");
+        let prover = Prover::new();
+        state.prover = Some(prover);
     }
     Ok(())
 }

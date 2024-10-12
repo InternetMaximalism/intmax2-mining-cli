@@ -13,14 +13,12 @@ use crate::{
 use claim::claim_task;
 use ethers::types::{H256, U256};
 use mining::mining_task;
-use rand::Rng as _;
 use utils::is_address_used;
 
 pub mod assets_status;
 pub mod balance_transfer;
 pub mod claim;
 pub mod mining;
-pub mod sleep;
 pub mod sync;
 pub mod utils;
 
@@ -69,7 +67,7 @@ pub async fn mining_loop(
             ));
             break;
         }
-        let cooldown = mining_task(
+        mining_task(
             state,
             &key,
             &assets_status,
@@ -81,9 +79,6 @@ pub async fn mining_loop(
         // print assets status after mining
         let assets_status = state.sync_and_fetch_assets(&key).await?;
         print_assets_status(&assets_status);
-        if cooldown {
-            mining_cooldown().await?;
-        }
         common_loop_cool_down().await;
     }
     Ok(())
@@ -215,19 +210,4 @@ async fn common_loop_cool_down() {
         settings.service.loop_cooldown_in_sec,
     ))
     .await;
-}
-
-/// Cooldown for mining. Random time between 0 and `mining_max_cooldown_in_sec` to improve privacy.
-async fn mining_cooldown() -> anyhow::Result<()> {
-    let settings = Settings::load()?;
-    let cooldown = rand::thread_rng().gen_range(0..settings.service.mining_max_cooldown_in_sec);
-    // print what time the next mining will start
-    let next_mining_time = chrono::Local::now() + chrono::Duration::seconds(cooldown as i64);
-    print_log(format!(
-        "Next deposit/withdrawal will start at {}. Sleeping for {} seconds...",
-        next_mining_time.format("%Y-%m-%d %H:%M:%S"),
-        cooldown
-    ));
-    tokio::time::sleep(std::time::Duration::from_secs(cooldown)).await;
-    Ok(())
 }
