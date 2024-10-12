@@ -83,7 +83,6 @@ pub async fn interactive() -> anyhow::Result<()> {
     config.save_to_file(config_number)?;
     config.export_to_env()?;
 
-    // todo
     address_duplication_check()?;
     Ok(())
 }

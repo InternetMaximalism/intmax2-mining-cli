@@ -44,10 +44,12 @@ async fn main() {
     let log_file = File::create(log_file_path).unwrap();
     WriteLogger::init(LevelFilter::Info, Config::default(), log_file).unwrap();
 
-    fetch_config_file_from_github()
-        .await
-        .expect("Failed to fetch config file from GitHub");
-
+    let does_not_fetch_config = std::env::var("NOT_FETCH_CONFIG").is_ok();
+    if !does_not_fetch_config {
+        fetch_config_file_from_github()
+            .await
+            .expect("Failed to fetch config file from GitHub");
+    }
     // run the CLI
     match run(mode).await {
         Ok(_) => {}
