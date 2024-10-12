@@ -102,23 +102,7 @@ pub async fn modify_config(config: &EnvConfig) -> anyhow::Result<EnvConfig> {
     } else {
         key
     };
-
-    let modify_encryption = Confirm::new()
-        .with_prompt(format!(
-            "Modify encryption current={}?",
-            config.encrypted_withdrawal_private_key.is_some()
-        ))
-        .default(false)
-        .interact()?;
-    let (encrypt, keys, encrypted_keys) = if modify_encryption {
-        input_encryption(withdrawal_private_key)?
-    } else {
-        (
-            config.encrypt,
-            config.withdrawal_private_key.clone(),
-            config.encrypted_withdrawal_private_key.clone(),
-        )
-    };
+    let (encrypt, keys, encrypted_keys) = input_encryption(withdrawal_private_key)?;
     let withdrawal_address = get_address(withdrawal_private_key);
     let config = EnvConfig {
         network: config.network,
