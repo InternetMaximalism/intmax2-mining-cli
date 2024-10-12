@@ -350,7 +350,7 @@ mod tests {
         new_config(Network::Localnet)
             .await
             .unwrap()
-            .save_to_file()
+            .save_to_file(0)
             .unwrap();
     }
 }

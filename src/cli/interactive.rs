@@ -17,47 +17,73 @@ pub async fn interactive() -> anyhow::Result<()> {
     let network = select_network()?;
     env::set_var("NETWORK", network.to_string());
 
-    let is_file_exists = EnvConfig::load_from_file(network).is_ok();
-    if is_file_exists {
-        let items = vec![
-            format!(
-                "{} {}",
-                style("Continue:").bold(),
-                style("continue with the existing config").dim()
-            ),
-            format!(
-                "{} {}",
-                style("Overwrite:").bold(),
-                style("overwrite the existing config").dim()
-            ),
-            format!(
-                "{} {}",
-                style("Modify:").bold(),
-                style("modify the existing config").dim()
-            ),
-        ];
-        let selection = Select::new()
-            .with_prompt("Config file already exists. What do you want to do?")
-            .items(&items)
-            .default(0)
-            .interact()?;
-        let config = match selection {
-            0 => EnvConfig::load_from_file(network)?,
-            1 => new_config(network).await?,
-            2 => {
-                let config = EnvConfig::load_from_file(network)?;
-                modify_config(&config).await?
-            }
-            _ => unreachable!(),
-        };
-        config.save_to_file()?;
-        config.export_to_env()?;
-    } else {
-        println!("Config file not found. Creating a new one.");
+    let existing_indices = EnvConfig::get_existing_indices(network);
+    if existing_indices.is_empty() {
+        println!("No existing indices found. Please create a new config.");
         let config = new_config(network).await?;
-        config.save_to_file()?;
+        config.save_to_file(0)?;
         config.export_to_env()?;
+        return Ok(());
+    }
+
+    // list existing config files
+    let mut items = existing_indices
+        .iter()
+        .map(|index| format!("#{}", index,))
+        .collect::<Vec<String>>();
+    items.push("Create New Config".to_string());
+    let selection = Select::new()
+        .with_prompt("Please select config to use")
+        .items(&items)
+        .default(0)
+        .interact()?;
+    if selection == existing_indices.len() {
+        let config = new_config(network).await?;
+        let new_index = existing_indices.iter().max().unwrap() + 1;
+        config.save_to_file(new_index)?;
+        config.export_to_env()?;
+        return Ok(());
+    }
+    let config_number = existing_indices[selection];
+
+    let items = vec![
+        format!(
+            "{} {}",
+            style("Continue:").bold(),
+            style("continue with the existing config").dim()
+        ),
+        format!(
+            "{} {}",
+            style("Overwrite:").bold(),
+            style("overwrite the existing config").dim()
+        ),
+        format!(
+            "{} {}",
+            style("Modify:").bold(),
+            style("modify the existing config").dim()
+        ),
+    ];
+    let selection = Select::new()
+        .with_prompt(format!(
+            "What do you want to do with for the config #{}?",
+            config_number
+        ))
+        .items(&items)
+        .default(0)
+        .interact()?;
+    let config = match selection {
+        0 => EnvConfig::load_from_file(network, config_number)?,
+        1 => new_config(network).await?,
+        2 => {
+            let config = EnvConfig::load_from_file(network, config_number)?;
+            modify_config(&config).await?
+        }
+        _ => unreachable!(),
     };
+    config.save_to_file(config_number)?;
+    config.export_to_env()?;
+
+    // todo
     address_duplication_check()?;
     Ok(())
 }
@@ -109,19 +135,23 @@ pub fn select_mode() -> anyhow::Result<RunMode> {
 }
 
 fn address_duplication_check() -> anyhow::Result<()> {
-    let mut address_to_network = HashMap::<Address, Network>::new();
+    let mut address_to_network = HashMap::<Address, (Network, usize)>::new();
     for network in Network::iter() {
-        let config = EnvConfig::load_from_file(network).ok();
-        if let Some(config) = config {
+        for config_index in EnvConfig::get_existing_indices(network) {
+            let config = EnvConfig::load_from_file(network, config_index)?;
             if address_to_network.get(&config.withdrawal_address).is_some() {
+                let (duplicated_network, duplicated_index) =
+                    address_to_network.get(&config.withdrawal_address).unwrap();
                 anyhow::bail!(
-                    "Withdrawal address {} is duplicated on {} and {}. Please use a different address.",
+                    "Withdrawal address {} on {} config #{} is duplicated as {} config #{}. Please use a different address.",
                     config.withdrawal_address,
-                    address_to_network.get(&config.withdrawal_address).unwrap(),
-                    network
+                    network,
+                    config_index,
+                    duplicated_network,
+                    duplicated_index,
                 );
             } else {
-                address_to_network.insert(config.withdrawal_address, network);
+                address_to_network.insert(config.withdrawal_address, (network, config_index));
             }
         }
     }

@@ -9,10 +9,15 @@ use super::{
     network::Network,
 };
 
-fn env_config_path(network: Network) -> PathBuf {
+fn env_config_path(network: Network, i: usize) -> PathBuf {
+    let i_str = if i == 0 {
+        "".to_string() // no suffix for the first env for the legacy support
+    } else {
+        format!(".{}", i)
+    };
     get_data_path()
         .unwrap()
-        .join(format!("env.{}.json", network))
+        .join(format!("env.{}{}.json", network, i_str))
 }
 
 // Structure for setting and getting env
@@ -30,16 +35,30 @@ pub struct EnvConfig {
 }
 
 impl EnvConfig {
-    pub fn load_from_file(network: Network) -> anyhow::Result<Self> {
-        let file = std::fs::File::open(&env_config_path(network))?;
+    pub fn get_existing_indices(network: Network) -> Vec<usize> {
+        let mut i = 0;
+        let mut indices = vec![];
+        while Self::is_file_exist(network, i) {
+            indices.push(i);
+            i += 1;
+        }
+        indices
+    }
+
+    pub fn is_file_exist(network: Network, i: usize) -> bool {
+        env_config_path(network, i).exists()
+    }
+
+    pub fn load_from_file(network: Network, i: usize) -> anyhow::Result<Self> {
+        let file = std::fs::File::open(&env_config_path(network, i))?;
         let reader = BufReader::new(file);
         let config: EnvConfig = serde_json::from_reader(reader)?;
         Ok(config)
     }
 
-    pub fn save_to_file(&self) -> anyhow::Result<()> {
+    pub fn save_to_file(&self, i: usize) -> anyhow::Result<()> {
         let input = serde_json::to_vec_pretty(self)?;
-        create_file_with_content(&env_config_path(self.network), &input)?;
+        create_file_with_content(&env_config_path(self.network, i), &input)?;
         Ok(())
     }
 

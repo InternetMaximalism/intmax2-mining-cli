@@ -29,67 +29,63 @@ pub async fn mining_loop(
     mining_unit: U256,
     mining_times: u64,
 ) -> anyhow::Result<()> {
-    let mut key_number = 0;
+    check_avaliability().await?;
+    let key = Key::new(withdrawal_private_key, 0);
+    print_log(format!(
+        "Mining using deposit address {:?}",
+        key.deposit_address
+    ));
+    let assets_status = state.sync_and_fetch_assets(&key).await?;
+    validate_deposit_address_balance(
+        &assets_status,
+        key.deposit_address,
+        mining_unit,
+        mining_times,
+    )
+    .await?;
     loop {
-        check_avaliability().await?;
-        let key = Key::new(withdrawal_private_key, key_number);
-        print_log(format!(
-            "Mining using deposit address #{} {:?}",
-            key_number, key.deposit_address
-        ));
         let assets_status = state.sync_and_fetch_assets(&key).await?;
-        validate_deposit_address_balance(
+        let is_qualified = !get_circulation(key.deposit_address).await?.is_excluded;
+        let will_deposit = assets_status.senders_deposits.len() < mining_times as usize
+            && assets_status.pending_indices.is_empty()
+            && is_qualified;
+
+        // skip deposit address if no remaining deposits, and will not deposit
+        if assets_status.no_remaining() && !will_deposit {
+            if !is_qualified {
+                print_warning(format!(
+                        "Deposit address {:?}: is not qualified for mining. For more information, please refer to the documentation.",
+                       key.deposit_address,
+                    ));
+            }
+            print_log(format!(
+                "Deposit address {:?}: Qualified: {}. Deposits {}/{}. Cancelled {}. Skipping...",
+                key.deposit_address,
+                is_qualified,
+                assets_status.senders_deposits.len(),
+                mining_times,
+                assets_status.cancelled_indices.len(),
+            ));
+            break;
+        }
+        let cooldown = mining_task(
+            state,
+            &key,
             &assets_status,
-            key.deposit_address,
+            will_deposit,
+            false,
             mining_unit,
-            mining_times,
         )
         .await?;
-        loop {
-            let assets_status = state.sync_and_fetch_assets(&key).await?;
-            let is_qualified = !get_circulation(key.deposit_address).await?.is_excluded;
-            let will_deposit = assets_status.senders_deposits.len() < mining_times as usize
-                && assets_status.pending_indices.is_empty()
-                && is_qualified;
-
-            // skip deposit address if no remaining deposits, and will not deposit
-            if assets_status.no_remaining() && !will_deposit {
-                if !is_qualified {
-                    print_warning(format!(
-                        "Deposit address #{} {:?}: is not qualified for mining. For more information, please refer to the documentation.",
-                        key_number, key.deposit_address,
-                    ));
-                }
-                print_log(format!(
-                    "Deposit address #{} {:?}: Qualified: {}. Deposits {}/{}. Cancelled {}. Skipping...",
-                    key_number,
-                    key.deposit_address,
-                    is_qualified,
-                    assets_status.senders_deposits.len(),
-                    mining_times,
-                    assets_status.cancelled_indices.len(),
-                ));
-                break;
-            }
-            let cooldown = mining_task(
-                state,
-                &key,
-                &assets_status,
-                will_deposit,
-                false,
-                mining_unit,
-            )
-            .await?;
-            // print assets status after mining
-            let assets_status = state.sync_and_fetch_assets(&key).await?;
-            print_assets_status(&assets_status);
-            if cooldown {
-                mining_cooldown().await?;
-            }
-            common_loop_cool_down().await;
+        // print assets status after mining
+        let assets_status = state.sync_and_fetch_assets(&key).await?;
+        print_assets_status(&assets_status);
+        if cooldown {
+            mining_cooldown().await?;
         }
-        key_number += 1;
+        common_loop_cool_down().await;
     }
+    Ok(())
 }
 
 pub async fn exit_loop(state: &mut State, withdrawal_private_key: H256) -> anyhow::Result<()> {
