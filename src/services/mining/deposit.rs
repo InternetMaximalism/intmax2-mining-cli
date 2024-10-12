@@ -29,8 +29,7 @@ pub async fn deposit_task(_state: &State, key: &Key, mining_unit: U256) -> anyho
         .deposit_native_token(pubkey_salt_hash)
         .value(mining_unit);
     tx.tx.set_nonce(nonce);
-
-    let tx_hash = handle_contract_call(tx, deposit_address, "deposit", "deposit").await?;
+    let _tx_hash = handle_contract_call(tx, deposit_address, "deposit", "deposit").await?;
     print_log(format!("Successfully deposited"));
     Ok(())
 }
