@@ -1,13 +1,12 @@
 use std::{collections::HashMap, env};
 
-use console::{style, Term};
+use console::style;
 use dialoguer::Select;
 use ethers::types::Address;
 use strum::IntoEnumIterator;
 
 use crate::{
     cli::configure::select_network,
-    state::mode::RunMode,
     utils::{env_config::EnvConfig, network::Network},
 };
 
@@ -46,6 +45,18 @@ pub async fn interactive() -> anyhow::Result<()> {
     }
     let config_number = existing_indices[selection];
 
+    let config = load_config_with_option(network, config_number).await?;
+    config.save_to_file(config_number)?;
+    config.export_to_env()?;
+
+    address_duplication_check()?;
+    Ok(())
+}
+
+async fn load_config_with_option(
+    network: Network,
+    config_number: usize,
+) -> anyhow::Result<EnvConfig> {
     let items = vec![
         format!(
             "{} {}",
@@ -80,57 +91,7 @@ pub async fn interactive() -> anyhow::Result<()> {
         }
         _ => unreachable!(),
     };
-    config.save_to_file(config_number)?;
-    config.export_to_env()?;
-
-    address_duplication_check()?;
-    Ok(())
-}
-
-pub fn select_mode() -> anyhow::Result<RunMode> {
-    let items = [
-        format!(
-            "{} {}",
-            style("Mining:").bold(),
-            style("performs mining by repeatedly executing deposits and withdrawals").dim()
-        ),
-        format!(
-            "{} {}",
-            style("Claim:").bold(),
-            style("claims available ITX tokens").dim()
-        ),
-        format!(
-            "{} {}",
-            style("Exit:").bold(),
-            style("withdraws all balances currently and cancels pending deposits").dim()
-        ),
-        format!(
-            "{} {}",
-            style("Export:").bold(),
-            style("export deposit private keys").dim()
-        ),
-        format!(
-            "{} {}",
-            style("Check Update:").bold(),
-            style("check for updates of this CLI").dim()
-        ),
-    ];
-    let term = Term::stdout();
-    term.clear_screen()?;
-    let mode = Select::new()
-        .with_prompt("Select mode (press ctrl+c to abort)")
-        .items(&items)
-        .default(0)
-        .interact()?;
-    let mode = match mode {
-        0 => RunMode::Mining,
-        1 => RunMode::Claim,
-        2 => RunMode::Exit,
-        3 => RunMode::Export,
-        4 => RunMode::CheckUpdate,
-        _ => unreachable!(),
-    };
-    Ok(mode)
+    Ok(config)
 }
 
 fn address_duplication_check() -> anyhow::Result<()> {

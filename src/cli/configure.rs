@@ -102,7 +102,7 @@ pub async fn modify_config(config: &EnvConfig) -> anyhow::Result<EnvConfig> {
     } else {
         key
     };
-    let withdrawal_address = get_address(withdrawal_private_key);
+
     let modify_encryption = Confirm::new()
         .with_prompt(format!(
             "Modify encryption current={}?",
@@ -119,6 +119,7 @@ pub async fn modify_config(config: &EnvConfig) -> anyhow::Result<EnvConfig> {
             config.encrypted_withdrawal_private_key.clone(),
         )
     };
+    let withdrawal_address = get_address(withdrawal_private_key);
     let config = EnvConfig {
         network: config.network,
         rpc_url,
