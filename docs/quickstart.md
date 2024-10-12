@@ -13,7 +13,7 @@ Before you begin, please ensure you have the following:
 
 - **Ethereum (ETH)**: A minimum of 0.5 ETH for testnet plus additional ETH for gas fees. Please refer to the [Network](./holesky.md) guide to obtain testnet ETH.
 - **Alchemy API key**: Please refer to the [How to get your Alchemy API key](./alchemy.md) guide to obtain your API key.
-- **Withdrawal Private Key**: The private key of the address you'll use to withdraw ETH and receive ITX tokens.(Instruction for Metamask [here](https://support.metamask.io/managing-my-wallet/secret-recovery-phrase-and-private-keys/how-to-export-an-accounts-private-key/)) 
+- **Withdrawal Private Key**: The private key of the address you'll use to withdraw ETH and receive ITX tokens.(Instruction for Metamask [here](https://support.metamask.io/managing-my-wallet/secret-recovery-phrase-and-private-keys/how-to-export-an-accounts-private-key/))
 
 ## Download the CLI
 

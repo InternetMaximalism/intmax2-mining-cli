@@ -11,9 +11,9 @@ https://discord.gg/nByKNNhyvn
 
 Before you begin, please ensure you have the following:
 
-- **Ethereum (ETH)**: A minimum of 1 ETH for mainnet plus additional ETH for gas fees. 
+- **Ethereum (ETH)**: A minimum of 1 ETH for mainnet plus additional ETH for gas fees.
 - **Alchemy API key**: Please refer to the [How to get your Alchemy API key](./alchemy.md) guide to obtain your API key.
-- **Withdrawal Private Key**: The private key of the address you'll use to withdraw ETH and receive ITX tokens.(Instruction for Metamask [here](https://support.metamask.io/managing-my-wallet/secret-recovery-phrase-and-private-keys/how-to-export-an-accounts-private-key/)) 
+- **Withdrawal Private Key**: The private key of the address you'll use to withdraw ETH and receive ITX tokens.(Instruction for Metamask [here](https://support.metamask.io/managing-my-wallet/secret-recovery-phrase-and-private-keys/how-to-export-an-accounts-private-key/))
 
 ## Download the CLI
 
@@ -155,7 +155,6 @@ Select `mainnet`.
    If you encrypted your private keys, you need to enter your Password.
    <div align="center"><img src="../assets/mainnet-instruction/t4.png" width="600" alt="Mining CLI"></div>
 
-4. **Export**:
+5. **Export**:
    The CLI will display the private keys of the deposit addresses. Please save them in a secure place.
    <div align="center"><img src="../assets/mainnet-instruction/t5.png" width="600" alt="Mining CLI"></div>
-
