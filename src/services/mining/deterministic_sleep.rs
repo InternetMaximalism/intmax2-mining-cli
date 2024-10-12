@@ -24,7 +24,7 @@ pub async fn sleep_before_deposit(withdrawal_address: Address) -> anyhow::Result
     let last_withdrawal_time = last_withdrawal_time.unwrap();
     let sleep_time = determin_sleep_time(last_withdrawal_time, withdrawal_address, "deposit");
     let target_time = last_withdrawal_time + sleep_time;
-    sleep_if_needed(target_time).await;
+    sleep_if_needed(target_time, true).await;
     Ok(())
 }
 
@@ -38,11 +38,11 @@ pub async fn sleep_before_withdrawal(deposit_address: Address) -> anyhow::Result
     let last_deposit_time = last_deposit_time.unwrap();
     let sleep_time = determin_sleep_time(last_deposit_time, deposit_address, "withdrawal");
     let target_time = last_deposit_time + sleep_time;
-    sleep_if_needed(target_time).await;
+    sleep_if_needed(target_time, false).await;
     Ok(())
 }
 
-async fn sleep_if_needed(target_time: u64) {
+async fn sleep_if_needed(target_time: u64, is_deposit: bool) {
     let now = SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .unwrap()
@@ -55,10 +55,11 @@ async fn sleep_if_needed(target_time: u64) {
     let sleep_until = Instant::now() + Duration::from_secs(sleep_from_now);
     let sleep_until_chrono =
         chrono::Local::now() + chrono::Duration::seconds(sleep_from_now as i64);
+    let next_step = if is_deposit { "deposit" } else { "withdrawal" };
     print_log(format!(
-        "Next deposit/withdrawal will start at {}. Sleeping for {} seconds...",
+        "Next {} will start at {}.",
+        next_step,
         sleep_until_chrono.format("%Y-%m-%d %H:%M:%S"),
-        sleep_from_now
     ));
     tokio::time::sleep_until(sleep_until).await;
 }
