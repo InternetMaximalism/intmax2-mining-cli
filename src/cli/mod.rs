@@ -139,7 +139,7 @@ pub fn print_mainnet_warning() {
     let colored_message = format!(
         "{} {}",
         style("WARNING:").yellow().bold(),
-        style("Mining will transition from Mainnet to Base. Currently, on Mainnet, only asset withdrawals and token claims are possible.")
+        style("Mining has transitioned from Mainnet to Base. Currently, on Mainnet, only asset withdrawals and token claims are possible.")
             .yellow()
     );
     term.write_line(&colored_message).unwrap();
