@@ -20,6 +20,7 @@ pub mod assets_status;
 pub mod balance_transfer;
 pub mod claim;
 pub mod mining;
+pub mod sleep;
 pub mod sync;
 pub mod utils;
 

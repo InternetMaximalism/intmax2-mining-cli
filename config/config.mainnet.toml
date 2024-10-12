@@ -20,6 +20,7 @@ single_claim_gas = 600000
 
 [service]
 repository_url = "https://github.com/InternetMaximalism/intmax2-mining-cli"
+mining_min_cooldown_in_sec = 3600 # 1 hour
 mining_max_cooldown_in_sec = 21600 # 6 hours
 loop_cooldown_in_sec = 10
 high_gas_retry_inverval_in_sec = 10
