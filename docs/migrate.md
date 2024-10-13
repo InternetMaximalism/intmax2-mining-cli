@@ -16,41 +16,60 @@ Before you begin, please ensure you have the following:
 
 ## Step-by-Step Instructions
 
-### Starting the Migrating Process
+### Upgrading CLI Version
 
 1.  **Lauching the CLI** Double-click on the mining-cli shown in this image to launch.
 
     <div align="center">
       <img src="../assets/instruction/extract.png" width="600" alt="Mining CLI"></div>
 
-2.  **Select Network**:
-When you double-click the CLI, you'll see a screen like this:
+2.  **Update CLI**:
+When you open the CLI, you'll see a screen like this:
 
    <div align="center">
-     <img src="../assets/migrate/m1.png" width="600" alt="Mining CLI"></div>
+     <img src="../assets/migrate/m17.png" width="600" alt="Mining CLI"></div>
 
+Press `Y` on your keyboard to select yes.
+
+3.  **Continue Update**:
+You'll see a screen like this:
+
+   <div align="center">
+     <img src="../assets/migrate/m18.png" width="600" alt="Mining CLI"></div>
+
+Press `Y` on your keyboard to select yes.
+
+4. **Select Network**:
 You can move the cursor with the arrow keys, select `mainnet` and press `Enter`.
 
-3. **Select Config**:
-When you select `mainnet`, you'll see a screen like this:
-
    <div align="center">
-     <img src="../assets/migrate/m2.png" width="600" alt="Mining CLI"></div>
+     <img src="../assets/migrate/m19.png" width="600" alt="Mining CLI"></div>
 
-Select `#0` for your default deposit mining account. You will see more than one option if you have been mining with multiple deposit accounts. The `Create New Config` option will walk you through setting up a new mining account.
-
-4. **Continue the process**:
+5. **Continue the process**:
    Select `Continue` to proceed with the previous settings.
 
-<div align="center"><img src="../assets/migrate/m3.png" width="600" alt="Mining CLI"></div>
+<div align="center"><img src="../assets/migrate/m20.png" width="600" alt="Mining CLI"></div>
 
-5. **Select Network**:
-When you click on continue, you'll see a screen like this:
+6. **Confirm Update**:
+Before resuming mining, select `Check Update` to check if you are using the current version.
+   <div align="center">
+     <img src="../assets/migrate/m23.png" width="600" alt="Mining CLI"></div>
+
+7. **Confirm CLI Version**:
+Your current version should be same as the latest release to mine on Base. Navigate to the [Releases](https://github.com/InternetMaximalism/intmax2-mining-cli/releases) page of this repository to see the available latest version.
 
    <div align="center">
-     <img src="../assets/migrate/m4.png" width="600" alt="Mining CLI"></div>
+     <img src="../assets/migrate/m24.png" width="600" alt="Mining CLI"></div>
 
-Mining has transitioned from Ethereum Mainnet to Base Network. Be rest assured that all your assets and ITX token are safe. To claim and retrieve the assets from Mainnet. Press any key to continue.
+To continue, press any key on your keyboard(e.g, Enter).
+
+
+### Mining
+1. **Select Network**:
+Mining has transitioned from Ethereum Mainnet to Base Network. Be rest assured that all your assets and ITX token are safe. To claim and retrieve the assets from Mainnet, select the next command.
+   <div align="center">
+     <img src="../assets/migrate/m21.png" width="600" alt="Mining CLI"></div>
+
 
 ### Claiming ITX Tokens
 
@@ -58,7 +77,7 @@ Mining has transitioned from Ethereum Mainnet to Base Network. Be rest assured t
 To claim ITX token, select `Claim`. You can check whether an deposit address is eligible for rewards in the "Qualified" column after selecting the mode.
 
    <div align="center">
-     <img src="../assets/migrate/m5.png" width="600" alt="Mining CLI"></div>
+     <img src="../assets/migrate/m25.png" width="600" alt="Mining CLI"></div>
 
 2. **Claim ITX Token To Withdrawal Address**:
 If `Claim` was selected and your address qualifies for ITX tokens, the CLI automatically transfers your available ITX tokens to your withdrawal wallet immediately or when the token availablity time reaches. To see the tokens in your wallet, ensure to add the ITX mainnet token contract address to your wallet using the Network [guide](./holesky.md).
@@ -70,21 +89,23 @@ Check wallet to see tokens.
 
 After claiming process is done, you can proceed to retreiving available ETH in the INTMAX2 Network back to your withdrawal address. Proceed by pressing any key as instructed by CLI.
 
-### Claiming ITX Tokens
+### Withdraw ETH 
 
-8. **Withdraw ETH**:
+#### Important: Avoid making direct or indirect transfers between deposit and withdrawal addresses. Depositing in a withdrawal address will disqualify it from receiving rewards during mining. Please refer to the [README document](../README.md) for more information.
+
+1. **Withdraw ETH**:
 Select `Exit` to retrieve assets to withdrawal address.
 
    <div align="center">
      <img src="../assets/migrate/m7.png" width="600" alt="Mining CLI"></div>
 
-9. **Withdraw ETH To Withdrawal Address**:
+2. **Withdraw ETH To Withdrawal Address**:
 Any pending deposit would be cancelled and all ETH balance will be withdrawn to your withdrawal address.
 
    <div align="center">
      <img src="../assets/migrate/m8.png" width="600" alt="Mining CLI"></div>
 
-Note: If there are still ETH in your deposit address after this process, you can manually transfer ETH from deposit wallet to another wallet.
+Note: If there are still ETH in your deposit address after this process, you can manually transfer ETH from deposit wallet to another wallet using the command below.
 
 ### Exporting Deposit Private Keys
 
@@ -108,9 +129,6 @@ To transfer ETH balance inside the CLI, type yes instead and select `#0` or your
 
 4. **Transfer ETH Balance**:
    Paste the address to transfer ETH balance to.
-
-Note: Avoid direct or indirect transfers between deposit addresses and withdrawal addresses because using the withdrawal address again will make it not be eligible for rewards in the next mining period. Please refer to the [Readme document](../README.md) for more information.
-
    <div align="center">
      <img src="../assets/migrate/m14.png" width="600" alt="Mining CLI"></div>
 
@@ -126,17 +144,4 @@ Repeat approval until ETH balance is insufficient. To end the process, press any
 
 After withdrawal process is done, you can proceed to upgrade CLI to resume mining on Base Network with Base ETH. Proceed by pressing any key as instructed by CLI.
 
-### Upgrading CLI Version
 
-1. **Check CLI Version**:
-Before resuming mining, select `Check Update` to check if you are using the current version.
-   <div align="center">
-     <img src="../assets/migrate/m9.png" width="600" alt="Mining CLI"></div>
-
-2. **Upgrade CLI Version**:
-Your current version should be same as the latest release to mine on Base. Navigate to the [Releases](https://github.com/InternetMaximalism/intmax2-mining-cli/releases) page of this repository to see the available latest version.
-
-   <div align="center">
-     <img src="../assets/migrate/m10.png" width="600" alt="Mining CLI"></div>
-
-Download latest version and use the [How to mine on Base](./mainnet-quickstart.md) guide to setup and resume mining on Base Network.
