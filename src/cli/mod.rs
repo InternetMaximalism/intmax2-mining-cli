@@ -131,7 +131,7 @@ async fn mode_loop(
 }
 
 async fn press_any_key_to_continue() {
-    println!("Press any key to continue...");
+    println!("Press Enter to continue...");
     let _ = tokio::io::AsyncReadExt::read(&mut tokio::io::stdin(), &mut [0u8]).await;
 }
 
