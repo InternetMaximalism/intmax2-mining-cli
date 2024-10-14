@@ -1,11 +1,12 @@
 use std::str::FromStr;
 
 use anyhow::bail;
+use console::style;
 use dialoguer::{Confirm, Input, Password, Select};
 use ethers::types::{H256, U256};
 
 use crate::{
-    external_api::contracts::utils::get_address,
+    external_api::contracts::utils::{get_address, get_balance_with_rpc},
     utils::{
         config::Settings,
         encryption::{decrypt, encrypt},
@@ -52,7 +53,7 @@ pub async fn new_config(network: Network) -> anyhow::Result<EnvConfig> {
         let mining_times = input_mining_times()?;
         (max_gas_price, mining_unit, mining_times)
     };
-    let withdrawal_private_key: H256 = input_withdrawal_private_key()?;
+    let withdrawal_private_key: H256 = input_withdrawal_private_key(&rpc_url).await?;
     let withdrawal_address = get_address(withdrawal_private_key);
     let (encrypt, keys, encrypted_keys) = input_encryption(withdrawal_private_key)?;
     let config = EnvConfig {
@@ -98,7 +99,7 @@ pub async fn modify_config(config: &EnvConfig) -> anyhow::Result<EnvConfig> {
         .default(false)
         .interact()?;
     let withdrawal_private_key = if modify_withdrawal_address {
-        input_withdrawal_private_key()?
+        input_withdrawal_private_key(&rpc_url).await?
     } else {
         key
     };
@@ -255,15 +256,38 @@ fn input_mining_times() -> anyhow::Result<u64> {
     Ok(mining_times)
 }
 
-fn input_withdrawal_private_key() -> anyhow::Result<H256> {
-    let withdrawal_private_key: String = Password::new()
-        .with_prompt(format!("Withdrawal private key of {}", get_network()))
-        .validate_with(|input: &String| validate_private_key_with_duplication_check(&[], input))
-        .interact()?;
-    let withdrawal_private_key: H256 = withdrawal_private_key.parse().unwrap();
-    let withdrawal_address = get_address(withdrawal_private_key);
-    println!("Withdrawal Address: {:?}", withdrawal_address);
-    Ok(withdrawal_private_key)
+async fn input_withdrawal_private_key(rpc_url: &str) -> anyhow::Result<H256> {
+    loop {
+        let withdrawal_private_key: String = Password::new()
+            .with_prompt(format!("Withdrawal private key of {}", get_network()))
+            .validate_with(|input: &String| validate_private_key_with_duplication_check(&[], input))
+            .interact()?;
+        let withdrawal_private_key: H256 = withdrawal_private_key.parse().unwrap();
+        let withdrawal_address = get_address(withdrawal_private_key);
+        println!("Withdrawal Address: {:?}", withdrawal_address);
+
+        // non-balance check
+        {
+            let balance = get_balance_with_rpc(rpc_url, withdrawal_address).await?;
+            if balance != U256::zero() {
+                let colored_message = format!(
+                "{} {}",
+                style("WARNING:").yellow().bold(),
+                style("The balance of the withdrawal address is not zero. If this is your first time setting up this address, please use a different, empty withdrawal address. If you are re-configuring and have entered this address intentionally, you can ignore this warning.").yellow()
+            );
+                println!("{}", colored_message);
+                let confirm = Confirm::new()
+                    .with_prompt("Continue?")
+                    .default(false)
+                    .interact()?;
+                if confirm {
+                    break Ok(withdrawal_private_key);
+                }
+            } else {
+                break Ok(withdrawal_private_key);
+            }
+        }
+    }
 }
 
 fn input_encryption(

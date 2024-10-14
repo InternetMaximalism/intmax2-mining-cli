@@ -22,6 +22,7 @@ pub mod mining;
 pub mod sync;
 pub mod utils;
 
+// note: in legacy environment, there is no mining loop
 pub async fn mining_loop(
     state: &mut State,
     withdrawal_private_key: H256,
@@ -31,7 +32,7 @@ pub async fn mining_loop(
     check_avaliability().await?;
     let key = Key::new(withdrawal_private_key, 0);
     print_log(format!(
-        "Mining using deposit address {:?}",
+        "Processing mining for deposit address {:?}",
         key.deposit_address
     ));
     let assets_status = state.sync_and_fetch_assets(&key).await?;
@@ -58,7 +59,7 @@ pub async fn mining_loop(
                     ));
             }
             print_log(format!(
-                "Deposit address {:?}: Qualified: {}. Deposits {}/{}. Cancelled {}. Skipping...",
+                "Deposit address {:?}: Qualified: {}. Deposits {}/{}. Cancelled {}.",
                 key.deposit_address,
                 is_qualified,
                 assets_status.senders_deposits.len(),
@@ -81,40 +82,33 @@ pub async fn mining_loop(
         print_assets_status(&assets_status);
         common_loop_cool_down().await;
     }
+    print_log(format!(
+        "Mining loop for deposit address {:?} ended",
+        key.deposit_address
+    ));
     Ok(())
 }
 
 pub async fn exit_loop(state: &mut State, withdrawal_private_key: H256) -> anyhow::Result<()> {
-    let mut key_number = 0;
+    check_avaliability().await?;
+    let key = Key::new(withdrawal_private_key, 0);
+    print_log(format!("Exit for deposit address{:?}", key.deposit_address));
     loop {
-        check_avaliability().await?;
-        let key = Key::new(withdrawal_private_key, key_number);
-        if !is_address_used(key.deposit_address).await {
-            print_status("exit loop finished".to_string());
-            return Ok(());
+        let assets_status = state.sync_and_fetch_assets(&key).await?;
+        if assets_status.pending_indices.is_empty()
+            && assets_status.rejected_indices.is_empty()
+            && assets_status.not_withdrawn_indices.is_empty()
+        {
+            break;
         }
-        print_log(format!(
-            "Exit for deposit address #{} {:?}",
-            key_number, key.deposit_address
-        ));
-        loop {
-            let assets_status = state.sync_and_fetch_assets(&key).await?;
-            if assets_status.pending_indices.is_empty()
-                && assets_status.rejected_indices.is_empty()
-                && assets_status.not_withdrawn_indices.is_empty()
-            {
-                print_status(format!(
-                    "All deposits are withdrawn for #{}. {:?}",
-                    key_number, key.deposit_address,
-                ));
-                key_number += 1;
-                break;
-            }
-            mining_task(state, &key, &assets_status, false, true, 0.into()).await?;
-
-            common_loop_cool_down().await;
-        }
+        mining_task(state, &key, &assets_status, false, true, 0.into()).await?;
+        common_loop_cool_down().await;
     }
+    print_status(format!(
+        "Exit ended for deposit address {:?}",
+        key.deposit_address,
+    ));
+    Ok(())
 }
 
 pub async fn legacy_exit_loop(
@@ -154,16 +148,15 @@ pub async fn legacy_exit_loop(
 }
 
 pub async fn claim_loop(state: &mut State, withdrawal_private_key: H256) -> anyhow::Result<()> {
+    let key = Key::new(withdrawal_private_key, 0);
     for is_short_term in [true, false] {
         check_avaliability().await?;
-        let key = Key::new(withdrawal_private_key, 0);
         if !is_address_used(key.deposit_address).await {
             print_status("claim loop finished".to_string());
             return Ok(());
         }
         print_log(format!(
-            "Claim for deposit address {:?}. Term: {}",
-            key.deposit_address,
+            "Processing claim for term: {}",
             if is_short_term { "short" } else { "long" }
         ));
         let assets_status = state.sync_and_fetch_assets(&key).await?;
@@ -172,6 +165,10 @@ pub async fn claim_loop(state: &mut State, withdrawal_private_key: H256) -> anyh
         claim_task(state, &key, is_short_term, &assets_status).await?;
         common_loop_cool_down().await;
     }
+    print_status(format!(
+        "Claim ended for deposit address {:?}",
+        key.deposit_address,
+    ));
     Ok(())
 }
 

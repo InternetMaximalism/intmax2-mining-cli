@@ -25,7 +25,7 @@ pub async fn accounts_status(
     let withdrawal_balance = get_balance(withdrawal_address).await?;
     let withdrawal_token_balance = get_token_balance(withdrawal_address).await?;
     println!(
-        "Withdrawal address(don’t deposit money to this): {} {} ETH {} ITX",
+        "Withdrawal address(don’t deposit Ether to this): {} {} ETH {} ITX",
         withdrawal_address,
         pretty_format_u256(withdrawal_balance),
         pretty_format_u256(withdrawal_token_balance),

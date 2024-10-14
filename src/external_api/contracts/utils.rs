@@ -65,7 +65,6 @@ pub fn get_address(private_key: H256) -> Address {
     wallet.address()
 }
 
-// on chain queries
 pub async fn get_account_nonce(address: Address) -> Result<u64, BlockchainError> {
     info!("get_account_nonce");
     let client = get_client().await?;
@@ -78,6 +77,18 @@ pub async fn get_account_nonce(address: Address) -> Result<u64, BlockchainError>
 pub async fn get_balance(address: Address) -> Result<U256, BlockchainError> {
     info!("get_balance");
     let client = get_client().await?;
+    let balance = with_retry(|| async { client.get_balance(address, None).await })
+        .await
+        .map_err(|_| BlockchainError::NetworkError("failed to get balance".to_string()))?;
+    Ok(balance)
+}
+
+pub async fn get_balance_with_rpc(
+    rpc_url: &str,
+    address: Address,
+) -> Result<U256, BlockchainError> {
+    info!("get_balance");
+    let client = get_client_with_rpc_url(rpc_url).await?;
     let balance = with_retry(|| async { client.get_balance(address, None).await })
         .await
         .map_err(|_| BlockchainError::NetworkError("failed to get balance".to_string()))?;

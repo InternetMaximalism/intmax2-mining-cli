@@ -50,6 +50,8 @@ pub fn print_warning<S: ToString>(message: S) {
     warn!("{}", message.to_string());
 }
 
+
+
 pub fn print_assets_status(assets_status: &crate::services::assets_status::AssetsStatus) {
     print_status(format!(
         "Deposits: {} (success: {} pending: {} rejected: {} cancelled: {}) Withdrawn: {}",
