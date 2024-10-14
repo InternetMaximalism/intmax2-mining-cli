@@ -125,7 +125,7 @@
 
 **For the Base Sepolia network**:<br>
 Token Contract Address: `0x2699CD7f883DecC464171a7A92f4CcC4eF220fa2`
-Token Symbol: `DMY`
+Token Symbol: `ITX`
 
 **For the Mainnet**:<br>
 Token Contract Address: ``Token Symbol:`ITX`
@@ -154,7 +154,7 @@ Token Contract Address: ``Token Symbol:`ITX`
 
 **For the Base Sepolia network**:<br>
 Token Contract Address: `0x2699CD7f883DecC464171a7A92f4CcC4eF220fa2`
-Token Symbol: `DMY`
+Token Symbol: `ITX`
 
 **For the Mainnet**:<br>
 Token Contract Address: ``Token Symbol:`ITX`
@@ -163,3 +163,52 @@ Token Contract Address: ``Token Symbol:`ITX`
 
 <div align="center">
   <img src="../assets/base/b12.png" width="800" alt="Mining CLI"></div>
+
+## Get testnet ETH
+
+You can bridge your Sepolia ETH to Base Sepolia ETH using [Superbridge](https://superbridge.app/base-sepolia). Follow these steps to complete the bridging process.
+
+1. Click "Connect".
+<div align="center">
+  <img src="../assets/bridge/b1.png" width="800" alt="Mining CLI"></div>
+In your wallet, Confirm that the active network is Sepolia before connecting. 
+
+2. Connect to wallet where you have your Sepolia stored.
+<div align="center">
+  <img src="../assets/bridge/b2.png" width="800" alt="Mining CLI"></div>
+
+3. Ensure that the toggle is on "Deposit" to bridge from Sepolia to Base Sepolia.
+<div align="center">
+  <img src="../assets/bridge/b3.png" width="800" alt="Mining CLI"></div>
+
+4. Fill in amount to deposit.
+<div align="center">
+  <img src="../assets/bridge/b4.png" width="800" alt="Mining CLI"></div>
+
+Ensure you have enough for gas fees to prevent the transaction from failing.
+
+5. Read and accept terms and click "Initiate Deposit" button.
+<div align="center">
+  <img src="../assets/bridge/b5.png" width="800" alt="Mining CLI"></div>
+
+Wait for bridging to happen. The time it takes was stated in the terms you just accepted. 
+
+6. Approve transaction in wallet.
+<div align="center">
+  <img src="../assets/bridge/b6.png" width="800" alt="Mining CLI"></div>
+
+7. If successful, confirm balance of Sepolia ETH in wallet.
+<div align="center">
+  <img src="../assets/bridge/b7.png" width="800" alt="Mining CLI"></div>
+
+8. Switch to Base Sepolia Network in wallet.
+<div align="center">
+  <img src="../assets/bridge/b8.png" width="800" alt="Mining CLI"></div>
+
+Your balance should have updated with Base Sepolia ETH.
+
+## How to bridge ETH from Ethereum mainnet to Base 
+To bridge ETH from Ethereum Mainnet to the Base network, follow the same steps as for the testnet. Simply replace Sepolia with Ethereum Mainnet and Base Sepolia with Base.To get started, click [here](https://superbridge.app/base) 
+
+<div align="center">
+  <img src="../assets/bridge/b9.png" width="800" alt="Mining CLI"></div>
