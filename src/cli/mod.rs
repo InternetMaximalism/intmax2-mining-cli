@@ -10,7 +10,10 @@ use crate::{
     services::{claim_loop, exit_loop, mining_loop},
     state::{mode::RunMode, state::State},
     utils::{
-        env_config::EnvConfig, env_validation::validate_env_config, network::is_legacy, update,
+        env_config::EnvConfig,
+        env_validation::validate_env_config,
+        network::{get_network, is_legacy, Network},
+        update,
     },
 };
 
@@ -134,11 +137,21 @@ async fn press_any_key_to_continue() {
 
 pub fn print_legacy_warning() {
     let term = Term::stdout();
-    let colored_message = format!(
+    let network = get_network();
+
+    let colored_message = if network == Network::Mainnet {
+        format!(
         "{} {}",
         style("WARNING:").yellow().bold(),
         style("Mining has transitioned from Mainnet to Base. Currently, on Mainnet, only asset withdrawals and token claims are possible.")
             .yellow()
-    );
+    )
+    } else {
+        format!(
+        "{} {}",
+        style("WARNING:").yellow().bold(),
+        style("Mining Testnet has transitioned from Holesky to Base-Sepolia. Currently, on Holesky, only asset withdrawals and token claims are possible.")
+            .yellow())
+    };
     term.write_line(&colored_message).unwrap();
 }
