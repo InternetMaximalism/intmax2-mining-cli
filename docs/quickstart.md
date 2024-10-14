@@ -183,7 +183,6 @@ Check wallet to see tokens.
 
 Follow the CLI instructions and press any key to proceed.
 
-
 ### Withdraw ETH 
 
 You can retrieve the available ETH from the intmax2 Network to your withdrawal address.
@@ -243,7 +242,7 @@ Repeat approval until ETH balance is insufficient. To end the process, press any
 After withdrawal process is done, proceed by pressing any key as instructed by CLI.
 
 
-### Exporting Deposit Private Keys
+### Check Available CLI Updates
 
 1. **Select Mode**:
 Select `Check Update` to check if you are using the latest version.
@@ -256,4 +255,4 @@ Your current version should be same as the latest release to mine on Base. Navig
    <div align="center">
      <img src="../assets/migrate/m24.png" width="600" alt="Mining CLI"></div>
 
-To continue, press any key on your keyboard(e.g, Enter).
+To continue with other modes, press any key on your keyboard.

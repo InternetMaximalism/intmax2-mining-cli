@@ -17,8 +17,9 @@ For more information on mining, please refer to [this article](https://hackmd.io
 
 You can find detailed information on how to use the CLI in the following documents:
 
-
 ### [How To Migrate From Ethereum Mainnet To Base](docs/migrate.md)
+
+### [How To Base Sepolia Testnet](docs/migrate.md)
 
 ### [Detailed Documents](docs/developer.md)
 
