@@ -45,10 +45,10 @@ You can move the cursor with the arrow keys and confirm with `Enter`.
 For this time, select `base-sepolia (testnet)`.
 
 3. **Select Config File**:
-If you're setting up the CLI for the first time, select Create New Config, which will guide you through setting up your mining account. If you've already configured it before, select account of choice. You'll see a screen like this:
+If you're setting up the CLI for the first time, select Create New Config, which will guide you through setting up your mining account. If you've already configured it before, select config of choice. You'll see a screen like this:
 
    <div align="center">
-     <img src="../assets/instruction/m6.png" width="600" alt="Mining CLI"></div>
+     <img src="../assets/instruction/m5.png" width="600" alt="Mining CLI"></div>
 
 Note: When mining on Base, each config file can only link one deposit address to one withdrawal address. To use multiple deposit addresses, you'll need to create separate config files. If you've already set one up previously, you'll be able to select from existing config files.
 
@@ -108,9 +108,7 @@ Here is the explanation of each setting:
 
 - **Continue**: Continue mining with the existing settings in the config file
 - **Overwrite**: This allows you to clear existing settings and set new ones.
-- **Modify**: Modify some of the existing settings and change them, e.g, change withdrawal private key.
-
-Note: Mining times and mining unit cannot be changed once they are set.
+- **Modify**: Modify some of the existing settings and change them, e.g, change withdrawal private key. Note that when using this method, mining times and mining unit cannot be changed.
 
 3. **Enter password for the private key**:
 If you choose to encrypt your password during setup, you'll be prompted to enter it. This step is optional and won't appear if you didn't set a password.
