@@ -50,9 +50,16 @@ impl EnvConfig {
     }
 
     pub fn load_from_file(network: Network, i: usize) -> anyhow::Result<Self> {
-        let file = std::fs::File::open(&env_config_path(network, i))?;
+        let file = std::fs::File::open(&env_config_path(network, i)).map_err(|_| {
+            anyhow::anyhow!(
+                "Faield to open the config file at {:?}",
+                env_config_path(network, i)
+            )
+        })?;
         let reader = BufReader::new(file);
-        let config: EnvConfig = serde_json::from_reader(reader)?;
+        let config: EnvConfig = serde_json::from_reader(reader).map_err(|_| {
+            anyhow::anyhow!("Config at {:?} is broken", env_config_path(network, i))
+        })?;
         Ok(config)
     }
 

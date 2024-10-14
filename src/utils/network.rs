@@ -50,8 +50,8 @@ pub fn get_network() -> Network {
     Network::from_str(&network).expect("Invalid network")
 }
 
-pub fn is_mainnet() -> bool {
-    get_network() == Network::Mainnet
+pub fn is_legacy() -> bool {
+    get_network() == Network::Mainnet || get_network() == Network::Holesky
 }
 
 pub fn is_testnet() -> bool {

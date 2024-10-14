@@ -7,7 +7,10 @@ use strum::IntoEnumIterator;
 
 use crate::{
     cli::configure::select_network,
-    utils::{env_config::EnvConfig, network::Network},
+    utils::{
+        env_config::EnvConfig,
+        network::{get_network, is_legacy, Network},
+    },
 };
 
 use super::configure::{modify_config, new_config};
@@ -16,20 +19,53 @@ pub async fn interactive() -> anyhow::Result<()> {
     let network = select_network()?;
     env::set_var("NETWORK", network.to_string());
 
-    let existing_indices = EnvConfig::get_existing_indices(network);
-    if existing_indices.is_empty() {
-        println!("No existing indices found. Please create a new config.");
-        let config = new_config(network).await?;
-        config.save_to_file(0)?;
-        config.export_to_env()?;
-        return Ok(());
+    if is_legacy() {
+        legacy_select_or_create_config().await?;
+    } else {
+        select_or_create_config().await?;
     }
 
-    // list existing config files
-    let mut items = existing_indices
-        .iter()
-        .map(|index| format!("#{}", index,))
-        .collect::<Vec<String>>();
+    address_duplication_check()?;
+    Ok(())
+}
+
+fn address_duplication_check() -> anyhow::Result<()> {
+    let mut address_to_network = HashMap::<Address, (Network, usize)>::new();
+    for network in Network::iter() {
+        for config_index in EnvConfig::get_existing_indices(network) {
+            let config = EnvConfig::load_from_file(network, config_index)?;
+            if address_to_network.get(&config.withdrawal_address).is_some() {
+                let (duplicated_network, duplicated_index) =
+                    address_to_network.get(&config.withdrawal_address).unwrap();
+                anyhow::bail!(
+                    "Withdrawal address {} on {} config #{} is duplicated as {} config #{}. Please use a different address.",
+                    config.withdrawal_address,
+                    network,
+                    config_index,
+                    duplicated_network,
+                    duplicated_index,
+                );
+            } else {
+                address_to_network.insert(config.withdrawal_address, (network, config_index));
+            }
+        }
+    }
+
+    Ok(())
+}
+
+async fn select_or_create_config() -> anyhow::Result<()> {
+    let network = get_network();
+    let existing_indices = EnvConfig::get_existing_indices(network);
+
+    let mut items = Vec::new();
+    for i in &existing_indices {
+        let config = EnvConfig::load_from_file(network, *i)?;
+        items.push(format!(
+            "Config #{} (withdrawal address: {})",
+            i, config.withdrawal_address
+        ));
+    }
     items.push("Create New Config".to_string());
     let selection = Select::new()
         .with_prompt("Please select config to use")
@@ -44,12 +80,24 @@ pub async fn interactive() -> anyhow::Result<()> {
         return Ok(());
     }
     let config_number = existing_indices[selection];
-
     let config = load_config_with_option(network, config_number).await?;
     config.save_to_file(config_number)?;
     config.export_to_env()?;
+    Ok(())
+}
 
-    address_duplication_check()?;
+async fn legacy_select_or_create_config() -> anyhow::Result<()> {
+    let network = get_network();
+
+    if !EnvConfig::is_file_exist(network, 0) {
+        let config = new_config(network).await?;
+        config.save_to_file(0)?;
+        config.export_to_env()?;
+        return Ok(());
+    }
+    let config = load_config_with_option(network, 0).await?;
+    config.save_to_file(0)?;
+    config.export_to_env()?;
     Ok(())
 }
 
@@ -92,29 +140,4 @@ async fn load_config_with_option(
         _ => unreachable!(),
     };
     Ok(config)
-}
-
-fn address_duplication_check() -> anyhow::Result<()> {
-    let mut address_to_network = HashMap::<Address, (Network, usize)>::new();
-    for network in Network::iter() {
-        for config_index in EnvConfig::get_existing_indices(network) {
-            let config = EnvConfig::load_from_file(network, config_index)?;
-            if address_to_network.get(&config.withdrawal_address).is_some() {
-                let (duplicated_network, duplicated_index) =
-                    address_to_network.get(&config.withdrawal_address).unwrap();
-                anyhow::bail!(
-                    "Withdrawal address {} on {} config #{} is duplicated as {} config #{}. Please use a different address.",
-                    config.withdrawal_address,
-                    network,
-                    config_index,
-                    duplicated_network,
-                    duplicated_index,
-                );
-            } else {
-                address_to_network.insert(config.withdrawal_address, (network, config_index));
-            }
-        }
-    }
-
-    Ok(())
 }

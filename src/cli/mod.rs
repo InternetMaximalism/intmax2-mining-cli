@@ -10,7 +10,7 @@ use crate::{
     services::{claim_loop, exit_loop, mining_loop},
     state::{mode::RunMode, state::State},
     utils::{
-        env_config::EnvConfig, env_validation::validate_env_config, network::is_mainnet, update,
+        env_config::EnvConfig, env_validation::validate_env_config, network::is_legacy, update,
     },
 };
 
@@ -39,13 +39,13 @@ pub async fn run(mode: Option<RunMode>) -> anyhow::Result<()> {
     validate_env_config(&config).await?;
     config.export_to_env()?;
 
-    if is_mainnet() {
-        print_mainnet_warning();
+    if is_legacy() {
+        print_legacy_warning();
         press_any_key_to_continue().await;
     }
 
     let mut mode = if is_interactive {
-        if is_mainnet() {
+        if is_legacy() {
             legacy_select_mode()?
         } else {
             select_mode()?
@@ -100,7 +100,13 @@ async fn mode_loop(
                 press_any_key_to_continue().await;
             }
             RunMode::Export => {
-                export_deposit_accounts::export_deposit_accounts(withdrawal_private_key).await?;
+                if is_legacy() {
+                    export_deposit_accounts::legacy_export_deposit_accounts(withdrawal_private_key)
+                        .await?;
+                } else {
+                    export_deposit_accounts::export_deposit_accounts(withdrawal_private_key)
+                        .await?;
+                }
                 press_any_key_to_continue().await;
             }
             RunMode::CheckUpdate => {
@@ -112,7 +118,11 @@ async fn mode_loop(
             // if not in interactive mode, we only run once
             break;
         }
-        *mode = select_mode()?;
+        *mode = if is_legacy() {
+            legacy_select_mode()?
+        } else {
+            select_mode()?
+        };
     }
     Ok(())
 }
@@ -122,7 +132,7 @@ async fn press_any_key_to_continue() {
     let _ = tokio::io::AsyncReadExt::read(&mut tokio::io::stdin(), &mut [0u8]).await;
 }
 
-pub fn print_mainnet_warning() {
+pub fn print_legacy_warning() {
     let term = Term::stdout();
     let colored_message = format!(
         "{} {}",
