@@ -122,7 +122,7 @@ Copy private key and import account into metamask using this [guide](https://sup
      <img src="../assets/migrate/m12.png" width="600" alt="Mining CLI"></div>
 
 3. **Transfer in CLI**:
-To transfer ETH balance inside the CLI, type yes instead and select `#0` or your account of choice if you have several deposit accounts.
+To transfer ETH balance inside the CLI instead, type yes and select `#0` or your account of choice if you have several deposit accounts.
 
    <div align="center">
      <img src="../assets/migrate/m13.png" width="600" alt="Mining CLI"></div>
@@ -137,11 +137,10 @@ Approve transfer by typing `Yes`.
    <div align="center">
      <img src="../assets/migrate/m15.png" width="600" alt="Mining CLI"></div>
 
-6. **Transfer in CLI**:
 Repeat approval until ETH balance is insufficient. To end the process, press any key.
    <div align="center">
      <img src="../assets/migrate/m15.png" width="600" alt="Mining CLI"></div>
 
-After withdrawal process is done, you can proceed to upgrade CLI to resume mining on Base Network with Base ETH. Proceed by pressing any key as instructed by CLI.
+After withdrawal process is done, proceed by pressing any key as instructed by CLI.
 
 
