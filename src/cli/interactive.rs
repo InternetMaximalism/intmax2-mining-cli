@@ -57,6 +57,13 @@ fn address_duplication_check() -> anyhow::Result<()> {
 async fn select_or_create_config() -> anyhow::Result<()> {
     let network = get_network();
     let existing_indices = EnvConfig::get_existing_indices(network);
+    if existing_indices.is_empty() {
+        println!("No existing indices found. Please create a new config.");
+        let config = new_config(network).await?;
+        config.save_to_file(0)?;
+        config.export_to_env()?;
+        return Ok(());
+    }
 
     let mut items = Vec::new();
     for i in &existing_indices {
