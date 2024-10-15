@@ -1,9 +1,10 @@
-use std::str::FromStr;
+use std::{collections::HashMap, str::FromStr};
 
 use anyhow::bail;
 use console::style;
 use dialoguer::{Confirm, Input, Password, Select};
-use ethers::types::{H256, U256};
+use ethers::types::{Address, H256, U256};
+use strum::IntoEnumIterator as _;
 
 use crate::{
     external_api::contracts::utils::{get_address, get_balance_with_rpc},
@@ -266,6 +267,11 @@ async fn input_withdrawal_private_key(rpc_url: &str) -> anyhow::Result<H256> {
         let withdrawal_address = get_address(withdrawal_private_key);
         println!("Withdrawal Address: {:?}", withdrawal_address);
 
+        // duplication check
+        if is_withdrawal_address_duplicated(withdrawal_address)? {
+            continue;
+        }
+
         // non-balance check
         {
             let balance = get_balance_with_rpc(rpc_url, withdrawal_address).await?;
@@ -288,6 +294,27 @@ async fn input_withdrawal_private_key(rpc_url: &str) -> anyhow::Result<H256> {
             }
         }
     }
+}
+
+fn is_withdrawal_address_duplicated(withdrawal_addres: Address) -> anyhow::Result<bool> {
+    let mut address_to_network = HashMap::<Address, (Network, usize)>::new();
+    for network in Network::iter() {
+        for config_index in EnvConfig::get_existing_indices(network) {
+            let config = EnvConfig::load_from_file(network, config_index)?;
+            address_to_network.insert(config.withdrawal_address, (network, config_index));
+        }
+    }
+    if let Some((duplicated_network, duplicated_index)) = address_to_network.get(&withdrawal_addres)
+    {
+        let message = format!(
+            "Withdrawal address is duplicated as {} config #{}. Please use a different address.",
+            duplicated_network, duplicated_index
+        );
+        let colored_message = format!("{} {}", style("ERROR:").red().bold(), style(message).red());
+        println!("{}", colored_message);
+        return Ok(true);
+    }
+    Ok(false)
 }
 
 fn input_encryption(
