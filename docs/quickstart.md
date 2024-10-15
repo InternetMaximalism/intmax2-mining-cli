@@ -239,7 +239,6 @@ Repeat approval until ETH balance is insufficient. To end the process, press any
 
 After withdrawal process is done, proceed by pressing any key as instructed by CLI.
 
-
 ### Check Available CLI Updates
 
 1. **Select Mode**:
