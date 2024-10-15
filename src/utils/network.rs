@@ -54,6 +54,7 @@ pub fn is_legacy() -> bool {
     get_network() == Network::Mainnet || get_network() == Network::Holesky
 }
 
+// todo: change this to adapt to the Base network
 pub fn is_testnet() -> bool {
     get_network() != Network::Mainnet
 }

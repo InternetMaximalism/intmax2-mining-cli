@@ -1,5 +1,5 @@
 use clap::{arg, command, Parser};
-use cli::{console::print_error, run};
+use cli::{console::print_error, press_enter_to_continue, run};
 use dotenv::dotenv;
 use external_api::github::fetch_config_file_from_github;
 use simplelog::{Config, LevelFilter, WriteLogger};
@@ -55,6 +55,7 @@ async fn main() {
         Ok(_) => {}
         Err(e) => {
             print_error(format!("{}", e.to_string()));
+            press_enter_to_continue().await;
         }
     }
 }

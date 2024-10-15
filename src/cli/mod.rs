@@ -44,7 +44,7 @@ pub async fn run(mode: Option<RunMode>) -> anyhow::Result<()> {
 
     if is_legacy() {
         print_legacy_warning();
-        press_any_key_to_continue().await;
+        press_enter_to_continue().await;
     }
 
     let mut mode = if is_interactive {
@@ -96,11 +96,11 @@ async fn mode_loop(
             }
             RunMode::Claim => {
                 claim_loop(state, withdrawal_private_key).await?;
-                press_any_key_to_continue().await;
+                press_enter_to_continue().await;
             }
             RunMode::Exit => {
                 exit_loop(state, withdrawal_private_key).await?;
-                press_any_key_to_continue().await;
+                press_enter_to_continue().await;
             }
             RunMode::Export => {
                 if is_legacy() {
@@ -110,11 +110,11 @@ async fn mode_loop(
                     export_deposit_accounts::export_deposit_accounts(withdrawal_private_key)
                         .await?;
                 }
-                press_any_key_to_continue().await;
+                press_enter_to_continue().await;
             }
             RunMode::CheckUpdate => {
                 update::update()?;
-                press_any_key_to_continue().await;
+                press_enter_to_continue().await;
             }
         };
         if !is_interactive {
@@ -130,7 +130,7 @@ async fn mode_loop(
     Ok(())
 }
 
-async fn press_any_key_to_continue() {
+pub async fn press_enter_to_continue() {
     println!("Press Enter to continue...");
     let _ = tokio::io::AsyncReadExt::read(&mut tokio::io::stdin(), &mut [0u8]).await;
 }
