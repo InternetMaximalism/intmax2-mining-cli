@@ -213,7 +213,8 @@ These Terms are made in the English language. Any translations are provided for 
 If you have any questions or concerns about these Terms, please contact us at:
 
 - Email: support@intmax.io
-- Address:<br>
+- Address:
+  <br>
   Ryodan Systems AG<br>
   Gartenstrasse 6<br>
   6300 Zug<br>
