@@ -214,7 +214,7 @@ If you have any questions or concerns about these Terms, please contact us at:
 
 - Email: support@intmax.io
 - Address:
-  Ryodan Systems AG<br
+  Ryodan Systems AG<br>
   Gartenstrasse 6<br>
   6300 Zug<br>
   Switzerland
