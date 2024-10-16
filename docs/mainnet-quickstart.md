@@ -23,7 +23,7 @@ Before you begin, please ensure you have the following:
 
 ## Step-by-Step Instructions
 
-### Starting the Mining Process
+### Setting Up Mining CLI
 
 1.  **Lauching the CLI** Double-click on the mining-cli shown in this image to launch.
 
@@ -43,7 +43,47 @@ When you double-click the CLI, you'll see a screen like this:
 
 You can move the cursor with the arrow keys, select `mainnet` and press `Enter`.
 
-2. **Continue**:
+
+### Setting Up - For First Time Users
+
+1. **Enter Alchemy API key**: Select `Alchemy` and enter your API key which you obtained from [How to get your Alchemy API key](./alchemy.md) guide. Your API key will not be displayed. Press `Enter` after pasting it.
+
+<div align="center"><img src="../assets/mainnet-instruction/k1.png" width="600" alt="Mining CLI"></div>
+
+
+2. **Configure settings for the mining process**: Set `max gas price`, `mining unit`, and `mining times`. You can use the default values by pressing `Enter` or pressing `y`. You can also set your own values by pressing `n`, then entering the desired values. We recommend using the default values.
+
+<div align="center"><img src="../assets/mainnet-instruction/k3.png" width="600" alt="Mining CLI"></div>
+
+Here is the explanation of each setting:
+
+- **Max Gas Price**: The maximum gas price allowed when executing transactions. Setting a higher value will cause undesirable funds loss.
+- **Mining Unit**: The amount of ETH to send in one deposit. The default is 0.1 ETH.
+- **Mining Times**: Specifies how many times to mine. The default is 10 times for mainnet.
+
+3. **Enter Withdrawal Private Key**: Enter the private key of the address you'll use to withdraw ETH and receive ITX tokens. Your withdrawal private key will not be displayed. Press `Enter` after pasting it.
+
+<div align="center"><img src="../assets/mainnet-instruction/k4.png" width="600" alt="Mining CLI"></div>
+
+After entering the withdrawal private key, the address will be displayed. Confirm that the address is correct.
+
+*Note: It is recommended to use an empty wallet as your withdrawal address. Make sure not to deposit directly into this address from the deposit address that would be generated for you during mining.*
+
+4. **Choose whether to encrypt the private key**: Choose whether to encrypt the private key. Because the withdrawal private key will be stored in local storage, we highly recommend encrypting it. Press `y` or `Enter` to encrypt the private key, or `n` to store it in plain text.
+
+<div align="center"><img src="../assets/mainnet-instruction/k5.png" width="600" alt="Mining CLI"></div>
+
+5. **Enter a password for the private key**: If you choose to encrypt the private key, you'll be asked to enter a password. Please enter a password of at least 12 characters.
+
+<div align="center"><img src="../assets/mainnet-instruction/k6.png" width="600" alt="Mining CLI"></div>
+
+You would be shown a prompt saying only claiming and withdrawal is allowed for now. Press enter to be taken to the next screen.
+
+<div align="center"><img src="../assets/mainnet-instruction/k9.png" width="600" alt="Mining CLI"></div>
+
+### Setting Up - For Existing Users
+
+1. **Continue**:
 After selecting `mainnet`, you'll see a screen like this:
 
    <div align="center">
@@ -57,7 +97,7 @@ Here is the explanation of each setting:
 - **Overwrite**: This allows you to clear existing settings and set new ones.
 - **Modify**: Modify some of the existing settings and change them, e.g, change withdrawal private key. Note that when using this method, mining times and mining unit cannot be changed.
 
-3. **Enter password for the private key**:
+2. **Enter password for the private key**:
 If you choose to encrypt your password during setup, you'll be prompted to enter it. This step is optional and won't appear if you didn't set a password.
 
    <div align="center">
@@ -72,7 +112,6 @@ Mining has transitioned from Ethereum Mainnet to Base Network, hence you would n
 Be rest assured that all your assets and ITX token are safe. To claim and retrieve the assets from Ethereum Mainnet, press `Enter` to continue.
 
 ### Claiming ITX Tokens
-
 The deposits eligible for ITX tokens are confirmed at UTC 0:00 on the Monday two weeks after mining. After that, you claim ITX tokens.
 
 1. **Select Mode**:

@@ -23,6 +23,8 @@ You can find detailed information on how to use the CLI in the following documen
 
 ### [Detailed Documents](docs/developer.md)
 
+### [Terms of Use](docs/terms.md)
+
 ## How It Works
 
 <div align="center">
