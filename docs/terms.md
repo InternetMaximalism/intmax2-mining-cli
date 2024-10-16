@@ -8,9 +8,9 @@ By downloading, installing, accessing, or using the Ryodan Systems AG CLI Miner 
 
 ### 2. Company Information
 
-Ryodan Systems AG
-Gartenstrasse 6
-6300 Zug
+Ryodan Systems AG<br>
+Gartenstrasse 6<br>
+6300 Zug<br>
 Switzerland
 
 ### 3. Eligibility
@@ -214,7 +214,7 @@ If you have any questions or concerns about these Terms, please contact us at:
 
 - Email: support@intmax.io
 - Address:
-  Ryodan Systems AG
-  Gartenstrasse 6
-  6300 Zug
+  Ryodan Systems AG<br
+  Gartenstrasse 6<br>
+  6300 Zug<br>
   Switzerland
