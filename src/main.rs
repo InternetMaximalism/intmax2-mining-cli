@@ -1,5 +1,5 @@
 use clap::{arg, command, Parser};
-use cli::{console::print_error, run};
+use cli::{console::print_error, press_enter_to_continue, run};
 use dotenv::dotenv;
 use external_api::github::fetch_config_file_from_github;
 use simplelog::{Config, LevelFilter, WriteLogger};
@@ -39,20 +39,35 @@ async fn main() {
     if !is_interactive {
         dotenv().ok();
     }
-    let log_file_path = get_log_file_path().expect("Failed to get log file path");
-    create_file_with_content(&log_file_path, &[]).expect("Failed to create log file");
-    let log_file = File::create(log_file_path).unwrap();
-    WriteLogger::init(LevelFilter::Info, Config::default(), log_file).unwrap();
 
-    fetch_config_file_from_github()
-        .await
-        .expect("Failed to fetch config file from GitHub");
+    match set_up().await {
+        Ok(_) => {}
+        Err(e) => {
+            print_error(format!("Error during setup: {}", e.to_string()));
+            press_enter_to_continue().await;
+            return;
+        }
+    }
 
     // run the CLI
     match run(mode).await {
         Ok(_) => {}
         Err(e) => {
             print_error(format!("{}", e.to_string()));
+            press_enter_to_continue().await;
         }
     }
+}
+
+async fn set_up() -> anyhow::Result<()> {
+    let log_file_path = get_log_file_path()?;
+    create_file_with_content(&log_file_path, &[])?;
+    let log_file = File::create(log_file_path)?;
+    WriteLogger::init(LevelFilter::Info, Config::default(), log_file)?;
+
+    let does_not_fetch_config = std::env::var("NOT_FETCH_CONFIG").is_ok();
+    if !does_not_fetch_config {
+        fetch_config_file_from_github().await?;
+    }
+    Ok(())
 }

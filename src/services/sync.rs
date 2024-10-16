@@ -4,7 +4,7 @@ use crate::{
             events::get_deposit_leaf_inserted_event,
             int1::{get_deposit_root, get_deposit_root_exits},
         },
-        github::fetch_latest_tree_from_github,
+        github::{fetch_latest_tree_from_github, BinTrees},
     },
     utils::{
         bin_parser::{BinDepositTree, BinEligibleTree, DepositTreeInfo, EligibleTreeInfo},
@@ -19,96 +19,140 @@ use chrono::{NaiveDateTime, Utc};
 use log::{info, warn};
 use tokio::time::sleep;
 
+#[derive(Debug, thiserror::Error)]
+pub enum Error {
+    #[error("Network Error: {}", _0)]
+    NetworkError(String),
+    #[error("Tree Deserialization Error {}", _0)]
+    TreeDeserializationError(String),
+    #[error("Tree Root Sync Error {}", _0)]
+    TreeRootSyncError(String),
+    #[error("Sync Deposit Tree From Events Error {}", _0)]
+    SyncDepositTreeFromEventsError(String),
+    #[error("Max Sync Trials Exceeded")]
+    MaxSyncTrialsExceeded,
+}
+
 const MAX_TRY_FETCH_TREE: usize = 10;
 
 pub async fn sync_trees(
     last_deposit_block_number: &mut u64,
     last_update: &mut NaiveDateTime,
     deposit_hash_tree: &mut DepositHashTree,
-    eligible_tree: &mut EligibleTreeWithMap,
-) -> anyhow::Result<()> {
-    let now = Utc::now().naive_utc();
-    let sync_tree_data_interval_in_sec = Settings::load()?.api.sync_tree_data_interval_in_sec;
-    if now.signed_duration_since(*last_update)
-        <= chrono::Duration::seconds(sync_tree_data_interval_in_sec as i64)
-    {
-        // sync deposit tree only
-        *last_deposit_block_number =
-            sync_to_latest_deposit_tree(deposit_hash_tree, *last_deposit_block_number).await?;
-        info!(
-            "No need to fetch latest trees from GitHub, last update: {}, deposit_len: {}, eligible_len: {}, last deposit block number: {}",
-            last_update, deposit_hash_tree.tree.len(), eligible_tree.tree.len(), last_deposit_block_number
-        );
-        return Ok(());
-    }
-    let mut try_number = 0;
-    loop {
-        if try_number > MAX_TRY_FETCH_TREE {
-            anyhow::bail!("Exceeded MAX_TRY_FETCH_TREE");
-        }
-        let result = fetch_latest_tree_from_github(*last_update).await?;
-        if let Some((bin_deposit_tree, bin_eligible_tree, new_last_update)) = result {
-            // in the case that new trees found in github
-            match validate_fetched_tree(bin_deposit_tree, bin_eligible_tree).await {
-                // in the case that the fetched tree is valid
-                Ok((deposit_tree_info, eligible_tree_info)) => {
-                    *last_update = new_last_update;
-                    *deposit_hash_tree = deposit_tree_info.tree;
-                    *eligible_tree = eligible_tree_info.tree;
+    short_term_eligible_tree: &mut EligibleTreeWithMap,
+    long_term_eligible_tree: &mut EligibleTreeWithMap,
+) -> Result<(), Error> {
+    let sync_tree_data_interval_in_sec =
+        Settings::load().unwrap().api.sync_tree_data_interval_in_sec;
 
-                    info!(
-                "Fetched latest trees from GitHub, last update: {}, deposit_len: {}, deposit_root: {}, eligible_len: {}, eligible_root: {}, last deposit block number: {}",
-                last_update, deposit_hash_tree.tree.len(), deposit_hash_tree.get_root(),  eligible_tree.tree.len(),eligible_tree.get_root(), last_deposit_block_number
-            );
-                    break;
+    let now = Utc::now().naive_utc();
+
+    // if last update is more than sync_tree_data_interval_in_sec, fetch latest trees from github
+    if now.signed_duration_since(*last_update)
+        > chrono::Duration::seconds(sync_tree_data_interval_in_sec as i64)
+    {
+        let mut try_number = 0;
+        loop {
+            if try_number > MAX_TRY_FETCH_TREE {
+                return Err(Error::MaxSyncTrialsExceeded);
+            }
+            // fetch trees from github
+            let BinTrees {
+                bin_deposit_tree,
+                bin_short_term_eligible_tree,
+                bin_long_term_eligible_tree,
+                latest_update: _,
+            } = fetch_latest_tree_from_github(last_update.date())
+                .await
+                .map_err(|e| {
+                    Error::NetworkError(format!("Failed to fetch latest tree from github: {}", e))
+                })?;
+
+            // retry if TreeRootSyncError occurs
+            let update = || async {
+                if let Some(bin_deposit_tree) = bin_deposit_tree {
+                    *deposit_hash_tree =
+                        parse_and_validate_bin_deposit_tree(bin_deposit_tree).await?;
                 }
-                // in the case that the fetched tree is invalid
+                if let Some(bin_short_term_eligible_tree) = bin_short_term_eligible_tree {
+                    *short_term_eligible_tree =
+                        parse_and_validate_bin_eligible_tree(true, bin_short_term_eligible_tree)
+                            .await?;
+                }
+                if let Some(bin_long_term_eligible_tree) = bin_long_term_eligible_tree {
+                    *long_term_eligible_tree =
+                        parse_and_validate_bin_eligible_tree(false, bin_long_term_eligible_tree)
+                            .await?;
+                }
+                Result::<(), Error>::Ok(())
+            };
+            match update().await {
+                Ok(()) => break,
                 Err(e) => {
                     warn!("Feched tree is invalid in try {}: {}", try_number, e);
-                    // retry after sleep
-                    sleep(std::time::Duration::from_secs(30)).await;
                     try_number += 1;
-                    continue;
+                    sleep(std::time::Duration::from_secs(30)).await;
                 }
             }
-        } else {
-            // in the case that new trees are not found.
-            *last_deposit_block_number =
-                sync_to_latest_deposit_tree(deposit_hash_tree, *last_deposit_block_number).await?;
-            *last_update = now; // update last_update to now
-            info!(
-                "No new trees found on GitHub, last update: {}, deposit_len: {}, eligible_len: {}, last deposit block number: {}",
-                last_update, deposit_hash_tree.tree.len(), eligible_tree.tree.len(), last_deposit_block_number
-            );
-            break;
         }
     }
+    // sync deposit tree only
+    *last_deposit_block_number =
+        sync_to_latest_deposit_tree(deposit_hash_tree, *last_deposit_block_number)
+            .await
+            .map_err(|e| {
+                Error::SyncDepositTreeFromEventsError(format!("Failed to sync deposit tree: {}", e))
+            })?;
+    *last_update = now; // update last_update to now
     Ok(())
 }
 
-async fn validate_fetched_tree(
+async fn parse_and_validate_bin_deposit_tree(
     bin_deposit_tree: BinDepositTree,
-    bin_eligible_tree: BinEligibleTree,
-) -> anyhow::Result<(DepositTreeInfo, EligibleTreeInfo)> {
+) -> Result<DepositHashTree, Error> {
     let deposit_tree_info: DepositTreeInfo = bin_deposit_tree
         .try_into()
-        .map_err(|e| anyhow::anyhow!("deposit tree deseiarize error {}", e))?;
+        .map_err(|e: anyhow::Error| Error::TreeDeserializationError(e.to_string()))?;
+    // check roots
+    let deposit_root_exists = get_deposit_root_exits(deposit_tree_info.root)
+        .await
+        .map_err(|e| Error::NetworkError(format!("Failed to get deposit root: {}", e)))?;
+    if !deposit_root_exists {
+        return Err(Error::TreeRootSyncError(format!(
+            "Deposit tree rood does not exist on chain: {}",
+            deposit_tree_info.root
+        )));
+    }
+    Ok(deposit_tree_info.tree)
+}
+
+async fn parse_and_validate_bin_eligible_tree(
+    is_short_term: bool,
+    bin_eligible_tree: BinEligibleTree,
+) -> Result<EligibleTreeWithMap, Error> {
     let eligible_tree_info: EligibleTreeInfo = bin_eligible_tree
         .try_into()
-        .map_err(|e| anyhow::anyhow!("eligible tree deseiarize error {}", e))?;
-    // check roots
-    let deposit_root_exists = get_deposit_root_exits(deposit_tree_info.root).await?;
-    ensure!(
-        deposit_root_exists,
-        "Deposit root does not exist on chain: {}",
-        deposit_tree_info.root
-    );
-    let onchain_eligible_root = crate::external_api::contracts::minter::get_eligible_root().await?;
-    ensure!(
-        onchain_eligible_root == eligible_tree_info.root,
-        "Eligible tree rood does not match"
-    );
-    Ok((deposit_tree_info, eligible_tree_info))
+        .map_err(|e: anyhow::Error| Error::TreeDeserializationError(e.to_string()))?;
+    let onchain_eligible_root = if is_short_term {
+        crate::external_api::contracts::minter::get_short_term_eligible_root()
+            .await
+            .map_err(|e| {
+                Error::NetworkError(format!("Failed to get short term eligible root: {}", e))
+            })?
+    } else {
+        crate::external_api::contracts::minter::get_long_term_eligible_root()
+            .await
+            .map_err(|e| {
+                Error::NetworkError(format!("Failed to get long term eligible root: {}", e))
+            })?
+    };
+    if onchain_eligible_root != eligible_tree_info.root {
+        return Err(Error::TreeRootSyncError(format!(
+            "Eligible tree rood does not match. Onchain: {:?}, Github {:?}",
+            onchain_eligible_root, eligible_tree_info.root
+        )));
+    }
+    Ok(eligible_tree_info.tree)
 }
 
 async fn sync_to_latest_deposit_tree(
@@ -170,14 +214,16 @@ mod tests {
     #[ignore]
     async fn sync_to_latest_deposit_tree() {
         let mut deposit_hash_tree = DepositHashTree::new();
-        let mut eligible_tree = EligibleTreeWithMap::new();
+        let mut short_term_eligible_tree = EligibleTreeWithMap::new();
+        let mut long_term_eligible_tree = EligibleTreeWithMap::new();
         let mut last_deposit_block_number = 0;
         let mut last_update = chrono::NaiveDateTime::default();
         super::sync_trees(
             &mut last_deposit_block_number,
             &mut last_update,
             &mut deposit_hash_tree,
-            &mut eligible_tree,
+            &mut short_term_eligible_tree,
+            &mut long_term_eligible_tree,
         )
         .await
         .unwrap();

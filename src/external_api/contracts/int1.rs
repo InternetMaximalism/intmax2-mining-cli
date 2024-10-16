@@ -17,7 +17,7 @@ use super::{
     utils::{get_client, get_client_with_signer},
 };
 
-abigen!(Int1, "abi/Int1.json",);
+abigen!(Int1, "abi/Int1L.json",);
 
 pub async fn get_int1_contract() -> Result<int_1::Int1<Provider<Http>>, BlockchainError> {
     let settings = crate::utils::config::Settings::load().unwrap();

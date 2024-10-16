@@ -30,6 +30,7 @@ pub enum ClaimStep {
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ClaimStatus {
+    pub is_short_term: bool,
     pub next_step: ClaimStep,
     pub witness: Vec<ClaimInnerValue>,
     pub plonlky2_proof: Option<ProofWithPublicInputs<F, C, D>>,

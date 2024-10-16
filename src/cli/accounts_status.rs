@@ -25,7 +25,7 @@ pub async fn accounts_status(
     let withdrawal_balance = get_balance(withdrawal_address).await?;
     let withdrawal_token_balance = get_token_balance(withdrawal_address).await?;
     println!(
-        "Withdrawal address(don’t deposit money to this): {} {} ETH {} ITX",
+        "Withdrawal address(don’t deposit Ether to this): {} {} ETH {} ITX",
         withdrawal_address,
         pretty_format_u256(withdrawal_balance),
         pretty_format_u256(withdrawal_token_balance),
@@ -53,9 +53,9 @@ pub async fn accounts_status(
             is_qualified,
             assets_status.senders_deposits.len(),
             mining_times,
-            pretty_format_u256(assets_status.claimable_amount)
+            pretty_format_u256(assets_status.short_term_claimable_amount)
         );
         key_number += 1;
-        total_claimable_amount += assets_status.claimable_amount;
+        total_claimable_amount += assets_status.short_term_claimable_amount;
     }
 }

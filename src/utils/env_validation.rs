@@ -5,7 +5,7 @@ pub fn get_allowed_mining_times() -> Vec<u64> {
     if is_testnet() {
         vec![1, 5, 10, 100]
     } else {
-        vec![10, 100]
+        vec![1, 10, 100]
     }
 }
 

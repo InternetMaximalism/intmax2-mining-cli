@@ -19,6 +19,7 @@ use crate::{
 
 pub async fn claim_tokens(
     claim_key: H256,
+    is_short_term: bool,
     claims: &[MiningClaim],
     pis: ClaimPublicInputs,
     proof: &str,
@@ -46,9 +47,14 @@ pub async fn claim_tokens(
 
     await_until_low_gas_price().await?;
     let minter = get_minter_contract_with_signer(claim_key).await?;
-    let tx = minter.claim_tokens(mint_claims.clone(), pis.clone(), proof.clone());
+    let tx = minter.claim_tokens(
+        is_short_term,
+        mint_claims.clone(),
+        pis.clone(),
+        proof.clone(),
+    );
     info!("Calling claim_tokens: tx {:?}", tx);
-    let tx_hash = handle_contract_call(tx, claim_address, "claim", "claim").await?;
-    print_log(format!("Claimed with tx hash: {:?}", tx_hash));
+    let _tx_hash = handle_contract_call(tx, claim_address, "claim", "claim").await?;
+    print_log(format!("Successfully claimed"));
     Ok(())
 }

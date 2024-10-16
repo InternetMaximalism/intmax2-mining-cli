@@ -31,7 +31,7 @@ where
     Ok(private_data)
 }
 
-fn keccak256_hash(input: &str) -> [u8; 32] {
+pub fn keccak256_hash(input: &str) -> [u8; 32] {
     let mut hasher = Keccak256::new();
     hasher.update(input.as_bytes());
     let result = hasher.finalize();

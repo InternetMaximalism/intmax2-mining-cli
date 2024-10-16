@@ -22,7 +22,6 @@ pub fn derive_salt_from_private_key_nonce(private_key: H256, nonce: u64) -> Salt
 }
 
 /// Get the public key from a private key
-/// TODO: Make it compatible with intmax2's specs.
 pub fn derive_pubkey_from_private_key(private_key: H256) -> U256 {
     let deposit_salt_prefix =
         H256::from_str("0xbf21c6520d666a4167f35c091393809e314f62a8e5cb1c166dd4dcac3abe53ad")

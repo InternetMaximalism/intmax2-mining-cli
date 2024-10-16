@@ -5,7 +5,7 @@ use ethers::{
     middleware::SignerMiddleware,
     providers::{Http, Middleware, Provider},
     signers::{LocalWallet, Signer, Wallet},
-    types::{Address, H256, U256},
+    types::{Address, Block, H256, U256},
     utils::hex::ToHex,
 };
 use log::info;
@@ -65,7 +65,6 @@ pub fn get_address(private_key: H256) -> Address {
     wallet.address()
 }
 
-// on chain queries
 pub async fn get_account_nonce(address: Address) -> Result<u64, BlockchainError> {
     info!("get_account_nonce");
     let client = get_client().await?;
@@ -78,6 +77,18 @@ pub async fn get_account_nonce(address: Address) -> Result<u64, BlockchainError>
 pub async fn get_balance(address: Address) -> Result<U256, BlockchainError> {
     info!("get_balance");
     let client = get_client().await?;
+    let balance = with_retry(|| async { client.get_balance(address, None).await })
+        .await
+        .map_err(|_| BlockchainError::NetworkError("failed to get balance".to_string()))?;
+    Ok(balance)
+}
+
+pub async fn get_balance_with_rpc(
+    rpc_url: &str,
+    address: Address,
+) -> Result<U256, BlockchainError> {
+    info!("get_balance");
+    let client = get_client_with_rpc_url(rpc_url).await?;
     let balance = with_retry(|| async { client.get_balance(address, None).await })
         .await
         .map_err(|_| BlockchainError::NetworkError("failed to get balance".to_string()))?;
@@ -114,6 +125,15 @@ pub async fn get_tx_receipt(
         tokio::time::sleep(std::time::Duration::from_secs(10)).await;
         loop_count += 1;
     }
+}
+
+pub async fn get_block(block_number: u64) -> Result<Option<Block<H256>>, BlockchainError> {
+    info!("get_block");
+    let client = get_client().await.unwrap();
+    let block = with_retry(|| async { client.get_block(block_number).await })
+        .await
+        .map_err(|_| BlockchainError::NetworkError("failed to get block".to_string()))?;
+    Ok(block)
 }
 
 pub fn u256_as_bytes_be(u256: ethers::types::U256) -> [u8; 32] {

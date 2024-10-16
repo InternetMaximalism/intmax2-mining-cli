@@ -6,6 +6,7 @@ use intmax2_zkp::ethereum_types::u32limb_trait::U32LimbTrait;
 use log::info;
 use mining_circuit_v1::withdrawal::simple_withraw_circuit::SimpleWithdrawalPublicInputs;
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use std::str::FromStr;
 
 use crate::{
@@ -29,7 +30,7 @@ pub struct SubmitWithdrawalInput {
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SubmitWithdrawalSuccess {
-    pub transaction_hash: String,
+    pub withdrawal_id: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -39,44 +40,133 @@ enum SumbitWithdrawalResponse {
     Error(IntmaxErrorResponse),
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct QueryWithdrawalSuccess {
+    pub status: String,
+    pub transaction_hash: Option<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(untagged)]
+enum QueryWithdrawalResponse {
+    Sucess(QueryWithdrawalSuccess),
+    Error(IntmaxErrorResponse),
+}
+
+async fn start_withdrawal(
+    pis: SimpleWithdrawalPublicInputs,
+    proof: &str,
+) -> Result<String, IntmaxError> {
+    let settings = Settings::load().unwrap();
+    let input = SubmitWithdrawalInput {
+        public_inputs: pis,
+        proof: "0x".to_string() + proof, // add 0x prefix
+    };
+    let url = format!("{}/submit-proof", settings.api.withdrawal_server_url);
+    info!("Submitting withdrawal to {}, body: {:?}", url, input);
+    let response = with_retry(|| async {
+        reqwest::Client::new()
+            .post(url.clone())
+            .json(&input)
+            .send()
+            .await
+    })
+    .await
+    .map_err(|_| IntmaxError::NetworkError("failed to request withdrawal server".to_string()))?;
+    let response: Value = response.json().await.map_err(|e| {
+        IntmaxError::SerializeError(format!(
+            "failed to parse response as json: {}",
+            e.to_string()
+        ))
+    })?;
+    let response: SumbitWithdrawalResponse =
+        serde_json::from_value(response.clone()).map_err(|_| {
+            IntmaxError::SerializeError(format!("failed to parse response: {}", response))
+        })?;
+
+    match response {
+        SumbitWithdrawalResponse::Sucess(success) => Ok(success.withdrawal_id),
+        SumbitWithdrawalResponse::Error(error) => Err(IntmaxError::ServerError(error)),
+    }
+}
+
+async fn query_withdrawal(withdrawal_id: &str) -> Result<QueryWithdrawalSuccess, IntmaxError> {
+    let settings = Settings::load().unwrap();
+    let url = format!(
+        "{}/{}/proof-status",
+        settings.api.withdrawal_server_url, withdrawal_id
+    );
+    let response = with_retry(|| async { reqwest::Client::new().get(url.clone()).send().await })
+        .await
+        .map_err(|_| IntmaxError::NetworkError("failed to query withdrawal server".to_string()))?;
+    let response: Value = response.json().await.map_err(|e| {
+        IntmaxError::SerializeError(format!(
+            "failed to parse response as json: {}",
+            e.to_string()
+        ))
+    })?;
+    let response: QueryWithdrawalResponse =
+        serde_json::from_value(response.clone()).map_err(|_| {
+            IntmaxError::SerializeError(format!("failed to parse response: {}", response))
+        })?;
+
+    match response {
+        QueryWithdrawalResponse::Sucess(success) => Ok(success),
+        QueryWithdrawalResponse::Error(error) => Err(IntmaxError::ServerError(error)),
+    }
+}
+
 pub async fn submit_withdrawal(
     pis: SimpleWithdrawalPublicInputs,
     proof: &str,
 ) -> Result<H256, IntmaxError> {
     info!("submit_withdrawal with args {:?} proof {}", pis, proof);
-    let settings = Settings::load().unwrap();
     let tx_hash = if get_network() == Network::Localnet {
         let tx_hash = localnet_withdrawal(pis, proof).await.unwrap();
         tx_hash
     } else {
-        let input = SubmitWithdrawalInput {
-            public_inputs: pis,
-            proof: "0x".to_string() + proof, // add 0x prefix
-        };
-        info!(
-            "Submitting withdrawal to {}, body: {:?}",
-            settings.api.withdrawal_server_url, input
-        );
-        let response = with_retry(|| async {
-            reqwest::Client::new()
-                .post(settings.api.withdrawal_server_url.clone())
-                .json(&input)
-                .send()
-                .await
-        })
-        .await
-        .map_err(|_| {
-            IntmaxError::NetworkError("failed to request withdrawal server".to_string())
-        })?;
-        let response: SumbitWithdrawalResponse = response.json().await.map_err(|e| {
-            IntmaxError::SerializeError(format!("failed to parse response: {}", e.to_string()))
-        })?;
-        match response {
-            SumbitWithdrawalResponse::Sucess(success) => H256::from_str(&success.transaction_hash)
-                .map_err(|_| {
-                    IntmaxError::SerializeError("failed to parse transaction hash".to_string())
-                })?,
-            SumbitWithdrawalResponse::Error(error) => Err(IntmaxError::ServerError(error))?,
+        let withdrawal_id = start_withdrawal(pis, proof).await?;
+        let max_try = 5;
+        let mut try_count = 0;
+        loop {
+            try_count += 1;
+            if try_count > max_try {
+                return Err(IntmaxError::InternalError("withdrawal timeout".to_string()));
+            }
+            let status = query_withdrawal(&withdrawal_id).await?;
+            match status.status.as_str() {
+                "pending" => {
+                    info!("withdrawal is pending");
+                    tokio::time::sleep(std::time::Duration::from_secs(60)).await;
+                }
+                "processing" => {
+                    info!("withdrawal is processing");
+                    tokio::time::sleep(std::time::Duration::from_secs(60)).await;
+                }
+                "completed" => {
+                    let tx_hash = H256::from_str(&status.transaction_hash.unwrap()).unwrap();
+                    break tx_hash;
+                }
+                "failed" => {
+                    return Err(IntmaxError::InternalError(format!(
+                        "withdrawal failed: {}",
+                        status.status
+                    )));
+                }
+                "not_found" => {
+                    return Err(IntmaxError::InternalError(format!(
+                        "withdrawal not found: {}",
+                        status.status
+                    )));
+                }
+                _ => {
+                    return Err(IntmaxError::InternalError(format!(
+                        "unexpected status: {}",
+                        status.status
+                    )));
+                }
+            }
         }
     };
     Ok(tx_hash)

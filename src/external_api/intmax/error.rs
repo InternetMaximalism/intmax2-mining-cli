@@ -6,7 +6,7 @@ use serde_json::Value;
 pub struct IntmaxErrorResponse {
     pub code: String,
     pub message: String,
-    pub errors: Value,
+    pub errors: Option<Value>,
 }
 
 #[derive(thiserror::Error, Debug)]

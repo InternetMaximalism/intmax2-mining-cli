@@ -17,7 +17,7 @@ use super::{
     utils::{get_client, get_client_with_signer},
 };
 
-abigen!(MinterV1, "abi/MinterV1.json",);
+abigen!(MinterV1, "abi/MinterV1L.json",);
 
 pub async fn get_minter_contract() -> Result<minter_v1::MinterV1<Provider<Http>>, BlockchainError> {
     let settings = crate::utils::config::Settings::load().unwrap();
@@ -40,9 +40,9 @@ pub async fn get_minter_contract_with_signer(
     Ok(contract)
 }
 
-pub async fn get_eligible_root() -> Result<Bytes32, BlockchainError> {
+pub async fn get_short_term_eligible_root() -> Result<Bytes32, BlockchainError> {
     let minter = get_minter_contract().await?;
-    let root = with_retry(|| async { minter.eligible_tree_root().call().await })
+    let root = with_retry(|| async { minter.short_term_eligible_tree_root().call().await })
         .await
         .map_err(|_| {
             BlockchainError::NetworkError("failed to call eligible_tree_root in minter".to_string())
@@ -50,10 +50,35 @@ pub async fn get_eligible_root() -> Result<Bytes32, BlockchainError> {
     Ok(Bytes32::from_bytes_be(&root))
 }
 
-pub async fn get_claim_nullifier_exists(nullifier: Bytes32) -> Result<bool, BlockchainError> {
+pub async fn get_long_term_eligible_root() -> Result<Bytes32, BlockchainError> {
+    let minter = get_minter_contract().await?;
+    let root = with_retry(|| async { minter.long_term_eligible_tree_root().call().await })
+        .await
+        .map_err(|_| {
+            BlockchainError::NetworkError("failed to call eligible_tree_root in minter".to_string())
+        })?;
+    Ok(Bytes32::from_bytes_be(&root))
+}
+
+pub async fn get_short_term_claim_nullifier_exists(
+    nullifier: Bytes32,
+) -> Result<bool, BlockchainError> {
     let minter = get_minter_contract().await?;
     let nullifier: [u8; 32] = nullifier.to_bytes_be().try_into().unwrap();
-    let exists = with_retry(|| async { minter.nullifiers(nullifier).call().await })
+    let exists = with_retry(|| async { minter.short_term_nullifiers(nullifier).call().await })
+        .await
+        .map_err(|_| {
+            BlockchainError::NetworkError("failed to call nullifiers in minter".to_string())
+        })?;
+    Ok(exists)
+}
+
+pub async fn get_long_term_claim_nullifier_exists(
+    nullifier: Bytes32,
+) -> Result<bool, BlockchainError> {
+    let minter = get_minter_contract().await?;
+    let nullifier: [u8; 32] = nullifier.to_bytes_be().try_into().unwrap();
+    let exists = with_retry(|| async { minter.long_term_nullifiers(nullifier).call().await })
         .await
         .map_err(|_| {
             BlockchainError::NetworkError("failed to call nullifiers in minter".to_string())
