@@ -19,7 +19,7 @@ You can find detailed information on how to use the CLI in the following documen
 
 ### [How To Migrate From Ethereum Mainnet To Base](docs/migrate.md)
 
-### [How To Use On Base)](docs/mainnet-quickstart.md)
+### [How To Use On Base](docs/mainnet-quickstart.md)
 
 ### [How To Use On Base-Sepolia(Testnet)](docs/quickstart.md)
 
