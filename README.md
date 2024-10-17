@@ -12,21 +12,21 @@ For more information on mining, please refer to [this article](https://hackmd.io
 
 - Memory: 8GB or more
 - CPU: 4 cores or more, with a clock speed of 2 GHz or higher
+  _Note: Some Windows version might have issues while mining. We're working to solve this issue. We'll announce as soon as we solve it._
 
 ## Quick Links
 
 You can find detailed information on how to use the CLI in the following documents:
 
+### [Quick Start for Beginners - Base Mainnet](docs/mainnet-quickstart.md)
+
+### [Quick Start for Beginners - Base Testnet](docs/quickstart.md)
+
 ### [How To Migrate From Ethereum Mainnet To Base](docs/migrate.md)
-
-### [How To Use On Base](docs/mainnet-quickstart.md)
-
-### [How To Use On Base-Sepolia(Testnet)](docs/quickstart.md)
 
 ### [Detailed Documents](docs/developer.md)
 
 ### [Terms of Use](docs/terms.md)
-
 
 ## How It Works
 
@@ -82,7 +82,6 @@ Here are examples of actions that would make an address **ineligible** for rewar
 - Deposit 1.01 ETH into deposit address #0, and a total of 0.98 ETH is withdrawn to the withdrawal address before mining ends. Then, deposit this amount into deposit address #1 and mine again.
 
 - Deposit 1.1 ETH into deposit address #0. After mining is completed, 0.09 ETH remains in deposit address #0, which is then sent to the withdrawal address.
-
 
 <div align="center">
   <img src="assets/diagram2.jpg" width="800" alt="Mining diagram">
