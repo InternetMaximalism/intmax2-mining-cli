@@ -93,6 +93,7 @@ async fn mode_loop(
                     config.mining_times,
                 )
                 .await?;
+                press_enter_to_continue().await;
             }
             RunMode::Claim => {
                 claim_loop(state, withdrawal_private_key).await?;
