@@ -2,7 +2,11 @@
 
 This guide explains how to migrate from mining on the Ethereum Mainnet to Base the using the intmax2 mining CLI. The instructions below describe the process.
 
-❗ Note: The tokens you receive through mining on the mainnet currently cannot be transferred to other addresses, but this feature will be enabled in the future.
+❗ Note: 
+- The tokens you receive through mining on the mainnet currently cannot be transferred to other addresses, but this feature will be enabled in the future.
+- Users who have initiated the 10 deposit process on Mainnet but haven't completed it should finalize it soon, as incomplete deposits will result in reduced allocations. 
+- The mining process can take up to 6 days, and Mainnet mining will stop one week after the migration to Base. Please avoid making new deposits on Mainnet during this time.
+
 
 🆘 Support: please join this with an anonymous account
 https://discord.gg/nByKNNhyvn
