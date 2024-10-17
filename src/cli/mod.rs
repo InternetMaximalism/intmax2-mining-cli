@@ -4,6 +4,7 @@ use configure::recover_withdrawal_private_key;
 use console::initialize_console;
 use ethers::types::H256;
 use mode_selection::{legacy_select_mode, select_mode};
+use term_of_use::make_agreement;
 
 use crate::{
     external_api::contracts::utils::get_address,
@@ -25,8 +26,11 @@ pub mod console;
 pub mod export_deposit_accounts;
 pub mod interactive;
 pub mod mode_selection;
+pub mod term_of_use;
 
 pub async fn run(mode: Option<RunMode>) -> anyhow::Result<()> {
+    make_agreement()?;
+
     let is_interactive = mode.is_none();
 
     check_avaliability().await?;
