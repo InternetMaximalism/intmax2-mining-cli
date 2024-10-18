@@ -8,11 +8,11 @@ use ethers::{providers::Middleware as _, types::U256};
 pub fn get_allowed_mining_times() -> Vec<u64> {
     let network = get_network();
     if network == Network::BaseSepolia {
-        vec![1, 5, 10, 100]
+        vec![1, 5, 10]
     } else if network == Network::Base {
-        vec![1, 10, 100]
+        vec![1, 10]
     } else if network == Network::Holesky {
-        vec![1, 5, 10, 100]
+        vec![1, 5, 10]
     } else {
         vec![10, 100]
     }
