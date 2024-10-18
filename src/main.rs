@@ -44,7 +44,7 @@ async fn main() {
         Ok(_) => {}
         Err(e) => {
             print_error(format!("Error during setup: {}", e.to_string()));
-            press_enter_to_continue().await;
+            press_enter_to_continue();
             return;
         }
     }
@@ -54,7 +54,7 @@ async fn main() {
         Ok(_) => {}
         Err(e) => {
             print_error(format!("{}", e.to_string()));
-            press_enter_to_continue().await;
+            press_enter_to_continue();
         }
     }
 }

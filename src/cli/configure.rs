@@ -136,8 +136,10 @@ async fn input_rpc_url() -> anyhow::Result<String> {
         };
         match validate_rpc_url(&rpc_url).await {
             Ok(_) => break Ok(rpc_url),
-            Err(_) => {
-                println!("Invalid RPC URL");
+            Err(e) => {
+                let colored_message =
+                    format!("{}: {}", style("Invalid RPC URL").red(), e.to_string());
+                println!("{}", colored_message);
             }
         }
     }

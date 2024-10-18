@@ -1,3 +1,5 @@
+use std::io::{self, Read as _};
+
 use ::console::{style, Term};
 use availability::check_avaliability;
 use configure::recover_withdrawal_private_key;
@@ -48,7 +50,7 @@ pub async fn run(mode: Option<RunMode>) -> anyhow::Result<()> {
 
     if is_legacy() {
         print_legacy_warning();
-        press_enter_to_continue().await;
+        press_enter_to_continue();
     }
 
     let mut mode = if is_interactive {
@@ -97,15 +99,15 @@ async fn mode_loop(
                     config.mining_times,
                 )
                 .await?;
-                press_enter_to_continue().await;
+                press_enter_to_continue();
             }
             RunMode::Claim => {
                 claim_loop(state, withdrawal_private_key).await?;
-                press_enter_to_continue().await;
+                press_enter_to_continue();
             }
             RunMode::Exit => {
                 exit_loop(state, withdrawal_private_key).await?;
-                press_enter_to_continue().await;
+                press_enter_to_continue();
             }
             RunMode::Export => {
                 if is_legacy() {
@@ -115,11 +117,11 @@ async fn mode_loop(
                     export_deposit_accounts::export_deposit_accounts(withdrawal_private_key)
                         .await?;
                 }
-                press_enter_to_continue().await;
+                press_enter_to_continue();
             }
             RunMode::CheckUpdate => {
                 update::update()?;
-                press_enter_to_continue().await;
+                press_enter_to_continue();
             }
         };
         if !is_interactive {
@@ -135,9 +137,10 @@ async fn mode_loop(
     Ok(())
 }
 
-pub async fn press_enter_to_continue() {
+pub fn press_enter_to_continue() {
     println!("Press Enter to continue...");
-    let _ = tokio::io::AsyncReadExt::read(&mut tokio::io::stdin(), &mut [0u8]).await;
+    let mut buffer = [0; 1];
+    io::stdin().read_exact(&mut buffer).unwrap();
 }
 
 pub fn print_legacy_warning() {
