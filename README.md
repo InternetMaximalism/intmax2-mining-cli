@@ -19,6 +19,7 @@ For more information on mining, please refer to [this article](https://hackmd.io
 You can find detailed information on how to use the CLI in the following documents:
 
 ### [Quick Start for Beginners - Base Mainnet](docs/mainnet-quickstart.md)
+_Base Mainnet will be available from 19th Oct 00:00 UTC_
 
 ### [Quick Start for Beginners - Base Testnet](docs/quickstart.md)
 
