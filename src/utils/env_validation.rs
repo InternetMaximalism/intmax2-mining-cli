@@ -14,7 +14,7 @@ pub fn get_allowed_mining_times() -> Vec<u64> {
     } else if network == Network::Holesky {
         vec![1, 5, 10]
     } else {
-        vec![10, 100]
+        vec![10]
     }
 }
 
