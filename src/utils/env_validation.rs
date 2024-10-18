@@ -1,11 +1,20 @@
-use super::{config::Settings, env_config::EnvConfig, network::is_testnet};
+use super::{
+    config::Settings,
+    env_config::EnvConfig,
+    network::{get_network, Network},
+};
 use ethers::{providers::Middleware as _, types::U256};
 
 pub fn get_allowed_mining_times() -> Vec<u64> {
-    if is_testnet() {
+    let network = get_network();
+    if network == Network::BaseSepolia {
+        vec![1, 5, 10, 100]
+    } else if network == Network::Base {
+        vec![1, 10, 100]
+    } else if network == Network::Holesky {
         vec![1, 5, 10, 100]
     } else {
-        vec![1, 10, 100]
+        vec![10, 100]
     }
 }
 

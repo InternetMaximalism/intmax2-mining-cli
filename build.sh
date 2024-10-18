@@ -60,8 +60,8 @@ build_copy_and_zip() {
 }
 
 # Build, copy binary, and create ZIP archive for each target platform
-build_copy_and_zip "x86_64-apple-darwin" "" false false  # Intel Mac
-build_copy_and_zip "aarch64-apple-darwin" "" false false  # Apple Silicon Mac
+# build_copy_and_zip "x86_64-apple-darwin" "" false false  # Intel Mac
+# build_copy_and_zip "aarch64-apple-darwin" "" false false  # Apple Silicon Mac
 build_copy_and_zip "x86_64-pc-windows-gnu" ".exe" false true  # Windows (with custom linker)
 build_copy_and_zip "x86_64-unknown-linux-gnu" "" false false  # Linux (using cross)
 
