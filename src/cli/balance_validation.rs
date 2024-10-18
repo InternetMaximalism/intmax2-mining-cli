@@ -33,7 +33,7 @@ pub async fn validate_withdrawal_address_balance(
     assets_status: &AssetsStatus,
     withdrawal_address: Address,
 ) -> anyhow::Result<()> {
-    let remaining_claims = assets_status.not_claimed_indices.len();
+    let remaining_claims = assets_status.short_term_not_claimed_indices.len();
     let num_claim_tx = remaining_claims.div_ceil(MAX_CLAIMS);
     let settings = Settings::load()?;
     let gas_price = get_gas_price().await?;

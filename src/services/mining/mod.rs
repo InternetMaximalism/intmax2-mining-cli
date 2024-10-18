@@ -1,5 +1,6 @@
 use cancel::cancel_task;
 use deposit::deposit_task;
+use deterministic_sleep::{sleep_before_deposit, sleep_before_withdrawal};
 use ethers::types::U256;
 use withdrawal::withdrawal_task;
 
@@ -9,20 +10,21 @@ use crate::{
     utils::errors::CLIError,
 };
 
-use super::assets_status::AssetsStatus;
+use super::{assets_status::AssetsStatus, utils::initialize_prover};
 
 pub mod cancel;
 pub mod deposit;
+pub mod deterministic_sleep;
 pub mod withdrawal;
 
 pub async fn mining_task(
-    state: &State,
+    state: &mut State,
     key: &Key,
     assets_status: &AssetsStatus,
     new_deposit: bool,
     cancel_pending_deposits: bool,
     mining_unit: U256,
-) -> anyhow::Result<bool> {
+) -> anyhow::Result<()> {
     // cancel pending deposits
     if cancel_pending_deposits {
         for &index in assets_status.pending_indices.iter() {
@@ -47,6 +49,8 @@ pub async fn mining_task(
 
     // withdrawal
     if !assets_status.not_withdrawn_indices.is_empty() {
+        initialize_prover(state).await?;
+        sleep_before_withdrawal(key.deposit_address).await?;
         for &index in assets_status.not_withdrawn_indices.iter() {
             let event = assets_status.senders_deposits[index].clone();
             withdrawal_task(state, key, event)
@@ -54,16 +58,17 @@ pub async fn mining_task(
                 .map_err(|e| CLIError::InternalError(format!("Failed to withdrawal: {:#}", e)))?;
         }
         // return true to cooldown after withdrawal
-        return Ok(true);
+        return Ok(());
     }
 
     // deposit
     if new_deposit {
+        sleep_before_deposit(key.withdrawal_address).await?;
         deposit_task(state, key, mining_unit)
             .await
             .map_err(|e| CLIError::InternalError(format!("Failed to deposit: {:#}", e)))?;
-        return Ok(true);
+        return Ok(());
     }
 
-    Ok(false)
+    Ok(())
 }

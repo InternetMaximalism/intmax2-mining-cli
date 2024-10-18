@@ -19,9 +19,10 @@ use super::*;
 pub async fn single_claim_task(
     state: &State,
     key: &Key,
+    is_short_term: bool,
     events: &[Deposited],
 ) -> anyhow::Result<()> {
-    from_step1(state, key, events).await?;
+    from_step1(state, key, is_short_term, events).await?;
     Ok(())
 }
 
@@ -40,10 +41,17 @@ pub async fn resume_claim_task(state: &State, key: &Key) -> anyhow::Result<()> {
 }
 
 // Generate witness
-async fn from_step1(state: &State, key: &Key, events: &[Deposited]) -> anyhow::Result<()> {
+async fn from_step1(
+    state: &State,
+    key: &Key,
+    is_short_term: bool,
+    events: &[Deposited],
+) -> anyhow::Result<()> {
     print_status("Claim: generating claim witness");
-    let witness = witness_generation::generate_claim_witness(state, key, events).await?;
+    let witness =
+        witness_generation::generate_claim_witness(state, key, is_short_term, events).await?;
     let status = temp::ClaimStatus {
+        is_short_term,
         next_step: temp::ClaimStep::Plonky2Prove,
         witness: witness.clone(),
         plonlky2_proof: None,
@@ -146,6 +154,7 @@ async fn from_step5(_state: &State, key: &Key) -> anyhow::Result<()> {
     temp::ClaimStatus::delete()?;
     claim_tokens(
         key.withdrawal_private_key,
+        status.is_short_term,
         &claims,
         pis,
         &status.gnark_proof.unwrap(),
@@ -173,11 +182,11 @@ mod tests {
 
         let prover = Prover::new();
         state.prover = Some(prover);
-
-        let not_claimed_events = assets_status.get_not_claimed_events();
+        let is_short_term = true;
+        let not_claimed_events = assets_status.get_not_claimed_events(is_short_term);
         assert!(not_claimed_events.len() > 0);
 
-        single_claim_task(&state, &dummy_key, &not_claimed_events)
+        single_claim_task(&state, &dummy_key, is_short_term, &not_claimed_events)
             .await
             .unwrap();
     }

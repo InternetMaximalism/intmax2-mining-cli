@@ -1,6 +1,6 @@
-## Quick Start Guide For Ethereum Mainnet
+## Quick Start Guide For Base Mainnet
 
-This guide explains how to start mining on the Intmax network using the intmax2 mining CLI. The instructions below describe the process for the Ethereum Mainnet.
+This guide explains how to start mining on the Base network using the intmax2 mining CLI. The instructions below describe the process for the Base Mainnet.
 
 ❗ Note: The tokens you receive through mining on the mainnet currently cannot be transferred to other addresses, but this feature will be enabled in the future.
 
@@ -11,9 +11,9 @@ https://discord.gg/nByKNNhyvn
 
 Before you begin, please ensure you have the following:
 
-- **Ethereum (ETH)**: A minimum of 1 ETH for mainnet plus additional ETH for gas fees. 
+- **Ethereum (ETH)**: A minimum of 0.1 ETH on Base mainnet plus additional ETH for gas fees.
 - **Alchemy API key**: Please refer to the [How to get your Alchemy API key](./alchemy.md) guide to obtain your API key.
-- **Withdrawal Private Key**: The private key of the address you'll use to withdraw ETH and receive ITX tokens.(Instruction for Metamask [here](https://support.metamask.io/managing-my-wallet/secret-recovery-phrase-and-private-keys/how-to-export-an-accounts-private-key/)) 
+- **Withdrawal Private Key**: The private key of the address you'll use to withdraw ETH and receive ITX tokens.(Instruction for Metamask [here](https://support.metamask.io/managing-my-wallet/secret-recovery-phrase-and-private-keys/how-to-export-an-accounts-private-key/))
 
 ## Download the CLI
 
@@ -23,7 +23,7 @@ Before you begin, please ensure you have the following:
 
 ## Step-by-Step Instructions
 
-### Starting the Mining Process
+### Setting Up Mining CLI
 
 1.  **Lauching the CLI** Double-click on the mining-cli shown in this image to launch.
 
@@ -39,17 +39,19 @@ Before you begin, please ensure you have the following:
 When you double-click the CLI, you'll see a screen like this:
 
    <div align="center">
-     <img src="../assets/mainnet-instruction/s1.png" width="600" alt="Mining CLI"></div>
+     <img src="../assets/mainnet-instruction/p1.png" width="600" alt="Mining CLI"></div>
 
 You can move the cursor with the arrow keys, select `mainnet` and press `Enter`.
 
-3. **Enter Alchemy API key**: Select `Alchemy` and enter your API key which you obtained from [How to get your Alchemy API key](./alchemy.md) guide. Your API key will not be displayed. Press `Enter` after pasting it.
+### Setting Up - For First Time Users
 
-<div align="center"><img src="../assets/mainnet-instruction/s2.png" width="600" alt="Mining CLI"></div>
+1. **Enter Alchemy API key**: Select `Alchemy` and enter your API key which you obtained from [How to get your Alchemy API key](./alchemy.md) guide. Your API key will not be displayed. Press `Enter` after pasting it.
 
-4. **Configure settings for the mining process**: Set `max gas price`, `mining unit`, and `mining times`. You can use the default values by pressing `Enter` or pressing `y`. You can also set your own values by pressing `n`, then entering the desired values. We recommend using the default values.
+<div align="center"><img src="../assets/mainnet-instruction/k1.png" width="600" alt="Mining CLI"></div>
 
-<div align="center"><img src="../assets/mainnet-instruction/s3.png" width="600" alt="Mining CLI"></div>
+2. **Configure settings for the mining process**: Set `max gas price`, `mining unit`, and `mining times`. You can use the default values by pressing `Enter` or pressing `y`. You can also set your own values by pressing `n`, then entering the desired values. We recommend using the default values.
+
+<div align="center"><img src="../assets/mainnet-instruction/k3.png" width="600" alt="Mining CLI"></div>
 
 Here is the explanation of each setting:
 
@@ -57,105 +59,142 @@ Here is the explanation of each setting:
 - **Mining Unit**: The amount of ETH to send in one deposit. The default is 0.1 ETH.
 - **Mining Times**: Specifies how many times to mine. The default is 10 times for mainnet.
 
-5. **Enter Withdrawal Private Key**: Enter the private key of the address you'll use to withdraw ETH and receive ITX tokens. Your withdrawal private key will not be displayed. Press `Enter` after pasting it.
+3. **Enter Withdrawal Private Key**: Enter the private key of the address you'll use to withdraw ETH and receive ITX tokens. Your withdrawal private key will not be displayed. Press `Enter` after pasting it.
 
-<div align="center"><img src="../assets/mainnet-instruction/s4.png" width="600" alt="Mining CLI"></div>
+<div align="center"><img src="../assets/mainnet-instruction/k4.png" width="600" alt="Mining CLI"></div>
 
 After entering the withdrawal private key, the address will be displayed. Confirm that the address is correct.
 
-6. **Choose whether to encrypt the private key**: Choose whether to encrypt the private key. Because the withdrawal private key will be stored in local storage, we highly recommend encrypting it. Press `y` or `Enter` to encrypt the private key, or `n` to store it in plain text.
+_Note: It is recommended to use an empty wallet as your withdrawal address. Make sure not to deposit directly into this address from the deposit address generated for you during mining._
 
-<div align="center"><img src="../assets/mainnet-instruction/s5.png" width="600" alt="Mining CLI"></div>
+4. **Choose whether to encrypt the private key**: Choose whether to encrypt the private key. Because the withdrawal private key will be stored in local storage, we highly recommend encrypting it. Press `y` or `Enter` to encrypt the private key, or `n` to store it in plain text.
 
-1. **Enter a password for the private key**: If you choose to encrypt the private key, you'll be asked to enter a password. Please enter a password of at least 12 characters.
+<div align="center"><img src="../assets/mainnet-instruction/k5.png" width="600" alt="Mining CLI"></div>
 
-<div align="center"><img src="../assets/mainnet-instruction/s6.png" width="600" alt="Mining CLI"></div>
+5. **Enter a password for the private key**: If you choose to encrypt the private key, you'll be asked to enter a password. Please enter a password of at least 12 characters.
 
-8. **Select Mode**: Choose from the following modes using the arrows key: `Mining`, `Claim`, `Exit` or `Export`. For this time, select `Mining`.
+<div align="center"><img src="../assets/mainnet-instruction/k6.png" width="600" alt="Mining CLI"></div>
 
-<div align="center"><img src="../assets/mainnet-instruction/s7.png" width="600" alt="Mining CLI"></div>
+You would be shown a prompt saying only claiming and withdrawal is allowed for now. Press enter to be taken to the next screen.
 
-Here is the explanation of each mode:
+<div align="center"><img src="../assets/mainnet-instruction/k9.png" width="600" alt="Mining CLI"></div>
 
-- **Start Mining**: performs mining by repeatedly executing deposits and withdrawals
-- **Claim**: claims available ITX tokens
-- **Exit**: withdraws all balances in intmax2 and cancels pending deposits
-- **Export**: exports the private key of the deposit addresses.
+### Setting Up - For Existing Users
 
-For this time, please select Mining.
+1. **Continue**:
+After selecting `mainnet`, you'll see a screen like this:
 
-1. **Deposit ETH to your deposit address**:
+   <div align="center">
+     <img src="../assets/mainnet-instruction/p3.png" width="600" alt="Mining CLI"></div>
 
-The mining process will begin.
+Mining has transitioned from Ethereum Mainnet to Base Network hence you won't be able to create a new config for mining but you would be able to continue with, overwrite or modify the existing mining config file.
 
-<div align="center"><img src="../assets/mainnet-instruction/s8.png" width="600" alt="Mining CLI"></div>
+Here is the explanation of each setting:
 
-The CLI will generate a deposit address and display it. In the first time, the deposit account does not have any balance. CLI will display the required amount of ETH to deposit (equals to `(mining unit)*(mining times) + (gas fees for deposits)`). Please send the required amount of ETH to the deposit address.
+- **Continue**: Continue mining with the existing settings in the config file
+- **Overwrite**: This allows you to clear existing settings and set new ones.
+- **Modify**: Modify some of the existing settings and change them, e.g, change withdrawal private key. Note that when using this method, mining times and mining unit cannot be changed.
 
-<div align="center"><img src="../assets/mainnet-instruction/s9.png" width="600" alt="Mining CLI"></div>
+2. **Enter password for the private key**:
+If you choose to encrypt your password during setup, you'll be prompted to enter it. This step is optional and won't appear if you didn't set a password.
 
-10. **Mining Process**:
+   <div align="center">
+     <img src="../assets/mainnet-instruction/p4.png" width="600" alt="Mining CLI"></div>
 
-CLI automatically deposits and withdraws ETH.
+### Mining Process
 
-<div align="center"><img src="../assets/mainnet-instruction/s10.png" width="600" alt="Mining CLI"></div>
+1. **Mining**:
 
-The mining process will pause if
+   <div align="center">
+     <img src="../assets/mainnet-instruction/p5.png" width="600" alt="Mining CLI"></div>
 
-- the balance of the deposit address is insufficient: please send ETH to the deposit address
-- the network's gas price is higher than the max gas price setting: wait until the network's gas price drops or change the `max gas price` value.
-- the number of `mining times` is reached: CLI will generate a new deposit address. Please send ETH to the new deposit address.
-
-11. **Stop and Resume process**:
-
-You can safely close the CLI window or press `ctrl + c` to stop the mining process. When you restart the CLI, you can resume the mining process by selecting `Mining` mode.
-
-NOTE: If you stop the mining process when there is a balance in the intmax2, you can withdraw the balance by running in `Exit` mode, or you can continue the mining process by running in `Mining` mode.
+Be rest assured that all your assets and ITX token are safe. To claim and retrieve the assets from Ethereum Mainnet, press `Enter` to continue.
 
 ### Claiming ITX Tokens
 
 The deposits eligible for ITX tokens are confirmed at UTC 0:00 on the Monday two weeks after mining. After that, you claim ITX tokens.
 
-1. **Select Network**:
-Select `mainnet`.
+1. **Select Mode**:
+To claim ITX token, select `Claim`. You can check whether an deposit address is eligible for rewards in the "Qualified" column after selecting the mode.
    <div align="center">
-     <img src="../assets/mainnet-instruction/s1.png" width="600" alt="Mining CLI"></div>
+     <img src="../assets/mainnet-instruction/p6.png" width="600" alt="Mining CLI"></div>
 
-2. **Continue the process**:
-   Select `Continue` to proceed with the previous settings.
+2. **Claim ITX Token To Withdrawal Address**:
+If `Claim` was selected and your address qualifies for ITX tokens, the CLI automatically transfers your available ITX tokens to your withdrawal wallet immediately or when the token availablity time reaches. To see the tokens in your wallet, ensure to add the ITX mainnet token contract address to your wallet using the Network [guide](./holesky.md).
 
-<div align="center"><img src="../assets/mainnet-instruction/t1.png" width="600" alt="Mining CLI"></div>
+   <div align="center">
+     <img src="../assets/migrate/m6.png" width="600" alt="Mining CLI"></div>
 
-3. **Select Mode**:
-   Select `Claim` mode. Then you will be asked password to decrypt the private key.
-   <div align="center"><img src="../assets/mainnet-instruction/t2.png" width="600" alt="Mining CLI"></div>
+Check wallet to see tokens.
 
-4. **Claim Process**:
-   The Claim process will start. This process continues until there are no more ITX tokens available to claim. The ITX tokens will be sent to the withdrawal address.
+After claiming process is done, you can proceed to retreiving available ETH in the Intmax2 Network back to your withdrawal address. Proceed by pressing any key as instructed by CLI.
+
+### Withdraw ETH
+
+#### Important: Avoid making direct or indirect transfers between deposit and withdrawal addresses. Depositing in a withdrawal address will disqualify it from receiving rewards during mining. Please refer to the [README document](../README.md) for more information.
+
+1. **Withdraw ETH**:
+Select `Exit` to retrieve assets to withdrawal address.
+
+   <div align="center">
+     <img src="../assets/mainnet-instruction/p7.png" width="600" alt="Mining CLI"></div>
+
+2. **Withdraw ETH To Withdrawal Address**:
+Any pending deposit would be cancelled and all ETH balance will be withdrawn to your withdrawal address.
+
+   <div align="center">
+     <img src="../assets/migrate/m8.png" width="600" alt="Mining CLI"></div>
+
+Note: If there are still ETH in your deposit address after this process, you can manually transfer ETH from deposit wallet to another wallet using the command below. Proceed by pressing any key as instructed by CLI.
 
 ### Exporting Deposit Private Keys
 
-You can see the private keys of the deposit addresses. This is useful when you want to retrieve the balance of the deposit addresses.
+1. **Export**:
+Select `Export`
 
-1. **Select Network**:
-Select `mainnet`.
    <div align="center">
-     <img src="../assets/mainnet-instruction/s1.png" width="600" alt="Mining CLI"></div>
+     <img src="../assets/mainnet-instruction/p8.png" width="600" alt="Mining CLI"></div>
 
-2. **Continue the process**:
-   Select `Continue` to proceed with the previous settings.
+2. **Export Deposit Private Key**:
+Copy private key and import account into metamask using this [guide](https://support.metamask.io/managing-my-wallet/accounts-and-addresses/how-to-import-an-account/).
 
-<div align="center"><img src="../assets/mainnet-instruction/t1.png" width="600" alt="Mining CLI"></div>
+   <div align="center">
+     <img src="../assets/migrate/m12.png" width="600" alt="Mining CLI"></div>
 
-3. **Select Mode**:
-   Select `Export` mode.
-   <div align="center"><img src="../assets/mainnet-instruction/t3.png" width="600" alt="Mining CLI"></div>
+3. **Transfer in CLI**:
+To transfer ETH balance inside the CLI instead, type yes and select `#0` or your account of choice if you have several deposit accounts.
 
-4. **Password**:
-   If you encrypted your private keys, you need to enter your Password.
-   <div align="center"><img src="../assets/mainnet-instruction/t4.png" width="600" alt="Mining CLI"></div>
+   <div align="center">
+     <img src="../assets/migrate/m13.png" width="600" alt="Mining CLI"></div>
 
-4. **Export**:
-   The CLI will display the private keys of the deposit addresses. Please save them in a secure place.
-   <div align="center"><img src="../assets/mainnet-instruction/t5.png" width="600" alt="Mining CLI"></div>
+4. **Transfer ETH Balance**:
+   Paste the address to transfer ETH balance to.
+   <div align="center">
+     <img src="../assets/migrate/m14.png" width="600" alt="Mining CLI"></div>
 
+5. **Transfer in CLI**:
+Approve transfer by typing `Yes`.
+   <div align="center">
+     <img src="../assets/migrate/m15.png" width="600" alt="Mining CLI"></div>
+
+Repeat approval until ETH balance is insufficient. To end the process, press `Enter` key.
+
+   <div align="center">
+     <img src="../assets/migrate/m15.png" width="600" alt="Mining CLI"></div>
+
+After withdrawal process is done, proceed by pressing any key as instructed by CLI.
+
+### Check Available CLI Updates
+
+1. **Select Mode**:
+Select `Check Update` to check if you are using the latest version.
+   <div align="center">
+     <img src="../assets/mainnet-instruction/p9.png" width="600" alt="Mining CLI"></div>
+
+2. **Confirm CLI Version**:
+Your current version should be same as the latest release to mine on Base. Navigate to the [Releases](https://github.com/InternetMaximalism/intmax2-mining-cli/releases) page of this repository to see the available latest version.
+
+   <div align="center">
+     <img src="../assets/migrate/m24.png" width="600" alt="Mining CLI"></div>
+
+To continue with other modes, press `Enter` key on your keyboard.

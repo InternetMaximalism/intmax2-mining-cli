@@ -2,7 +2,7 @@
 availability_server_url = "https://holesky.v1.mining-gateway.intmax.xyz/v1/availability"
 withdrawal_gnark_prover_url = "https://holesky.v1.mining-gateway.intmax.xyz/v1/gnark-withdraw-circuit"
 claim_gnark_prover_url = "https://holesky.v1.mining-gateway.intmax.xyz/v1/gnark-claim-circuit"
-withdrawal_server_url="https://holesky.v1.mining-gateway.intmax.xyz/v1/withdrawal/submit-proof"
+withdrawal_server_url="https://holesky.v1.mining-gateway.intmax.xyz/v1/withdrawal"
 circulation_server_url="https://holesky.v1.mining-gateway.intmax.xyz/v1/mining"
 tree_data_repository="InternetMaximalism/intmax2-v1-mining-mock"
 tree_data_directory="holesky-data"
@@ -20,7 +20,8 @@ single_claim_gas = 600000
 
 [service]
 repository_url = "https://github.com/InternetMaximalism/intmax2-mining-cli"
-mining_max_cooldown_in_sec = 20 
+mining_min_cooldown_in_sec = 20 
+mining_max_cooldown_in_sec = 200
 loop_cooldown_in_sec = 10
 high_gas_retry_inverval_in_sec = 10
 

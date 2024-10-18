@@ -11,6 +11,63 @@ use crate::{
 };
 
 pub async fn export_deposit_accounts(withdrawal_private_key: H256) -> anyhow::Result<()> {
+    let key = Key::new(withdrawal_private_key, 0);
+    let balance = get_balance(key.deposit_address).await?;
+    println!();
+    println!(
+        "Deposit Address: {:?} ({} ETH)",
+        key.deposit_address,
+        pretty_format_u256(balance),
+    );
+    println!("Private Key: {:?}", key.deposit_private_key);
+
+    let do_transfer = Confirm::new()
+        .with_prompt("Do you want to make transfers from this account?")
+        .default(true)
+        .interact()?;
+    if do_transfer {
+        transfer_instruction(withdrawal_private_key).await?;
+    }
+    Ok(())
+}
+
+async fn transfer_instruction(withdrawal_private_key: H256) -> anyhow::Result<()> {
+    let key = Key::new(withdrawal_private_key, 0);
+    let to_address: Address = dialoguer::Input::<String>::new()
+        .with_prompt("Enter the address to transfer to")
+        .validate_with(|input: &String| {
+            let result: Result<Address, _> = input.parse();
+            match result {
+                Ok(to_address) => {
+                    if to_address == key.withdrawal_address {
+                        return Err("Cannot transfer to the withdrawal address".to_string());
+                    }
+                    // The deposit address is encrypted, so it is theoretically impossible to check for duplicates.
+                    Ok(())
+                }
+                Err(_) => Err("Invalid address".to_string()),
+            }
+        })
+        .interact()?
+        .parse()
+        .unwrap(); // safe to unwrap because of the validation
+    let is_ok = Confirm::new()
+        .with_prompt(format!(
+            "Are you sure to transfer all ETH from {:?} to {:?}",
+            key.deposit_address, to_address,
+        ))
+        .report(false)
+        .default(true)
+        .interact()?;
+    if !is_ok {
+        return Ok(());
+    } else {
+        balance_transfer(key.deposit_private_key, to_address).await?;
+    }
+    Ok(())
+}
+
+pub async fn legacy_export_deposit_accounts(withdrawal_private_key: H256) -> anyhow::Result<()> {
     let mut key_number = 0;
     loop {
         let key = Key::new(withdrawal_private_key, key_number);
@@ -39,12 +96,12 @@ pub async fn export_deposit_accounts(withdrawal_private_key: H256) -> anyhow::Re
         .interact()?;
 
     if do_transfer {
-        transfer_instruction(withdrawal_private_key, key_number).await?;
+        legacy_transfer_instruction(withdrawal_private_key, key_number).await?;
     }
     Ok(())
 }
 
-async fn transfer_instruction(
+async fn legacy_transfer_instruction(
     withdrawal_private_key: H256,
     up_to_key_number: u64,
 ) -> anyhow::Result<()> {

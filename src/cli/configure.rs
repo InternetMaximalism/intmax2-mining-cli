@@ -1,10 +1,13 @@
-use std::str::FromStr;
+use std::{collections::HashMap, str::FromStr};
 
+use anyhow::bail;
+use console::style;
 use dialoguer::{Confirm, Input, Password, Select};
-use ethers::types::{H256, U256};
+use ethers::types::{Address, H256, U256};
+use strum::IntoEnumIterator as _;
 
 use crate::{
-    external_api::contracts::utils::get_address,
+    external_api::contracts::utils::{get_address, get_balance_with_rpc},
     utils::{
         config::Settings,
         encryption::{decrypt, encrypt},
@@ -15,15 +18,22 @@ use crate::{
 };
 
 pub fn select_network() -> anyhow::Result<Network> {
-    let items = vec!["mainnet", "holesky (testnet)"];
+    let items = vec![
+        "base",
+        "base-sepolia (testnet)",
+        "mainnet (legacy)",
+        "holesky (legacy-testnet)",
+    ];
     let selection = Select::new()
         .with_prompt("Choose network")
         .items(&items)
         .default(0)
         .interact()?;
     let network = match selection {
-        0 => "mainnet",
-        1 => "holesky",
+        0 => "base",
+        1 => "base-sepolia",
+        2 => "mainnet",
+        3 => "holesky",
         _ => unreachable!(),
     };
     Network::from_str(network).map_err(|_| anyhow::anyhow!("Invalid network"))
@@ -50,7 +60,7 @@ pub async fn new_config(network: Network) -> anyhow::Result<EnvConfig> {
         let mining_times = input_mining_times()?;
         (max_gas_price, mining_unit, mining_times)
     };
-    let withdrawal_private_key: H256 = input_withdrawal_private_key()?;
+    let withdrawal_private_key: H256 = input_withdrawal_private_key(&rpc_url).await?;
     let withdrawal_address = get_address(withdrawal_private_key);
     let (encrypt, keys, encrypted_keys) = input_encryption(withdrawal_private_key)?;
     let config = EnvConfig {
@@ -96,27 +106,12 @@ pub async fn modify_config(config: &EnvConfig) -> anyhow::Result<EnvConfig> {
         .default(false)
         .interact()?;
     let withdrawal_private_key = if modify_withdrawal_address {
-        input_withdrawal_private_key()?
+        input_withdrawal_private_key(&rpc_url).await?
     } else {
         key
     };
+    let (encrypt, keys, encrypted_keys) = input_encryption(withdrawal_private_key)?;
     let withdrawal_address = get_address(withdrawal_private_key);
-    let modify_encryption = Confirm::new()
-        .with_prompt(format!(
-            "Modify encryption current={}?",
-            config.encrypted_withdrawal_private_key.is_some()
-        ))
-        .default(false)
-        .interact()?;
-    let (encrypt, keys, encrypted_keys) = if modify_encryption {
-        input_encryption(withdrawal_private_key)?
-    } else {
-        (
-            config.encrypt,
-            config.withdrawal_private_key.clone(),
-            config.encrypted_withdrawal_private_key.clone(),
-        )
-    };
     let config = EnvConfig {
         network: config.network,
         rpc_url,
@@ -147,8 +142,10 @@ async fn input_rpc_url() -> anyhow::Result<String> {
         };
         match validate_rpc_url(&rpc_url).await {
             Ok(_) => break Ok(rpc_url),
-            Err(_) => {
-                println!("Invalid RPC URL");
+            Err(e) => {
+                let colored_message =
+                    format!("{}: {}", style("Invalid RPC URL").red(), e.to_string());
+                println!("{}", colored_message);
             }
         }
     }
@@ -156,24 +153,58 @@ async fn input_rpc_url() -> anyhow::Result<String> {
 
 async fn input_alchemy_url() -> anyhow::Result<String> {
     let alchemy_api_key: String = Password::new().with_prompt("Alchemy API Key").interact()?;
-    let alchemy_url = format!(
-        "https://eth-{}.g.alchemy.com/v2/{}",
-        get_network(),
-        alchemy_api_key
-    );
-    Ok(alchemy_url)
+    match get_network() {
+        Network::Localnet => bail!("Localnet is not supported"),
+        Network::Sepolia => {
+            let alchemy_url = format!("https://eth-sepolia.g.alchemy.com/v2/{}", alchemy_api_key);
+            return Ok(alchemy_url);
+        }
+        Network::Holesky => {
+            let alchemy_url = format!("https://eth-holesky.g.alchemy.com/v2/{}", alchemy_api_key);
+            return Ok(alchemy_url);
+        }
+        Network::BaseSepolia => {
+            let alchemy_url = format!("https://base-sepolia.g.alchemy.com/v2/{}", alchemy_api_key);
+            return Ok(alchemy_url);
+        }
+        Network::Mainnet => {
+            let alchemy_url = format!("https://eth-mainnet.g.alchemy.com/v2/{}", alchemy_api_key);
+            return Ok(alchemy_url);
+        }
+        Network::Base => {
+            let alchemy_url = format!("https://base-mainnet.g.alchemy.com/v2/{}", alchemy_api_key);
+            return Ok(alchemy_url);
+        }
+    }
 }
 
 async fn input_infura_url() -> anyhow::Result<String> {
     let infura_project_id: String = Password::new()
         .with_prompt("Infura Project ID")
         .interact()?;
-    let infura_url = format!(
-        "https://{}.infura.io/v3/{}",
-        get_network(),
-        infura_project_id
-    );
-    Ok(infura_url)
+    match get_network() {
+        Network::Localnet => bail!("Localnet is not supported"),
+        Network::Sepolia => {
+            let infura_url = format!("https://sepolia.infura.io/v3/{}", infura_project_id);
+            return Ok(infura_url);
+        }
+        Network::Holesky => {
+            let infura_url = format!("https://holesky.infura.io/v3/{}", infura_project_id);
+            return Ok(infura_url);
+        }
+        Network::BaseSepolia => {
+            let infura_url = format!("https://base-sepolia.infura.io/v3/{}", infura_project_id);
+            return Ok(infura_url);
+        }
+        Network::Mainnet => {
+            let infura_url = format!("https://mainnet.infura.io/v3/{}", infura_project_id);
+            return Ok(infura_url);
+        }
+        Network::Base => {
+            let infura_url = format!("https://base-mainnet.infura.io/v3/{}", infura_project_id);
+            return Ok(infura_url);
+        }
+    }
 }
 
 async fn input_custom_url() -> anyhow::Result<String> {
@@ -242,15 +273,64 @@ fn input_mining_times() -> anyhow::Result<u64> {
     Ok(mining_times)
 }
 
-fn input_withdrawal_private_key() -> anyhow::Result<H256> {
-    let withdrawal_private_key: String = Password::new()
-        .with_prompt(format!("Withdrawal private key of {}", get_network()))
-        .validate_with(|input: &String| validate_private_key_with_duplication_check(&[], input))
-        .interact()?;
-    let withdrawal_private_key: H256 = withdrawal_private_key.parse().unwrap();
-    let withdrawal_address = get_address(withdrawal_private_key);
-    println!("Withdrawal Address: {:?}", withdrawal_address);
-    Ok(withdrawal_private_key)
+async fn input_withdrawal_private_key(rpc_url: &str) -> anyhow::Result<H256> {
+    loop {
+        let withdrawal_private_key: String = Password::new()
+            .with_prompt(format!("Withdrawal private key of {}", get_network()))
+            .validate_with(|input: &String| validate_private_key_with_duplication_check(&[], input))
+            .interact()?;
+        let withdrawal_private_key: H256 = withdrawal_private_key.parse().unwrap();
+        let withdrawal_address = get_address(withdrawal_private_key);
+        println!("Withdrawal Address: {:?}", withdrawal_address);
+
+        // duplication check
+        if is_withdrawal_address_duplicated(withdrawal_address)? {
+            continue;
+        }
+
+        // non-balance check
+        {
+            let balance = get_balance_with_rpc(rpc_url, withdrawal_address).await?;
+            if balance != U256::zero() {
+                let colored_message = format!(
+                "{} {}",
+                style("WARNING:").yellow().bold(),
+                style("The balance of the withdrawal address is not zero. If this is your first time setting up this address, please use a different, empty withdrawal address. If you are re-configuring and have entered this address intentionally, you can ignore this warning.").yellow()
+            );
+                println!("{}", colored_message);
+                let confirm = Confirm::new()
+                    .with_prompt("Continue?")
+                    .default(false)
+                    .interact()?;
+                if confirm {
+                    break Ok(withdrawal_private_key);
+                }
+            } else {
+                break Ok(withdrawal_private_key);
+            }
+        }
+    }
+}
+
+fn is_withdrawal_address_duplicated(withdrawal_addres: Address) -> anyhow::Result<bool> {
+    let mut address_to_network = HashMap::<Address, (Network, usize)>::new();
+    for network in Network::iter() {
+        for config_index in EnvConfig::get_existing_indices(network) {
+            let config = EnvConfig::load_from_file(network, config_index)?;
+            address_to_network.insert(config.withdrawal_address, (network, config_index));
+        }
+    }
+    if let Some((duplicated_network, duplicated_index)) = address_to_network.get(&withdrawal_addres)
+    {
+        let message = format!(
+            "Withdrawal address is duplicated as {} config #{}. Please use a different address.",
+            duplicated_network, duplicated_index
+        );
+        let colored_message = format!("{} {}", style("ERROR:").red().bold(), style(message).red());
+        println!("{}", colored_message);
+        return Ok(true);
+    }
+    Ok(false)
 }
 
 fn input_encryption(
@@ -322,7 +402,7 @@ mod tests {
         new_config(Network::Localnet)
             .await
             .unwrap()
-            .save_to_file()
+            .save_to_file(0)
             .unwrap();
     }
 }

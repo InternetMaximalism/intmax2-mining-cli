@@ -23,7 +23,6 @@
 
 <div align="center"><img src="../assets/alchemy/a5.png" width="800"/></div>
 
-
 That's it! You have successfully obtained your Alchemy API key.
 
 Note: If you're using Base network and encounter an error like invalid API Key or any API-related issue, it’s likely because your Alchemy app is not properly configured. By default, Alchemy only enables the network you selected when creating the app and disables all other networks. To fix this, you need to update your Alchemy app settings and configure the API key for the Base network. Here's how to do it.
@@ -48,7 +47,3 @@ Note: If you're using Base network and encounter an error like invalid API Key o
 
 7. At the top of the page, you'll find your API key. Copy it and use it in the CLI when prompted.
 <div align="center"><img src="../assets/alchemy/a12.png" width="800"/></div>
-
-
-
-

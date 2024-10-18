@@ -141,7 +141,7 @@ async fn from_step5(_state: &State, _key: &Key) -> anyhow::Result<()> {
         tx_reciept.status == Some(ethers::types::U64::from(1)),
         "Withdrawal transaction failed"
     );
-    print_status(format!("Withdrawan with tx hash: {:?}", tx_hash));
+    print_status(format!("Succsesfully withdrawn"));
     Ok(())
 }
 

@@ -5,7 +5,7 @@ use intmax2_zkp::{
 };
 use log::info;
 
-use crate::utils::retry::with_retry;
+use crate::{external_api::contracts::utils::get_block, utils::retry::with_retry};
 
 use super::{
     error::BlockchainError,
@@ -103,6 +103,58 @@ pub async fn get_deposit_leaf_inserted_event(
         .collect();
     events.sort_by_key(|event| event.deposit_index);
     Ok(events)
+}
+
+pub async fn get_latest_deposit_timestamp(sender: Address) -> Result<Option<u64>, BlockchainError> {
+    let int1 = get_int1_contract().await?;
+    let events = with_retry(|| async {
+        int1.deposited_filter()
+            .from_block(0)
+            .address(int1.address().into())
+            .topic2(sender)
+            .query_with_meta()
+            .await
+    })
+    .await
+    .map_err(|_| BlockchainError::NetworkError("failed to get deposited event".to_string()))?;
+    let latest_block_number: Option<u64> = events
+        .into_iter()
+        .map(|(_, meta)| meta.block_number.as_u64())
+        .max();
+    let block_timestamp = if let Some(block_number) = latest_block_number {
+        let block = get_block(block_number).await?;
+        Some(block.unwrap().timestamp.as_u64())
+    } else {
+        None
+    };
+    Ok(block_timestamp)
+}
+
+pub async fn get_latest_withdrawal_timestamp(
+    recipient: Address,
+) -> Result<Option<u64>, BlockchainError> {
+    let int1 = get_int1_contract().await?;
+    let events = with_retry(|| async {
+        int1.withdrawn_filter()
+            .from_block(0)
+            .address(int1.address().into())
+            .topic1(recipient)
+            .query_with_meta()
+            .await
+    })
+    .await
+    .map_err(|_| BlockchainError::NetworkError("failed to get withdrawn event".to_string()))?;
+    let latest_block_number: Option<u64> = events
+        .into_iter()
+        .map(|(_, meta)| meta.block_number.as_u64())
+        .max();
+    let block_timestamp = if let Some(block_number) = latest_block_number {
+        let block = get_block(block_number).await?;
+        Some(block.unwrap().timestamp.as_u64())
+    } else {
+        None
+    };
+    Ok(block_timestamp)
 }
 
 #[cfg(test)]

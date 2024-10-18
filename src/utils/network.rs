@@ -8,12 +8,14 @@ pub enum Network {
     Localnet,
     Sepolia,
     Holesky,
+    BaseSepolia,
+    Base,
     Mainnet,
 }
 
 impl Default for Network {
     fn default() -> Self {
-        Network::Holesky
+        Network::BaseSepolia
     }
 }
 
@@ -23,6 +25,8 @@ impl Display for Network {
             Network::Localnet => write!(f, "localnet"),
             Network::Sepolia => write!(f, "sepolia"),
             Network::Holesky => write!(f, "holesky"),
+            Network::BaseSepolia => write!(f, "base-sepolia"),
+            Network::Base => write!(f, "base"),
             Network::Mainnet => write!(f, "mainnet"),
         }
     }
@@ -37,6 +41,8 @@ impl FromStr for Network {
             "sepolia" => Ok(Network::Sepolia),
             "holesky" => Ok(Network::Holesky),
             "mainnet" => Ok(Network::Mainnet),
+            "base" => Ok(Network::Base),
+            "base-sepolia" => Ok(Network::BaseSepolia),
             _ => Err(()),
         }
     }
@@ -47,8 +53,8 @@ pub fn get_network() -> Network {
     Network::from_str(&network).expect("Invalid network")
 }
 
-pub fn is_testnet() -> bool {
-    get_network() != Network::Mainnet
+pub fn is_legacy() -> bool {
+    get_network() == Network::Mainnet || get_network() == Network::Holesky
 }
 
 #[cfg(test)]
