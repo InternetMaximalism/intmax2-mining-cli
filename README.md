@@ -11,8 +11,8 @@ For more information on mining, please refer to [this article](https://hackmd.io
 ### Minimum Requirements
 
 - Memory: 8GB or more
-- CPU: 4 cores or more, with a clock speed of 2 GHz or higher
-  _Note: Some Windows version might have issues while mining. We're working to solve this issue. We'll announce as soon as we solve it._
+- CPU: 4 cores or more, with a clock speed of 2 GHz or higher.
+  _Note: Some Windows version might have issues while mining. Refer to this [guide](docs/windows.md) to fix it._
 
 ## Quick Links
 
