@@ -179,6 +179,7 @@ pub async fn fetch_config_file_from_github() -> anyhow::Result<()> {
     let files_to_download = vec![
         "config.holesky.toml",
         "config.mainnet.toml",
+        "config.base.toml",
         "config.base-sepolia.toml",
     ];
 

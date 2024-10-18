@@ -18,16 +18,22 @@ use crate::{
 };
 
 pub fn select_network() -> anyhow::Result<Network> {
-    let items = vec!["mainnet", "holesky (testnet)", "base-sepolia (testnet)"];
+    let items = vec![
+        "base",
+        "base-sepolia (testnet)",
+        "mainnet (legacy)",
+        "holesky (legacy-testnet)",
+    ];
     let selection = Select::new()
         .with_prompt("Choose network")
         .items(&items)
         .default(0)
         .interact()?;
     let network = match selection {
-        0 => "mainnet",
-        1 => "holesky",
-        2 => "base-sepolia",
+        0 => "base",
+        1 => "base-sepolia",
+        2 => "mainnet",
+        3 => "holesky",
         _ => unreachable!(),
     };
     Network::from_str(network).map_err(|_| anyhow::anyhow!("Invalid network"))
