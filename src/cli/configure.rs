@@ -163,6 +163,10 @@ async fn input_alchemy_url() -> anyhow::Result<String> {
             let alchemy_url = format!("https://eth-mainnet.g.alchemy.com/v2/{}", alchemy_api_key);
             return Ok(alchemy_url);
         }
+        Network::Base => {
+            let alchemy_url = format!("https://base-mainnet.g.alchemy.com/v2/{}", alchemy_api_key);
+            return Ok(alchemy_url);
+        }
     }
 }
 
@@ -186,6 +190,10 @@ async fn input_infura_url() -> anyhow::Result<String> {
         }
         Network::Mainnet => {
             let infura_url = format!("https://mainnet.infura.io/v3/{}", infura_project_id);
+            return Ok(infura_url);
+        }
+        Network::Base => {
+            let infura_url = format!("https://base-mainnet.infura.io/v3/{}", infura_project_id);
             return Ok(infura_url);
         }
     }
