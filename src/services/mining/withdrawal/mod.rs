@@ -12,7 +12,7 @@ use crate::{
             withdrawal::submit_withdrawal,
         },
     },
-    services::utils::await_until_low_gas_price,
+    services::utils::{await_until_low_gas_price, initialize_prover},
     state::{key::Key, state::State},
     utils::config::Settings,
 };
@@ -20,7 +20,8 @@ use crate::{
 pub mod temp;
 pub mod witness_generation;
 
-pub async fn withdrawal_task(state: &State, key: &Key, event: Deposited) -> anyhow::Result<()> {
+pub async fn withdrawal_task(state: &mut State, key: &Key, event: Deposited) -> anyhow::Result<()> {
+    initialize_prover(state).await?;
     from_step1(state, key, event).await?;
     Ok(())
 }
@@ -165,7 +166,7 @@ mod tests {
         let prover = Prover::new();
         state.prover = Some(prover);
 
-        super::withdrawal_task(&state, &dummy_key, events[0].clone())
+        super::withdrawal_task(&mut state, &dummy_key, events[0].clone())
             .await
             .unwrap();
     }
