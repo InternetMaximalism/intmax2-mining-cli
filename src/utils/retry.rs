@@ -27,7 +27,7 @@ where
                     e.to_string(),
                     delay
                 );
-                tokio::time::sleep(delay).await;
+                std::thread::sleep(delay);
                 retries += 1;
                 delay *= 2; // Exponential backoff
             }

@@ -1,3 +1,5 @@
+use std::thread::sleep;
+
 use crate::{
     cli::{
         availability::check_avaliability,
@@ -80,7 +82,7 @@ pub async fn mining_loop(
         // print assets status after mining
         let assets_status = state.sync_and_fetch_assets(&key).await?;
         print_assets_status(&assets_status);
-        common_loop_cool_down().await;
+        common_loop_cool_down();
     }
     print_log(format!(
         "Mining loop for deposit address {:?} ended",
@@ -102,7 +104,7 @@ pub async fn exit_loop(state: &mut State, withdrawal_private_key: H256) -> anyho
             break;
         }
         mining_task(state, &key, &assets_status, false, true, 0.into()).await?;
-        common_loop_cool_down().await;
+        common_loop_cool_down();
     }
     print_status(format!(
         "Exit ended for deposit address {:?}",
@@ -142,7 +144,7 @@ pub async fn legacy_exit_loop(
             }
             mining_task(state, &key, &assets_status, false, true, 0.into()).await?;
 
-            common_loop_cool_down().await;
+            common_loop_cool_down();
         }
     }
 }
@@ -163,7 +165,7 @@ pub async fn claim_loop(state: &mut State, withdrawal_private_key: H256) -> anyh
         validate_withdrawal_address_balance(&assets_status, key.withdrawal_address).await?;
         let assets_status = state.sync_and_fetch_assets(&key).await?;
         claim_task(state, &key, is_short_term, &assets_status).await?;
-        common_loop_cool_down().await;
+        common_loop_cool_down();
     }
     print_status(format!(
         "Claim ended for deposit address {:?}",
@@ -195,16 +197,15 @@ pub async fn legacy_claim_loop(
             validate_withdrawal_address_balance(&assets_status, key.withdrawal_address).await?;
             let assets_status = state.sync_and_fetch_assets(&key).await?;
             claim_task(state, &key, is_short_term, &assets_status).await?;
-            common_loop_cool_down().await;
+            common_loop_cool_down();
         }
         key_number += 1;
     }
 }
 
-async fn common_loop_cool_down() {
+fn common_loop_cool_down() {
     let settings = Settings::load().expect("Failed to load settings");
-    tokio::time::sleep(std::time::Duration::from_secs(
+    sleep(std::time::Duration::from_secs(
         settings.service.loop_cooldown_in_sec,
-    ))
-    .await;
+    ));
 }

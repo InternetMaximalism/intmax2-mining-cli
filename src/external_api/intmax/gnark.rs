@@ -151,7 +151,7 @@ pub async fn fetch_gnark_proof(
                 "gnark server did not return proof in time".to_string(),
             ));
         }
-        tokio::time::sleep(tokio::time::Duration::from_secs(cooldown)).await;
+        std::thread::sleep(tokio::time::Duration::from_secs(cooldown));
     }
 }
 
@@ -164,6 +164,6 @@ async fn sleep_until(target_time: u64) {
         if now >= target_time {
             break;
         }
-        tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
+        std::thread::sleep(tokio::time::Duration::from_secs(1));
     }
 }

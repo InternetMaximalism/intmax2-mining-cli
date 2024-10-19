@@ -122,7 +122,7 @@ pub async fn get_tx_receipt(
         if receipt.is_some() {
             return Ok(receipt.unwrap());
         }
-        tokio::time::sleep(std::time::Duration::from_secs(10)).await;
+        std::thread::sleep(std::time::Duration::from_secs(10));
         loop_count += 1;
     }
 }

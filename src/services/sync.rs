@@ -17,7 +17,7 @@ use crate::{
 use anyhow::ensure;
 use chrono::{NaiveDateTime, Utc};
 use log::{info, warn};
-use tokio::time::sleep;
+use std::thread::sleep;
 
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
@@ -91,7 +91,7 @@ pub async fn sync_trees(
                 Err(e) => {
                     warn!("Feched tree is invalid in try {}: {}", try_number, e);
                     try_number += 1;
-                    sleep(std::time::Duration::from_secs(30)).await;
+                    sleep(std::time::Duration::from_secs(30));
                 }
             }
         }

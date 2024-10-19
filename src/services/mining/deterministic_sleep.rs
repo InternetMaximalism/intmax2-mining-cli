@@ -1,10 +1,12 @@
-use std::time::{Duration, SystemTime, UNIX_EPOCH};
+use std::{
+    thread::sleep,
+    time::{Duration, SystemTime, UNIX_EPOCH},
+};
 
 use ethers::types::Address;
 use log::info;
 use rand::{Rng as _, SeedableRng as _};
 use rand_chacha::ChaCha20Rng;
-use tokio::time::Instant;
 
 use crate::{
     cli::console::print_log,
@@ -52,7 +54,6 @@ async fn sleep_if_needed(target_time: u64, is_deposit: bool) {
         return; // no need to sleep
     }
     let sleep_from_now = target_time - now;
-    let sleep_until = Instant::now() + Duration::from_secs(sleep_from_now);
     let sleep_until_chrono =
         chrono::Local::now() + chrono::Duration::seconds(sleep_from_now as i64);
     let next_step = if is_deposit { "deposit" } else { "withdrawal" };
@@ -61,7 +62,7 @@ async fn sleep_if_needed(target_time: u64, is_deposit: bool) {
         next_step,
         sleep_until_chrono.format("%Y-%m-%d %H:%M:%S"),
     ));
-    tokio::time::sleep_until(sleep_until).await;
+    sleep(Duration::from_secs(sleep_from_now));
 }
 
 fn determin_sleep_time(last_time: u64, address: Address, random_nonce: &'static str) -> u64 {

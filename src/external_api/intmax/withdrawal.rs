@@ -138,11 +138,11 @@ pub async fn submit_withdrawal(
             match status.status.as_str() {
                 "pending" => {
                     info!("withdrawal is pending");
-                    tokio::time::sleep(std::time::Duration::from_secs(60)).await;
+                    std::thread::sleep(std::time::Duration::from_secs(60));
                 }
                 "processing" => {
                     info!("withdrawal is processing");
-                    tokio::time::sleep(std::time::Duration::from_secs(60)).await;
+                    std::thread::sleep(std::time::Duration::from_secs(60));
                 }
                 "completed" => {
                     let tx_hash = H256::from_str(&status.transaction_hash.unwrap()).unwrap();
@@ -192,7 +192,7 @@ async fn localnet_withdrawal(
     let tx = int1.withdraw(public_inputs, proof);
     let pending_tx: PendingTransaction<Http> = match tx.send().await {
         Ok(tx) => {
-            tokio::time::sleep(std::time::Duration::from_secs(5)).await;
+            std::thread::sleep(std::time::Duration::from_secs(5));
             tx
         }
         Err(e) => {
