@@ -104,6 +104,17 @@ pub async fn get_gas_price() -> Result<U256, BlockchainError> {
     Ok(gas_price)
 }
 
+pub async fn get_eip1559_fees() -> Result<(U256, U256), BlockchainError> {
+    let client = get_client().await?;
+    let (max_gas_price, max_priority_fee_per_gas) =
+        with_retry(|| async { client.estimate_eip1559_fees(None).await })
+            .await
+            .map_err(|_| {
+                BlockchainError::NetworkError("Failed to estimate EIP1559 fees".to_string())
+            })?;
+    Ok((max_gas_price, max_priority_fee_per_gas))
+}
+
 pub async fn get_tx_receipt(
     tx_hash: H256,
 ) -> Result<ethers::core::types::TransactionReceipt, BlockchainError> {
@@ -163,6 +174,15 @@ mod tests {
         dotenv::dotenv().ok();
         let gas_price = super::get_gas_price().await?;
         println!("{}", gas_price);
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn test_get_eip1559_fees() -> anyhow::Result<()> {
+        dotenv::dotenv().ok();
+        let (max_gas_price, max_priority_fee_per_gas) = super::get_eip1559_fees().await?;
+        println!("max_gas_price: {}", max_gas_price);
+        println!("max_priority_fee_per_gas: {}", max_priority_fee_per_gas);
         Ok(())
     }
 }

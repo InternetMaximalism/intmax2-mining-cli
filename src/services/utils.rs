@@ -14,6 +14,17 @@ use crate::{
     utils::{config::Settings, env_config::EnvConfig, time::sleep_for},
 };
 
+pub fn set_max_priority_fee(
+    tx: &mut ethers::contract::builders::ContractCall<
+        SignerMiddleware<Provider<Http>, Wallet<SigningKey>>,
+        (),
+    >,
+) {
+    let max_priorify_fee = Settings::load().unwrap().blockchain.max_priority_fee;
+    let inner_tx = tx.tx.as_eip1559_mut().expect("tx is not EIP1559");
+    *inner_tx = inner_tx.clone().max_priority_fee_per_gas(max_priorify_fee);
+}
+
 pub async fn handle_contract_call<S: ToString>(
     tx: ethers::contract::builders::ContractCall<
         SignerMiddleware<Provider<Http>, Wallet<SigningKey>>,

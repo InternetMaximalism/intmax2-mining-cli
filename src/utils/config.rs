@@ -47,6 +47,7 @@ pub struct Blockchain {
     pub token_address: String,
     pub single_deposit_gas: u64,
     pub single_claim_gas: u64,
+    pub max_priority_fee: u64,
 }
 
 #[derive(Clone, Debug, Deserialize)]

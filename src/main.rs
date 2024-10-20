@@ -1,5 +1,5 @@
 use clap::{arg, command, Parser};
-use cli::{console::print_error, press_enter_to_continue, run};
+use cli::{availability::check_avaliability, console::print_error, press_enter_to_continue, run};
 use dotenv::dotenv;
 use simplelog::{Config, LevelFilter, WriteLogger};
 use state::mode::RunMode;
@@ -65,6 +65,8 @@ async fn main() {
 }
 
 async fn set_up() -> anyhow::Result<()> {
+    check_avaliability().await?;
+
     let log_file_path = get_log_file_path()?;
     create_file_with_content(&log_file_path, &[])?;
     let log_file = File::create(log_file_path)?;

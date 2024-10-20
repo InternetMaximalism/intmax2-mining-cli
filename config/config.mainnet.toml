@@ -17,6 +17,7 @@ minter_address = "0x38DE07d2526Ae929f1903E5F109B70C50e12A8E0"
 token_address = "0xe24e207c6156241cAfb41D025B3b5F0677114C81"
 single_deposit_gas = 88000
 single_claim_gas = 600000
+max_priority_fee = 1000000000 # 1 gwei
 
 [service]
 repository_url = "https://github.com/InternetMaximalism/intmax2-mining-cli"
