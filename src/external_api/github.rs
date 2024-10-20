@@ -1,20 +1,12 @@
-use std::fs;
-
-use anyhow::Context;
 use chrono::NaiveDate;
 use log::info;
 use regex::Regex;
-use reqwest::{self, Client};
+use reqwest::{self};
 use serde_json::Value;
 
-use crate::{
-    constants::{BRANCH, CONFIG_PATH, REPO_NAME, REPO_OWNER},
-    utils::{
-        bin_parser::{BinDepositTree, BinEligibleTree},
-        config::Settings,
-        file::{create_data_dir, get_data_path},
-        retry::with_retry,
-    },
+use crate::utils::{
+    bin_parser::{BinDepositTree, BinEligibleTree},
+    config::Settings,
 };
 
 #[derive(Debug, thiserror::Error)]
@@ -172,40 +164,6 @@ async fn fetch_content(client: &reqwest::Client, file: &Value) -> Result<Vec<u8>
     Ok(content.into())
 }
 
-pub async fn fetch_config_file_from_github() -> anyhow::Result<()> {
-    create_data_dir()?;
-
-    let client = Client::new();
-    let files_to_download = vec![
-        "config.holesky.toml",
-        "config.mainnet.toml",
-        "config.base.toml",
-        "config.base-sepolia.toml",
-    ];
-
-    for file_name in files_to_download {
-        let file_url = format!(
-            "https://raw.githubusercontent.com/{}/{}/{}/{}/{}",
-            REPO_OWNER, REPO_NAME, BRANCH, CONFIG_PATH, file_name
-        );
-
-        let content = with_retry(|| async { client.get(&file_url).send().await })
-            .await
-            .context(format!(
-                "Failed to fetch config file from GitHub: {}",
-                file_name
-            ))?;
-        let content = content
-            .bytes()
-            .await
-            .context("Failed to read response body")?;
-        let file_path = get_data_path()?.join(file_name);
-        fs::write(&file_path, content).context(format!("Failed to write file: {}", file_name))?;
-        info!("Downloaded: {}", file_path.display());
-    }
-    Ok(())
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -220,10 +178,5 @@ mod tests {
     async fn test_fetch_latest_files_no_new_files() {
         let last_update = NaiveDate::parse_from_str("2999-12-31", "%Y-%m-%d").unwrap();
         let _result = fetch_latest_tree_from_github(last_update).await.unwrap();
-    }
-
-    #[tokio::test]
-    async fn test_fetch_config_file_from_github() {
-        fetch_config_file_from_github().await.unwrap();
     }
 }

@@ -1,11 +1,13 @@
 use clap::{arg, command, Parser};
 use cli::{console::print_error, press_enter_to_continue, run};
 use dotenv::dotenv;
-use external_api::github::fetch_config_file_from_github;
 use simplelog::{Config, LevelFilter, WriteLogger};
 use state::mode::RunMode;
 use std::{fs::File, path::PathBuf};
-use utils::file::{create_file_with_content, get_data_path};
+use utils::{
+    config::create_config_files,
+    file::{create_file_with_content, get_data_path},
+};
 
 pub mod cli;
 pub mod constants;
@@ -64,10 +66,6 @@ async fn set_up() -> anyhow::Result<()> {
     create_file_with_content(&log_file_path, &[])?;
     let log_file = File::create(log_file_path)?;
     WriteLogger::init(LevelFilter::Info, Config::default(), log_file)?;
-
-    let does_not_fetch_config = std::env::var("NOT_FETCH_CONFIG").is_ok();
-    if !does_not_fetch_config {
-        fetch_config_file_from_github().await?;
-    }
+    create_config_files()?;
     Ok(())
 }
