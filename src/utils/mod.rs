@@ -10,4 +10,5 @@ pub mod errors;
 pub mod file;
 pub mod network;
 pub mod retry;
+pub mod time;
 pub mod update;

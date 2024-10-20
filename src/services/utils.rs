@@ -11,7 +11,7 @@ use crate::{
     cli::console::{print_status, print_warning},
     external_api::contracts::utils::{get_account_nonce, get_balance, get_client, get_gas_price},
     state::{prover::Prover, state::State},
-    utils::{config::Settings, env_config::EnvConfig},
+    utils::{config::Settings, env_config::EnvConfig, time::sleep_for},
 };
 
 pub async fn handle_contract_call<S: ToString>(
@@ -84,10 +84,10 @@ pub async fn insuffient_balance_instruction(
         let new_balance = get_balance(address).await?;
         if new_balance > required_balance {
             print_status("Balance updated");
-            std::thread::sleep(std::time::Duration::from_secs(10));
+            sleep_for(10);
             break;
         }
-        std::thread::sleep(std::time::Duration::from_secs(10));
+        sleep_for(10);
     }
     Ok(())
 }
@@ -112,9 +112,7 @@ pub async fn await_until_low_gas_price() -> anyhow::Result<()> {
             ethers::utils::format_units(current_gas_price.clone(), "gwei").unwrap(),
             ethers::utils::format_units(max_gas_price.clone(), "gwei").unwrap(),
         ));
-        std::thread::sleep(std::time::Duration::from_secs(
-            high_gas_retry_inverval_in_sec,
-        ));
+        sleep_for(high_gas_retry_inverval_in_sec);
     }
     Ok(())
 }

@@ -1,8 +1,3 @@
-use std::{
-    thread::sleep,
-    time::{Duration, SystemTime, UNIX_EPOCH},
-};
-
 use ethers::types::Address;
 use log::info;
 use rand::{Rng as _, SeedableRng as _};
@@ -13,7 +8,7 @@ use crate::{
     external_api::contracts::events::{
         get_latest_deposit_timestamp, get_latest_withdrawal_timestamp,
     },
-    utils::{config::Settings, encryption::keccak256_hash},
+    utils::{config::Settings, encryption::keccak256_hash, time::sleep_for},
 };
 
 /// Random sleep before deposit to improve privacy.
@@ -45,10 +40,7 @@ pub async fn sleep_before_withdrawal(deposit_address: Address) -> anyhow::Result
 }
 
 async fn sleep_if_needed(target_time: u64, is_deposit: bool) {
-    let now = SystemTime::now()
-        .duration_since(UNIX_EPOCH)
-        .unwrap()
-        .as_secs();
+    let now = chrono::Utc::now().timestamp() as u64;
     if now >= target_time {
         info!("No need to sleep");
         return; // no need to sleep
@@ -62,7 +54,7 @@ async fn sleep_if_needed(target_time: u64, is_deposit: bool) {
         next_step,
         sleep_until_chrono.format("%Y-%m-%d %H:%M:%S"),
     ));
-    sleep(Duration::from_secs(sleep_from_now));
+    sleep_for(sleep_from_now);
 }
 
 fn determin_sleep_time(last_time: u64, address: Address, random_nonce: &'static str) -> u64 {

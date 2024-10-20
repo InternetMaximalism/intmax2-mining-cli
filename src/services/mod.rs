@@ -1,5 +1,3 @@
-use std::thread::sleep;
-
 use crate::{
     cli::{
         availability::check_avaliability,
@@ -10,7 +8,7 @@ use crate::{
     },
     external_api::intmax::circulation::get_circulation,
     state::{key::Key, state::State},
-    utils::config::Settings,
+    utils::{config::Settings, time::sleep_for},
 };
 use claim::claim_task;
 use ethers::types::{H256, U256};
@@ -205,7 +203,5 @@ pub async fn legacy_claim_loop(
 
 fn common_loop_cool_down() {
     let settings = Settings::load().expect("Failed to load settings");
-    sleep(std::time::Duration::from_secs(
-        settings.service.loop_cooldown_in_sec,
-    ));
+    sleep_for(settings.service.loop_cooldown_in_sec);
 }

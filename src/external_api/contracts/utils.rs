@@ -10,7 +10,7 @@ use ethers::{
 };
 use log::info;
 
-use crate::utils::retry::with_retry;
+use crate::utils::{retry::with_retry, time::sleep_for};
 
 use super::error::BlockchainError;
 
@@ -122,7 +122,7 @@ pub async fn get_tx_receipt(
         if receipt.is_some() {
             return Ok(receipt.unwrap());
         }
-        std::thread::sleep(std::time::Duration::from_secs(10));
+        sleep_for(10);
         loop_count += 1;
     }
 }
