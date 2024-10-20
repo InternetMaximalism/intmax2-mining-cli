@@ -65,8 +65,6 @@ async fn main() {
 }
 
 async fn set_up() -> anyhow::Result<()> {
-    check_avaliability().await?;
-
     let log_file_path = get_log_file_path()?;
     create_file_with_content(&log_file_path, &[])?;
     let log_file = File::create(log_file_path)?;
@@ -75,5 +73,7 @@ async fn set_up() -> anyhow::Result<()> {
 
     // check loading test
     Settings::load()?;
+
+    check_avaliability().await?;
     Ok(())
 }
