@@ -5,7 +5,7 @@ use simplelog::{Config, LevelFilter, WriteLogger};
 use state::mode::RunMode;
 use std::{fs::File, path::PathBuf};
 use utils::{
-    config::create_config_files,
+    config::{create_config_files, Settings},
     file::{create_file_with_content, get_data_path},
 };
 
@@ -72,5 +72,8 @@ async fn set_up() -> anyhow::Result<()> {
     let log_file = File::create(log_file_path)?;
     WriteLogger::init(LevelFilter::Info, Config::default(), log_file)?;
     create_config_files()?;
+
+    // check loading test
+    Settings::load()?;
     Ok(())
 }
