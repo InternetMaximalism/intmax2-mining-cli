@@ -54,7 +54,7 @@ pub async fn balance_transfer(
     print_status(format!("Transfer tx hash: {:?}", pending_tx.tx_hash()));
     let reciept = get_tx_receipt(pending_tx.tx_hash()).await?;
     if reciept.status.unwrap() != 1.into() {
-        print_warning("Transfer failed. Please rety.");
+        print_warning("Transfer failed. Please retry.");
     }
     print_status("Transfer successful");
     Ok(())
