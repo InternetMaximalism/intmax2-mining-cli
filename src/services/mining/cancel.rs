@@ -6,7 +6,7 @@ use crate::{
         events::Deposited,
         int1::{get_int1_contract_with_signer, int_1},
     },
-    services::utils::{await_until_low_gas_price, handle_contract_call},
+    services::utils::{await_until_low_gas_price, handle_contract_call, set_max_priority_fee},
     state::{key::Key, state::State},
 };
 
@@ -20,7 +20,8 @@ pub async fn cancel_task(_state: &State, key: &Key, event: Deposited) -> anyhow:
 
     await_until_low_gas_price().await?;
     let int1 = get_int1_contract_with_signer(key.deposit_private_key).await?;
-    let tx = int1.cancel_deposit(event.deposit_id.into(), deposit.clone());
+    let mut tx = int1.cancel_deposit(event.deposit_id.into(), deposit.clone());
+    set_max_priority_fee(&mut tx);
     let tx_hash = handle_contract_call(tx, deposit_address, "deposit", "cancel").await?;
     print_log(format!(
         "Cancelled deposit id {:?} with tx hash {:?}",

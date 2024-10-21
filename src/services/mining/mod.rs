@@ -10,7 +10,7 @@ use crate::{
     utils::errors::CLIError,
 };
 
-use super::{assets_status::AssetsStatus, utils::initialize_prover};
+use super::assets_status::AssetsStatus;
 
 pub mod cancel;
 pub mod deposit;
@@ -49,7 +49,6 @@ pub async fn mining_task(
 
     // withdrawal
     if !assets_status.not_withdrawn_indices.is_empty() {
-        initialize_prover(state).await?;
         sleep_before_withdrawal(key.deposit_address).await?;
         for &index in assets_status.not_withdrawn_indices.iter() {
             let event = assets_status.senders_deposits[index].clone();

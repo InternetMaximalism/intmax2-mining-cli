@@ -1,7 +1,6 @@
 use std::io::{self, Read as _};
 
 use ::console::{style, Term};
-use availability::check_avaliability;
 use configure::recover_withdrawal_private_key;
 use console::initialize_console;
 use ethers::types::H256;
@@ -35,7 +34,6 @@ pub async fn run(mode: Option<RunMode>) -> anyhow::Result<()> {
 
     let is_interactive = mode.is_none();
 
-    check_avaliability().await?;
     if is_interactive {
         interactive::interactive().await?;
     }

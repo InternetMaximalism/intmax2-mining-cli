@@ -11,8 +11,19 @@ use crate::{
     cli::console::{print_status, print_warning},
     external_api::contracts::utils::{get_account_nonce, get_balance, get_client, get_gas_price},
     state::{prover::Prover, state::State},
-    utils::{config::Settings, env_config::EnvConfig},
+    utils::{config::Settings, env_config::EnvConfig, time::sleep_for},
 };
+
+pub fn set_max_priority_fee(
+    tx: &mut ethers::contract::builders::ContractCall<
+        SignerMiddleware<Provider<Http>, Wallet<SigningKey>>,
+        (),
+    >,
+) {
+    let max_priorify_fee = Settings::load().unwrap().blockchain.max_priority_fee;
+    let inner_tx = tx.tx.as_eip1559_mut().expect("tx is not EIP1559");
+    *inner_tx = inner_tx.clone().max_priority_fee_per_gas(max_priorify_fee);
+}
 
 pub async fn handle_contract_call<S: ToString>(
     tx: ethers::contract::builders::ContractCall<
@@ -84,10 +95,10 @@ pub async fn insuffient_balance_instruction(
         let new_balance = get_balance(address).await?;
         if new_balance > required_balance {
             print_status("Balance updated");
-            tokio::time::sleep(std::time::Duration::from_secs(10)).await;
+            sleep_for(10);
             break;
         }
-        tokio::time::sleep(std::time::Duration::from_secs(10)).await;
+        sleep_for(10);
     }
     Ok(())
 }
@@ -112,10 +123,7 @@ pub async fn await_until_low_gas_price() -> anyhow::Result<()> {
             ethers::utils::format_units(current_gas_price.clone(), "gwei").unwrap(),
             ethers::utils::format_units(max_gas_price.clone(), "gwei").unwrap(),
         ));
-        tokio::time::sleep(std::time::Duration::from_secs(
-            high_gas_retry_inverval_in_sec,
-        ))
-        .await;
+        sleep_for(high_gas_retry_inverval_in_sec);
     }
     Ok(())
 }

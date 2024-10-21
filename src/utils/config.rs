@@ -5,12 +5,16 @@ use serde::Deserialize;
 
 use crate::utils::network::get_network;
 
-use super::{errors::CLIError, file::get_data_path};
+use super::{
+    errors::CLIError,
+    file::{create_file_with_content, get_data_path},
+    network::Network,
+};
 
-fn config_path() -> PathBuf {
+fn config_path(network: Network) -> PathBuf {
     get_data_path()
         .unwrap()
-        .join(format!("config.{}.toml", get_network()))
+        .join(format!("config.{}.toml", network))
 }
 
 #[derive(Clone, Debug, Deserialize)]
@@ -43,6 +47,7 @@ pub struct Blockchain {
     pub token_address: String,
     pub single_deposit_gas: u64,
     pub single_claim_gas: u64,
+    pub max_priority_fee: u64,
 }
 
 #[derive(Clone, Debug, Deserialize)]
@@ -64,11 +69,33 @@ pub struct Service {
 impl Settings {
     pub fn load() -> anyhow::Result<Self> {
         let s = Config::builder()
-            .add_source(File::from(config_path()))
+            .add_source(File::from(config_path(get_network())))
             .build()?;
         let s = s
             .try_deserialize()
             .map_err(|e| CLIError::ParseError(format!("Failed to parse config: {:?}", e)))?;
         Ok(s)
+    }
+}
+
+const BASE_SEPOLIA_CONFIG: &'static [u8] = include_bytes!("../../config/config.base-sepolia.toml");
+const BASE_CONFIG: &'static [u8] = include_bytes!("../../config/config.base.toml");
+const HOLESKY_CONFIG: &'static [u8] = include_bytes!("../../config/config.holesky.toml");
+const MAINNET_CONFIG: &'static [u8] = include_bytes!("../../config/config.mainnet.toml");
+
+pub fn create_config_files() -> anyhow::Result<()> {
+    create_file_with_content(&config_path(Network::BaseSepolia), BASE_SEPOLIA_CONFIG)?;
+    create_file_with_content(&config_path(Network::Base), BASE_CONFIG)?;
+    create_file_with_content(&config_path(Network::Holesky), HOLESKY_CONFIG)?;
+    create_file_with_content(&config_path(Network::Mainnet), MAINNET_CONFIG)?;
+    Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+
+    #[test]
+    fn test_create_config_files() {
+        super::create_config_files().unwrap();
     }
 }

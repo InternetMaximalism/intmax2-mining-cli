@@ -1,11 +1,13 @@
 use clap::{arg, command, Parser};
-use cli::{console::print_error, press_enter_to_continue, run};
+use cli::{availability::check_avaliability, console::print_error, press_enter_to_continue, run};
 use dotenv::dotenv;
-use external_api::github::fetch_config_file_from_github;
 use simplelog::{Config, LevelFilter, WriteLogger};
 use state::mode::RunMode;
 use std::{fs::File, path::PathBuf};
-use utils::file::{create_file_with_content, get_data_path};
+use utils::{
+    config::{create_config_files, Settings},
+    file::{create_file_with_content, get_data_path},
+};
 
 pub mod cli;
 pub mod constants;
@@ -54,7 +56,10 @@ async fn main() {
         Ok(_) => {}
         Err(e) => {
             print_error(format!("{}", e.to_string()));
-            press_enter_to_continue();
+            if is_interactive {
+                // Because Windows closes the console window immediately, we need to wait for the user to see the error message
+                press_enter_to_continue();
+            }
         }
     }
 }
@@ -64,10 +69,11 @@ async fn set_up() -> anyhow::Result<()> {
     create_file_with_content(&log_file_path, &[])?;
     let log_file = File::create(log_file_path)?;
     WriteLogger::init(LevelFilter::Info, Config::default(), log_file)?;
+    create_config_files()?;
 
-    let does_not_fetch_config = std::env::var("NOT_FETCH_CONFIG").is_ok();
-    if !does_not_fetch_config {
-        fetch_config_file_from_github().await?;
-    }
+    // check loading test
+    Settings::load()?;
+
+    check_avaliability().await?;
     Ok(())
 }

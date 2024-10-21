@@ -10,6 +10,7 @@ use crate::{
         contracts::events::Deposited,
         intmax::gnark::{fetch_gnark_proof, gnark_start_prove},
     },
+    services::utils::initialize_prover,
     state::{key::Key, state::State},
     utils::config::Settings,
 };
@@ -17,11 +18,12 @@ use crate::{
 use super::*;
 
 pub async fn single_claim_task(
-    state: &State,
+    state: &mut State,
     key: &Key,
     is_short_term: bool,
     events: &[Deposited],
 ) -> anyhow::Result<()> {
+    initialize_prover(state).await?;
     from_step1(state, key, is_short_term, events).await?;
     Ok(())
 }
@@ -186,7 +188,7 @@ mod tests {
         let not_claimed_events = assets_status.get_not_claimed_events(is_short_term);
         assert!(not_claimed_events.len() > 0);
 
-        single_claim_task(&state, &dummy_key, is_short_term, &not_claimed_events)
+        single_claim_task(&mut state, &dummy_key, is_short_term, &not_claimed_events)
             .await
             .unwrap();
     }

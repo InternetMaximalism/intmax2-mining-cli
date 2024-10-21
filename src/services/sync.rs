@@ -11,13 +11,13 @@ use crate::{
         config::Settings,
         deposit_hash_tree::DepositHashTree,
         eligible_tree_with_map::EligibleTreeWithMap,
+        time::sleep_for,
     },
 };
 
 use anyhow::ensure;
 use chrono::{NaiveDateTime, Utc};
 use log::{info, warn};
-use tokio::time::sleep;
 
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
@@ -91,7 +91,7 @@ pub async fn sync_trees(
                 Err(e) => {
                     warn!("Feched tree is invalid in try {}: {}", try_number, e);
                     try_number += 1;
-                    sleep(std::time::Duration::from_secs(30)).await;
+                    sleep_for(30);
                 }
             }
         }

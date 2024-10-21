@@ -15,6 +15,7 @@ use crate::{
         config::Settings,
         network::{get_network, Network},
         retry::with_retry,
+        time::sleep_for,
     },
 };
 
@@ -129,6 +130,7 @@ pub async fn submit_withdrawal(
         let withdrawal_id = start_withdrawal(pis, proof).await?;
         let max_try = 5;
         let mut try_count = 0;
+        let cooldown = 60;
         loop {
             try_count += 1;
             if try_count > max_try {
@@ -138,11 +140,11 @@ pub async fn submit_withdrawal(
             match status.status.as_str() {
                 "pending" => {
                     info!("withdrawal is pending");
-                    tokio::time::sleep(std::time::Duration::from_secs(60)).await;
+                    sleep_for(cooldown);
                 }
                 "processing" => {
                     info!("withdrawal is processing");
-                    tokio::time::sleep(std::time::Duration::from_secs(60)).await;
+                    sleep_for(cooldown);
                 }
                 "completed" => {
                     let tx_hash = H256::from_str(&status.transaction_hash.unwrap()).unwrap();
@@ -192,7 +194,7 @@ async fn localnet_withdrawal(
     let tx = int1.withdraw(public_inputs, proof);
     let pending_tx: PendingTransaction<Http> = match tx.send().await {
         Ok(tx) => {
-            tokio::time::sleep(std::time::Duration::from_secs(5)).await;
+            sleep_for(5);
             tx
         }
         Err(e) => {

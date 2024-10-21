@@ -1,5 +1,3 @@
-use std::time::{SystemTime, UNIX_EPOCH};
-
 use ethers::types::Address;
 use intmax2_zkp::wrapper_config::plonky2_config::PoseidonBN128GoldilocksConfig;
 
@@ -10,7 +8,11 @@ use plonky2::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::utils::{config::Settings, retry::with_retry};
+use crate::utils::{
+    config::Settings,
+    retry::with_retry,
+    time::{sleep_for, sleep_until},
+};
 
 use super::error::{IntmaxError, IntmaxErrorResponse};
 
@@ -132,7 +134,7 @@ pub async fn fetch_gnark_proof(
         .unwrap()
         .api
         .gnark_get_proof_cooldown_in_sec;
-    sleep_until(start_query_time).await;
+    sleep_until(start_query_time);
 
     let max_tries = 4;
     let mut tries = 0;
@@ -151,19 +153,6 @@ pub async fn fetch_gnark_proof(
                 "gnark server did not return proof in time".to_string(),
             ));
         }
-        tokio::time::sleep(tokio::time::Duration::from_secs(cooldown)).await;
-    }
-}
-
-async fn sleep_until(target_time: u64) {
-    loop {
-        let now = SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .unwrap()
-            .as_secs();
-        if now >= target_time {
-            break;
-        }
-        tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
+        sleep_for(cooldown);
     }
 }

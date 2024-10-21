@@ -2,6 +2,8 @@ use std::{future::Future, time::Duration};
 
 use log::warn;
 
+use crate::utils::time::sleep_for;
+
 const MAX_RETRIES: u32 = 5;
 const INITIAL_DELAY: u64 = 1000;
 
@@ -27,7 +29,7 @@ where
                     e.to_string(),
                     delay
                 );
-                tokio::time::sleep(delay).await;
+                sleep_for(delay.as_secs());
                 retries += 1;
                 delay *= 2; // Exponential backoff
             }

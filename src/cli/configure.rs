@@ -381,13 +381,19 @@ pub fn recover_withdrawal_private_key(config: &EnvConfig) -> anyhow::Result<H256
     let key = if !config.encrypt {
         config.withdrawal_private_key.clone().unwrap()
     } else {
-        let password = Password::new().with_prompt("Password").interact()?;
-        let key: H256 = decrypt(
-            &password,
-            config.encrypted_withdrawal_private_key.as_ref().unwrap(),
-        )
-        .map_err(|_| anyhow::anyhow!("Invalid password"))?;
-        key
+        loop {
+            let password = Password::new().with_prompt("Password").interact()?;
+            match decrypt(
+                &password,
+                config.encrypted_withdrawal_private_key.as_ref().unwrap(),
+            ) {
+                Ok(key) => break key,
+                Err(_) => {
+                    let colored_message = format!("{}", style("Invalid password").red());
+                    println!("{}", colored_message);
+                }
+            }
+        }
     };
     Ok(key)
 }

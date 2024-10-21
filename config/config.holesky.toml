@@ -24,6 +24,7 @@ mining_min_cooldown_in_sec = 20
 mining_max_cooldown_in_sec = 200
 loop_cooldown_in_sec = 10
 high_gas_retry_inverval_in_sec = 10
+max_priority_fee = 1000000000 # 1 gwei
 
 [env]
 default_max_gas_price ="100"
