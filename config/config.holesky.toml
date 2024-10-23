@@ -4,6 +4,7 @@ withdrawal_gnark_prover_url = "https://holesky.v1.mining-gateway.intmax.xyz/v1/g
 claim_gnark_prover_url = "https://holesky.v1.mining-gateway.intmax.xyz/v1/gnark-claim-circuit"
 withdrawal_server_url="https://holesky.v1.mining-gateway.intmax.xyz/v1/withdrawal"
 circulation_server_url="https://holesky.v1.mining-gateway.intmax.xyz/v1/mining"
+gas_server_url=""
 tree_data_repository="InternetMaximalism/intmax2-v1-mining-mock"
 tree_data_directory="holesky-data"
 tree_data_branch="main"

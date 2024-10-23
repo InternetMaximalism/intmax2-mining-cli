@@ -14,7 +14,7 @@ use crate::{
         minter::{get_minter_contract_with_signer, minter_v1},
         utils::get_wallet,
     },
-    services::utils::{await_until_low_gas_price, handle_contract_call, set_max_priority_fee},
+    services::utils::{await_until_low_gas_price, handle_contract_call, set_gas_price},
 };
 
 pub async fn claim_tokens(
@@ -53,7 +53,7 @@ pub async fn claim_tokens(
         pis.clone(),
         proof.clone(),
     );
-    set_max_priority_fee(&mut tx);
+    set_gas_price(&mut tx).await?;
     info!("Calling claim_tokens: tx {:?}", tx);
     let _tx_hash = handle_contract_call(tx, claim_address, "claim", "claim").await?;
     print_log(format!("Successfully claimed"));

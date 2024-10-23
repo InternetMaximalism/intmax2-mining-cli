@@ -6,7 +6,7 @@ use intmax2_zkp::{
 use crate::{
     cli::console::print_log,
     external_api::contracts::{int1::get_int1_contract_with_signer, utils::get_account_nonce},
-    services::utils::{await_until_low_gas_price, handle_contract_call, set_max_priority_fee},
+    services::utils::{await_until_low_gas_price, handle_contract_call, set_gas_price},
     state::{key::Key, state::State},
     utils::derive_key::{derive_pubkey_from_private_key, derive_salt_from_private_key_nonce},
 };
@@ -28,7 +28,7 @@ pub async fn deposit_task(_state: &State, key: &Key, mining_unit: U256) -> anyho
     let mut tx = int1
         .deposit_native_token(pubkey_salt_hash)
         .value(mining_unit);
-    set_max_priority_fee(&mut tx);
+    set_gas_price(&mut tx).await?;
     tx.tx.set_nonce(nonce);
     let _tx_hash = handle_contract_call(tx, deposit_address, "deposit", "deposit").await?;
     print_log(format!("Successfully deposited"));
