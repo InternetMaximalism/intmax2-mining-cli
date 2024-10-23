@@ -31,6 +31,7 @@ pub struct Api {
     pub withdrawal_gnark_prover_url: String,
     pub claim_gnark_prover_url: String,
     pub circulation_server_url: String,
+    pub gas_server_url: String,
     pub tree_data_repository: String,
     pub tree_data_directory: String,
     pub tree_data_branch: String,
@@ -47,7 +48,6 @@ pub struct Blockchain {
     pub token_address: String,
     pub single_deposit_gas: u64,
     pub single_claim_gas: u64,
-    pub max_priority_fee: u64,
 }
 
 #[derive(Clone, Debug, Deserialize)]

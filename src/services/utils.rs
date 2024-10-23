@@ -9,20 +9,33 @@ use ethers::{
 
 use crate::{
     cli::console::{print_status, print_warning},
-    external_api::contracts::utils::{get_account_nonce, get_balance, get_client, get_gas_price},
+    external_api::{
+        contracts::utils::{get_account_nonce, get_balance, get_client, get_gas_price},
+        intmax::gas_estimation::get_gas_estimation,
+    },
     state::{prover::Prover, state::State},
-    utils::{config::Settings, env_config::EnvConfig, time::sleep_for},
+    utils::{config::Settings, env_config::EnvConfig, network::is_legacy, time::sleep_for},
 };
 
-pub fn set_max_priority_fee(
+pub async fn set_gas_price(
     tx: &mut ethers::contract::builders::ContractCall<
         SignerMiddleware<Provider<Http>, Wallet<SigningKey>>,
         (),
     >,
-) {
-    let max_priorify_fee = Settings::load().unwrap().blockchain.max_priority_fee;
-    let inner_tx = tx.tx.as_eip1559_mut().expect("tx is not EIP1559");
-    *inner_tx = inner_tx.clone().max_priority_fee_per_gas(max_priorify_fee);
+) -> anyhow::Result<()> {
+    if is_legacy() {
+        return Ok(()); // gas server does not support legacy environment.
+    }
+    let result = get_gas_estimation().await?;
+    let inner_tx = tx
+        .tx
+        .as_eip1559_mut()
+        .ok_or(anyhow::anyhow!("EIP-1559 tx expected"))?;
+    *inner_tx = inner_tx
+        .clone()
+        .max_priority_fee_per_gas(result.max_priority_fee_per_gas)
+        .max_fee_per_gas(result.max_fee_per_gas);
+    Ok(())
 }
 
 pub async fn handle_contract_call<S: ToString>(
