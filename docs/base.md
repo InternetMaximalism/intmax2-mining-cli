@@ -128,7 +128,8 @@ Token Contract Address: `0x2699CD7f883DecC464171a7A92f4CcC4eF220fa2`
 Token Symbol: `ITX`
 
 **For the Mainnet**:<br>
-Token Contract Address: ``Token Symbol:`ITX`
+Token Contract Address: `0x58f434698571346f77Bc755cfDC89c5708E7b184`
+Token Symbol:`ITX`
 
 3. Click “Next”
 
@@ -157,7 +158,8 @@ Token Contract Address: `0x2699CD7f883DecC464171a7A92f4CcC4eF220fa2`
 Token Symbol: `ITX`
 
 **For the Mainnet**:<br>
-Token Contract Address: ``Token Symbol:`ITX`
+Token Contract Address: `0x58f434698571346f77Bc755cfDC89c5708E7b184`
+Token Symbol:`ITX`
 
 3. You can see the ITX token in your wallet.
 
