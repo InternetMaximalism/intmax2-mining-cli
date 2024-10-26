@@ -46,7 +46,7 @@ pub async fn mining_loop(
     loop {
         let assets_status = state.sync_and_fetch_assets(&key).await?;
         let is_qualified = !get_circulation(key.deposit_address).await?.is_excluded;
-        let will_deposit = assets_status.senders_deposits.len() < mining_times as usize
+        let will_deposit = assets_status.effective_deposit_times() < mining_times as usize
             && assets_status.pending_indices.is_empty()
             && is_qualified;
 
@@ -62,7 +62,7 @@ pub async fn mining_loop(
                 "Deposit address {:?}: Qualified: {}. Deposits {}/{}. Cancelled {}.",
                 key.deposit_address,
                 is_qualified,
-                assets_status.senders_deposits.len(),
+                assets_status.effective_deposit_times(),
                 mining_times,
                 assets_status.cancelled_indices.len(),
             ));

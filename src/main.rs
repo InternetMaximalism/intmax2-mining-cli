@@ -1,9 +1,12 @@
 use clap::{arg, command, Parser};
-use cli::{availability::check_avaliability, console::print_error, press_enter_to_continue, run};
+use cli::{
+    availability::check_avaliability, configure::select_network, console::print_error,
+    press_enter_to_continue, run,
+};
 use dotenv::dotenv;
 use simplelog::{Config, LevelFilter, WriteLogger};
 use state::mode::RunMode;
-use std::{fs::File, path::PathBuf};
+use std::{env, fs::File, path::PathBuf};
 use utils::{
     config::{create_config_files, Settings},
     file::{create_file_with_content, get_data_path},
@@ -37,12 +40,7 @@ async fn main() {
     let mode = Args::parse().command;
     let is_interactive = mode.is_none();
 
-    // load the .env file if not in interactive mode
-    if !is_interactive {
-        dotenv().ok();
-    }
-
-    match set_up().await {
+    match set_up(is_interactive).await {
         Ok(_) => {}
         Err(e) => {
             print_error(format!("Error during setup: {}", e.to_string()));
@@ -64,7 +62,16 @@ async fn main() {
     }
 }
 
-async fn set_up() -> anyhow::Result<()> {
+async fn set_up(is_interactive: bool) -> anyhow::Result<()> {
+    if is_interactive {
+        // select network if in interactive mode
+        let network = select_network()?;
+        env::set_var("NETWORK", network.to_string());
+    } else {
+        // load the .env file if not in interactive mode
+        dotenv().ok();
+    }
+
     let log_file_path = get_log_file_path()?;
     create_file_with_content(&log_file_path, &[])?;
     let log_file = File::create(log_file_path)?;

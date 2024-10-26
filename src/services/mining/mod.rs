@@ -45,6 +45,8 @@ pub async fn mining_task(
         cancel_task(state, key, event).await.map_err(|e| {
             CLIError::InternalError(format!("Failed to cancel a rejected deposit: {:#}", e))
         })?;
+        // Halt the CLI if a deposit is rejected to prevent further deposits
+        return Err(CLIError::InternalError("Deposit is rejected".to_string()).into());
     }
 
     // withdrawal

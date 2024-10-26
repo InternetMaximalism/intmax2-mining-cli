@@ -1,30 +1,23 @@
-use std::{collections::HashMap, env};
+use std::collections::HashMap;
 
 use console::style;
 use dialoguer::Select;
 use ethers::types::Address;
 use strum::IntoEnumIterator;
 
-use crate::{
-    cli::configure::select_network,
-    utils::{
-        env_config::EnvConfig,
-        network::{get_network, is_legacy, Network},
-    },
+use crate::utils::{
+    env_config::EnvConfig,
+    network::{get_network, is_legacy, Network},
 };
 
 use super::configure::{modify_config, new_config};
 
 pub async fn interactive() -> anyhow::Result<()> {
-    let network = select_network()?;
-    env::set_var("NETWORK", network.to_string());
-
     if is_legacy() {
         legacy_select_or_create_config().await?;
     } else {
         select_or_create_config().await?;
     }
-
     address_duplication_check()?;
     Ok(())
 }

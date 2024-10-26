@@ -204,6 +204,12 @@ impl AssetsStatus {
         }
     }
 
+    /// Retruns the times of deposits that are not cancelled
+    pub fn effective_deposit_times(&self) -> usize {
+        assert!(self.senders_deposits.len() >= self.cancelled_indices.len());
+        self.senders_deposits.len() - self.cancelled_indices.len() // this never underflows
+    }
+
     pub fn no_remaining(&self) -> bool {
         let income = self.senders_deposits.len();
         let outcome = self.withdrawn_indices.len() + self.cancelled_indices.len();
