@@ -51,7 +51,7 @@ pub async fn accounts_status(
             key.deposit_address,
             pretty_format_u256(deposit_balance),
             is_qualified,
-            assets_status.senders_deposits.len(),
+            assets_status.effective_deposit_times(),
             mining_times,
             pretty_format_u256(assets_status.short_term_claimable_amount)
         );

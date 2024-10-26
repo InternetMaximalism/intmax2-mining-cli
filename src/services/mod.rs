@@ -62,7 +62,7 @@ pub async fn mining_loop(
                 "Deposit address {:?}: Qualified: {}. Deposits {}/{}. Cancelled {}.",
                 key.deposit_address,
                 is_qualified,
-                assets_status.senders_deposits.len(),
+                assets_status.effective_deposit_times(),
                 mining_times,
                 assets_status.cancelled_indices.len(),
             ));
