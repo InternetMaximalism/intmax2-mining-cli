@@ -61,7 +61,7 @@ When you double-click the CLI, you'll see a screen like this:
 You can move the cursor with the arrow keys, select `mainnet` and press `Enter`.
 
 
-### Setting Up - For First Time Users
+### First-Time User Setup
 
 
 1. **Enter Alchemy API key**: Select `Alchemy` and enter your API key which you obtained from [How to get your Alchemy API key](./alchemy.md) guide. Your API key will not be displayed. Press `Enter` after pasting it.
@@ -114,7 +114,7 @@ You would be shown a prompt saying only claiming and withdrawal is allowed for n
 <div align="center"><img src="../assets/mainnet-instruction/k9.png" width="600" alt="Mining CLI"></div>
 
 
-### Setting Up - For Existing Users
+### Setup for Returning Users
 
 
 1. **Continue**:
@@ -165,8 +165,7 @@ Here is the explanation of each mode:
 For this time, please select Mining.
 
 
-### Mining Process
-
+### How Mining Works
 
 1. **Deposit ETH to your deposit address**:
 
