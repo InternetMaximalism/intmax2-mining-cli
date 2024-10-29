@@ -13,9 +13,7 @@ https://discord.gg/nByKNNhyvn
 
 ## Prerequisites
 
-
 Before you begin, please ensure you have the following:
-
 
 - **Ethereum (ETH)**: A minimum of 0.1 ETH on Base mainnet plus additional ETH for gas fees.
 - **Alchemy API key**: Please refer to the [How to get your Alchemy API key](./alchemy.md) guide to obtain your API key.
@@ -24,17 +22,26 @@ Before you begin, please ensure you have the following:
 
 ## Download the CLI
 
-
 1. Navigate to the [Releases](https://github.com/InternetMaximalism/intmax2-mining-cli/releases) page of this repository.
 2. Download the ZIP file appropriate for your operating system.
 3. Extract the contents of the ZIP file.
 
 
+## Quick Links
+
+- [Set Up the Mining CLI](#setting-up-mining-cli)
+- [First-Time User Setup](#setting-up-for-first-time-users)
+- [Setup for Returning Users](#setting-up-for-existing-users)
+- [How Mining Works](#mining-process)
+- [Claim ITX Tokens](#claiming-itx-tokens)
+- [Withdraw Your ETH](#withdraw-eth)
+- [Export Deposit Private Keys](#exporting-deposit-private-keys)
+- [Check for CLI Updates](#check-available-cli-updates)
+
+
 ## Step-by-Step Instructions
 
-
 ### Setting Up Mining CLI
-
 
 1.  **Lauching the CLI** Double-click on the mining-cli shown in this image to launch.
 
