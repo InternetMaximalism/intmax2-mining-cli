@@ -3,9 +3,7 @@
 
 This guide explains how to start mining on the Base network using the intmax2 mining CLI. The instructions below describe the process for the Base Mainnet.
 
-
 ❗ Note: The tokens you receive through mining on the mainnet currently cannot be transferred to other addresses, but this feature will be enabled in the future.
-
 
 🆘 Support: please join this with an anonymous account
 https://discord.gg/nByKNNhyvn
@@ -30,9 +28,9 @@ Before you begin, please ensure you have the following:
 ## Quick Links
 
 - [Set Up the Mining CLI](#setting-up-mining-cli)
-- [First-Time User Setup](#setting-up-for-first-time-users)
-- [Setup for Returning Users](#setting-up-for-existing-users)
-- [How Mining Works](#mining-process)
+- [First-Time User Setup](#first-time-user-setup)
+- [Setup for Returning Users](#set-up-for-returning-users)
+- [How Mining Works](#how-mining-works)
 - [Claim ITX Tokens](#claiming-itx-tokens)
 - [Withdraw Your ETH](#withdraw-eth)
 - [Export Deposit Private Keys](#exporting-deposit-private-keys)
