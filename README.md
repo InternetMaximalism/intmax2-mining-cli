@@ -99,9 +99,6 @@ A: Yes, but the contract is currently upgradable. The intmax team plans to relin
 Q: What are the costs associated with mining?<br>
 A: Gas fees are incurred for each deposit, withdrawal, and claim. The gas fee for withdrawal is deducted from the withdrawn ETH.
 
-Q: How is the amount of ITX that can be mined determined?<br>
-A: The amount of ITX that can be mined is proportional to the amount of ETH deposited. For example, if you deposit 0.1 ETH 10 times, you can earn the same amount of ITX as if you deposited 1 ETH. Also, the rewards for that day are determined based on the proportion of the ETH deposited that day to the ETH you deposited.
-
 Q: What actions will disqualify me from receiving ITX token rewards?<br>
 A: Avoid actions that link your deposit and withdrawal addresses. For example, if you directly or indirectly transfer funds from your withdrawal address to your deposit address, you will not be eligible for ITX rewards. Also, using the funds in the withdrawal address for the next mining directly is considered a linking action.
 
