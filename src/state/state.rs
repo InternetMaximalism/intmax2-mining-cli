@@ -15,7 +15,7 @@ pub struct State {
     pub long_term_eligible_tree: EligibleTreeWithMap,
     pub last_tree_feched_at: NaiveDateTime,
     pub last_deposit_synced_block: u64,
-    pub prover: Option<Prover>,
+    pub prover: Prover,
 }
 
 impl State {
@@ -26,13 +26,8 @@ impl State {
             long_term_eligible_tree: EligibleTreeWithMap::new(),
             last_tree_feched_at: NaiveDateTime::default(),
             last_deposit_synced_block: 0,
-            prover: None,
+            prover: Prover::new(),
         }
-    }
-
-    pub fn build_circuit(&mut self) -> anyhow::Result<()> {
-        self.prover = Some(Prover::new());
-        Ok(())
     }
 
     pub async fn sync_trees(&mut self) -> anyhow::Result<()> {

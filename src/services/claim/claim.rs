@@ -10,7 +10,6 @@ use crate::{
         contracts::events::Deposited,
         intmax::gnark::{fetch_gnark_proof, gnark_start_prove},
     },
-    services::utils::initialize_prover,
     state::{key::Key, state::State},
     utils::config::Settings,
 };
@@ -23,7 +22,6 @@ pub async fn single_claim_task(
     is_short_term: bool,
     events: &[Deposited],
 ) -> anyhow::Result<()> {
-    initialize_prover(state).await?;
     from_step1(state, key, is_short_term, events).await?;
     Ok(())
 }
@@ -71,22 +69,14 @@ async fn from_step2(state: &State, key: &Key) -> anyhow::Result<()> {
     print_status("Claim: proving with plonky2");
     let mut status = temp::ClaimStatus::new()?;
     ensure!(status.next_step == temp::ClaimStep::Plonky2Prove);
-    ensure!(state.prover.is_some(), "Prover is not initialized");
     let mut cyclic_proof = None;
     for w in &status.witness {
-        let proof = state
-            .prover
-            .as_ref()
-            .unwrap()
-            .claim_processor
-            .prove(w, &cyclic_proof)?;
+        let proof = state.prover.claim_processor().prove(w, &cyclic_proof)?;
         cyclic_proof = Some(proof);
     }
     let plonky2_proof = state
         .prover
-        .as_ref()
-        .unwrap()
-        .claim_wrapper_processor
+        .claim_wrapper_processor()
         .prove(&cyclic_proof.unwrap())?;
     status.plonlky2_proof = Some(plonky2_proof.clone());
     status.next_step = temp::ClaimStep::GnarkStart;
@@ -167,10 +157,7 @@ async fn from_step5(_state: &State, key: &Key) -> anyhow::Result<()> {
 
 #[cfg(test)]
 mod tests {
-    use crate::{
-        state::prover::Prover,
-        test::{get_dummy_keys, get_dummy_state},
-    };
+    use crate::test::{get_dummy_keys, get_dummy_state};
 
     use super::*;
 
@@ -182,8 +169,6 @@ mod tests {
         let mut state = get_dummy_state().await;
         let assets_status = state.sync_and_fetch_assets(&dummy_key).await.unwrap();
 
-        let prover = Prover::new();
-        state.prover = Some(prover);
         let is_short_term = true;
         let not_claimed_events = assets_status.get_not_claimed_events(is_short_term);
         assert!(not_claimed_events.len() > 0);
