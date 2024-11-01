@@ -71,8 +71,10 @@ pub async fn sync_trees(
             // retry if TreeRootSyncError occurs
             let update = || async {
                 if let Some(bin_deposit_tree) = bin_deposit_tree {
-                    *deposit_hash_tree =
+                    let (new_deposit_hash_tree, new_block_number) =
                         parse_and_validate_bin_deposit_tree(bin_deposit_tree).await?;
+                    *deposit_hash_tree = new_deposit_hash_tree;
+                    *last_deposit_block_number = new_block_number;
                 }
                 if let Some(bin_short_term_eligible_tree) = bin_short_term_eligible_tree {
                     *short_term_eligible_tree =
@@ -109,7 +111,7 @@ pub async fn sync_trees(
 
 async fn parse_and_validate_bin_deposit_tree(
     bin_deposit_tree: BinDepositTree,
-) -> Result<DepositHashTree, Error> {
+) -> Result<(DepositHashTree, u64), Error> {
     let deposit_tree_info: DepositTreeInfo = bin_deposit_tree
         .try_into()
         .map_err(|e: anyhow::Error| Error::TreeDeserializationError(e.to_string()))?;
@@ -123,7 +125,7 @@ async fn parse_and_validate_bin_deposit_tree(
             deposit_tree_info.root
         )));
     }
-    Ok(deposit_tree_info.tree)
+    Ok((deposit_tree_info.tree, deposit_tree_info.block_number))
 }
 
 async fn parse_and_validate_bin_eligible_tree(
