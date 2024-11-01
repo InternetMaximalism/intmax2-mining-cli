@@ -6,6 +6,8 @@ use mining_circuit_v1::{
 };
 use plonky2::{field::goldilocks_field::GoldilocksField, plonk::config::PoseidonGoldilocksConfig};
 
+use crate::cli::console::print_status;
+
 type F = GoldilocksField;
 const D: usize = 2;
 type C = PoseidonGoldilocksConfig;
@@ -26,16 +28,23 @@ impl Prover {
     }
 
     pub fn withdrawal_wrapper_processor(&self) -> &SimpleWithdrawalWrapperProcessor {
-        self.withdrawal_wrapper_processor
-            .get_or_init(|| SimpleWithdrawalWrapperProcessor::new())
+        self.withdrawal_wrapper_processor.get_or_init(|| {
+            print_status("Waiting for withdrawal prover to be ready");
+            SimpleWithdrawalWrapperProcessor::new()
+        })
     }
 
     pub fn claim_processor(&self) -> &ClaimProcessor<F, C, D> {
-        self.claim_processor.get_or_init(|| ClaimProcessor::new())
+        self.claim_processor.get_or_init(|| {
+            print_status("Waiting for claim prover to be ready");
+            ClaimProcessor::new()
+        })
     }
 
     pub fn claim_wrapper_processor(&self) -> &ClaimWrapperProcessor {
-        self.claim_wrapper_processor
-            .get_or_init(|| ClaimWrapperProcessor::new(&self.claim_processor().claim_circuit))
+        self.claim_wrapper_processor.get_or_init(|| {
+            print_status("Waiting for claim wrapper prover to be ready");
+            ClaimWrapperProcessor::new(&self.claim_processor().claim_circuit)
+        })
     }
 }
