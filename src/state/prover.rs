@@ -1,48 +1,50 @@
-use log::info;
+use std::sync::OnceLock;
+
 use mining_circuit_v1::{
     claim::{claim_processor::ClaimProcessor, claim_wrapper_processor::ClaimWrapperProcessor},
     withdrawal::simple_withdrawal_wrapper_processor::SimpleWithdrawalWrapperProcessor,
 };
 use plonky2::{field::goldilocks_field::GoldilocksField, plonk::config::PoseidonGoldilocksConfig};
 
+use crate::cli::console::print_status;
+
 type F = GoldilocksField;
 const D: usize = 2;
 type C = PoseidonGoldilocksConfig;
 
 pub struct Prover {
-    pub withdrawal_wrapper_processor: SimpleWithdrawalWrapperProcessor,
-    pub claim_processor: ClaimProcessor<F, C, D>,
-    pub claim_wrapper_processor: ClaimWrapperProcessor,
+    withdrawal_wrapper_processor: OnceLock<SimpleWithdrawalWrapperProcessor>,
+    claim_processor: OnceLock<ClaimProcessor<F, C, D>>,
+    claim_wrapper_processor: OnceLock<ClaimWrapperProcessor>,
 }
 
 impl Prover {
     pub fn new() -> Self {
-        let withdrawal_wrapper_processor = SimpleWithdrawalWrapperProcessor::new();
-        let claim_processor = ClaimProcessor::new();
-        let claim_wrapper_processor = ClaimWrapperProcessor::new(&claim_processor.claim_circuit);
-
-        let withdrawal_digest = serde_json::to_string(
-            &withdrawal_wrapper_processor
-                .wrapper_circuit1
-                .data
-                .verifier_only
-                .circuit_digest,
-        )
-        .unwrap();
-        let claim_digest = serde_json::to_string(
-            &claim_wrapper_processor
-                .wrapper_circuit1
-                .data
-                .verifier_only
-                .circuit_digest,
-        )
-        .unwrap();
-        info!("Withdrawal digest: {}", withdrawal_digest);
-        info!("Claim digest: {}", claim_digest);
         Self {
-            withdrawal_wrapper_processor,
-            claim_processor,
-            claim_wrapper_processor,
+            withdrawal_wrapper_processor: OnceLock::new(),
+            claim_processor: OnceLock::new(),
+            claim_wrapper_processor: OnceLock::new(),
         }
+    }
+
+    pub fn withdrawal_wrapper_processor(&self) -> &SimpleWithdrawalWrapperProcessor {
+        self.withdrawal_wrapper_processor.get_or_init(|| {
+            print_status("Waiting for withdrawal prover to be ready");
+            SimpleWithdrawalWrapperProcessor::new()
+        })
+    }
+
+    pub fn claim_processor(&self) -> &ClaimProcessor<F, C, D> {
+        self.claim_processor.get_or_init(|| {
+            print_status("Waiting for claim prover to be ready");
+            ClaimProcessor::new()
+        })
+    }
+
+    pub fn claim_wrapper_processor(&self) -> &ClaimWrapperProcessor {
+        self.claim_wrapper_processor.get_or_init(|| {
+            print_status("Waiting for claim wrapper prover to be ready");
+            ClaimWrapperProcessor::new(&self.claim_processor().claim_circuit)
+        })
     }
 }

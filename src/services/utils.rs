@@ -13,7 +13,6 @@ use crate::{
         contracts::utils::{get_account_nonce, get_balance, get_client, get_gas_price},
         intmax::gas_estimation::get_gas_estimation,
     },
-    state::{prover::Prover, state::State},
     utils::{config::Settings, env_config::EnvConfig, network::is_legacy, time::sleep_for},
 };
 
@@ -137,15 +136,6 @@ pub async fn await_until_low_gas_price() -> anyhow::Result<()> {
             ethers::utils::format_units(max_gas_price.clone(), "gwei").unwrap(),
         ));
         sleep_for(high_gas_retry_inverval_in_sec);
-    }
-    Ok(())
-}
-
-pub async fn initialize_prover(state: &mut State) -> anyhow::Result<()> {
-    if state.prover.is_none() {
-        print_status("Waiting for prover to be ready");
-        let prover = Prover::new();
-        state.prover = Some(prover);
     }
     Ok(())
 }
