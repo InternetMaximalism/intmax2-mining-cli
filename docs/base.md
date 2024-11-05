@@ -2,6 +2,7 @@
 
 ## Quick Links
 
+- [Token Contract Address](#token-contract-address)
 - [Add Base Sepolia testnet to your MetaMask](#add-base-sepolia-testnet-to-your-metaMask)
 - [Add Base Sepolia testnet to your Intmax wallet](#add-base-sepolia-testnet-to-your-intmax-wallet)
 - [Add Base Mainnet to your MetaMask](#add-base-mainnet-to-your-metaMask)
@@ -10,8 +11,15 @@
 - [Import ITX token to your Intmax wallet](#import-itx-token-to-your-intmax-wallet)
 - [Get testnet ETH](#get-testnet-eth)
 - [How to bridge ETH from Ethereum mainnet to Base](#how-to-bridge-eth-from-ethereum-mainnet-to-base)
-- [Token Contract Address](#token-contract-address)
 
+
+## Token Contract Address
+
+  | ITX Contract | Address |
+| ----------- | ----------- |
+| Network | Address |
+| Base Sepolia | 0x2699CD7f883DecC464171a7A92f4CcC4eF220fa2 |
+| Base Mainnet | 0x58f434698571346f77Bc755cfDC89c5708E7b184 |
 
 ## Add Base Sepolia testnet to your MetaMask
 
@@ -227,12 +235,3 @@ To bridge ETH from Ethereum Mainnet to the Base network, follow the same steps a
 
 <div align="center">
   <img src="../assets/bridge/b9.png" width="800" alt="Mining CLI"></div>
-
-
-## Token Contract Address
-
-  | ITX Contract | Address |
-| ----------- | ----------- |
-| Network | Address |
-| Base Sepolia | 0x2699CD7f883DecC464171a7A92f4CcC4eF220fa2 |
-| Base Mainnet | 0x58f434698571346f77Bc755cfDC89c5708E7b184 |
