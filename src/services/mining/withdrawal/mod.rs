@@ -12,7 +12,7 @@ use crate::{
             withdrawal::submit_withdrawal,
         },
     },
-    services::utils::{await_until_low_gas_price, initialize_prover},
+    services::utils::await_until_low_gas_price,
     state::{key::Key, state::State},
     utils::config::Settings,
 };
@@ -21,7 +21,6 @@ pub mod temp;
 pub mod witness_generation;
 
 pub async fn withdrawal_task(state: &mut State, key: &Key, event: Deposited) -> anyhow::Result<()> {
-    initialize_prover(state).await?;
     from_step1(state, key, event).await?;
     Ok(())
 }
@@ -63,12 +62,9 @@ async fn from_step2(state: &State, key: &Key) -> anyhow::Result<()> {
     print_status("Withdrawal: proving with plonky2");
     let mut status = temp::WithdrawalStatus::new()?;
     ensure!(status.next_step == temp::WithdrawalStep::Plonky2Prove);
-    ensure!(state.prover.is_some(), "Prover is not initialized");
     let plonky2_proof = state
         .prover
-        .as_ref()
-        .unwrap()
-        .withdrawal_wrapper_processor
+        .withdrawal_wrapper_processor()
         .prove(&status.witness)?;
     status.plonlky2_proof = Some(plonky2_proof.clone());
     status.next_step = temp::WithdrawalStep::GnarkStart;
@@ -148,10 +144,7 @@ async fn from_step5(_state: &State, _key: &Key) -> anyhow::Result<()> {
 
 #[cfg(test)]
 mod tests {
-    use crate::{
-        state::prover::Prover,
-        test::{get_dummy_keys, get_dummy_state},
-    };
+    use crate::test::{get_dummy_keys, get_dummy_state};
 
     #[tokio::test]
     #[ignore]
@@ -162,9 +155,6 @@ mod tests {
         let assets_status = state.sync_and_fetch_assets(&dummy_key).await.unwrap();
         let events = assets_status.get_not_withdrawn_events();
         assert!(events.len() > 0);
-
-        let prover = Prover::new();
-        state.prover = Some(prover);
 
         super::withdrawal_task(&mut state, &dummy_key, events[0].clone())
             .await
@@ -177,8 +167,6 @@ mod tests {
         let mut state = get_dummy_state().await;
         state.sync_trees().await.unwrap();
         let dummy_key = get_dummy_keys();
-        let prover = Prover::new();
-        state.prover = Some(prover);
         super::resume_withdrawal_task(&state, &dummy_key)
             .await
             .unwrap();

@@ -6,7 +6,7 @@ use num_bigint::BigUint;
 
 use crate::{
     external_api::contracts::utils::get_address,
-    state::{key::Key, state::State},
+    state::{key::Key, prover::Prover, state::State},
     utils::{deposit_hash_tree::DepositHashTree, eligible_tree_with_map::EligibleTreeWithMap},
 };
 
@@ -40,7 +40,7 @@ pub async fn get_dummy_state() -> State {
         long_term_eligible_tree: eligible_tree.clone(),
         last_tree_feched_at: NaiveDateTime::default(),
         last_deposit_synced_block: 0,
-        prover: None,
+        prover: Prover::new(),
     };
     state
 }
