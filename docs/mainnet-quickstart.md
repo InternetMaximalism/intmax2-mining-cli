@@ -3,9 +3,7 @@
 
 This guide explains how to start mining on the Base network using the intmax2 mining CLI. The instructions below describe the process for the Base Mainnet.
 
-
 ❗ Note: The tokens you receive through mining on the mainnet currently cannot be transferred to other addresses, but this feature will be enabled in the future.
-
 
 🆘 Support: please join this with an anonymous account
 https://discord.gg/nByKNNhyvn
@@ -13,9 +11,7 @@ https://discord.gg/nByKNNhyvn
 
 ## Prerequisites
 
-
 Before you begin, please ensure you have the following:
-
 
 - **Ethereum (ETH)**: A minimum of 0.1 ETH on Base mainnet plus additional ETH for gas fees.
 - **Alchemy API key**: Please refer to the [How to get your Alchemy API key](./alchemy.md) guide to obtain your API key.
@@ -24,17 +20,26 @@ Before you begin, please ensure you have the following:
 
 ## Download the CLI
 
-
 1. Navigate to the [Releases](https://github.com/InternetMaximalism/intmax2-mining-cli/releases) page of this repository.
 2. Download the ZIP file appropriate for your operating system.
 3. Extract the contents of the ZIP file.
 
 
+## Quick Links
+
+- [Set Up the Mining CLI](#setting-up-mining-cli)
+- [First-Time User Setup](#first-time-user-setup)
+- [Setup for Returning Users](#set-up-for-returning-users)
+- [How Mining Works](#how-mining-works)
+- [Claim ITX Tokens](#claiming-itx-tokens)
+- [Withdraw Your ETH](#withdraw-eth)
+- [Export Deposit Private Keys](#exporting-deposit-private-keys)
+- [Check for CLI Updates](#check-available-cli-updates)
+
+
 ## Step-by-Step Instructions
 
-
 ### Setting Up Mining CLI
-
 
 1.  **Lauching the CLI** Double-click on the mining-cli shown in this image to launch.
 
@@ -61,7 +66,7 @@ When you double-click the CLI, you'll see a screen like this:
 You can move the cursor with the arrow keys, select `mainnet` and press `Enter`.
 
 
-### Setting Up - For First Time Users
+### First-Time User Setup
 
 
 1. **Enter Alchemy API key**: Select `Alchemy` and enter your API key which you obtained from [How to get your Alchemy API key](./alchemy.md) guide. Your API key will not be displayed. Press `Enter` after pasting it.
@@ -114,7 +119,7 @@ You would be shown a prompt saying only claiming and withdrawal is allowed for n
 <div align="center"><img src="../assets/mainnet-instruction/k9.png" width="600" alt="Mining CLI"></div>
 
 
-### Setting Up - For Existing Users
+### Setup for Returning Users
 
 
 1. **Continue**:
@@ -165,8 +170,7 @@ Here is the explanation of each mode:
 For this time, please select Mining.
 
 
-### Mining Process
-
+### How Mining Works
 
 1. **Deposit ETH to your deposit address**:
 

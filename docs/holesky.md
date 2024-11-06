@@ -1,5 +1,13 @@
 # Network Guide
 
+## Quick Links
+
+- [Add Holesky testnet to your MetaMask](#add-holesky-testnet-to-your-metamask)
+- [Add Holesky testnet to your Intmax wallet](#add-holesky-testnet-to-your-intmax-wallet)
+- [Get testnet ETH](#get-testneteth)
+- [Import ITX token to your MetaMask](#add-base-mainnet-to-your-metamask)
+- [Import ITX token to your Intmax wallet](#import-itx-token-to-your-intmax-wallet)
+
 ## Add Holesky testnet to your MetaMask
 
 1. Open Metamask and click on the network icon in the top left corner.
