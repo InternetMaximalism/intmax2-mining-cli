@@ -93,10 +93,10 @@ pub async fn get_deposit_leaf_inserted_event(
         .as_u64();
     let mut flatten_events = Vec::new();
     let mut from_block = from_block;
-    let mut end_block = from_block + PAGE_SIZE - 1;
+    let mut to_block = from_block + PAGE_SIZE - 1;
     while from_block <= latest_block_number {
-        if end_block > latest_block_number {
-            end_block = latest_block_number;
+        if to_block > latest_block_number {
+            to_block = latest_block_number;
         }
 
         let int1 = get_int1_contract().await?;
@@ -104,7 +104,7 @@ pub async fn get_deposit_leaf_inserted_event(
             int1.deposit_leaf_inserted_filter()
                 .address(int1.address().into())
                 .from_block(from_block)
-                .to_block(end_block)
+                .to_block(to_block)
                 .query_with_meta()
                 .await
         })
@@ -123,8 +123,8 @@ pub async fn get_deposit_leaf_inserted_event(
             .collect();
         flatten_events.extend_from_slice(&events);
 
-        from_block = end_block + 1;
-        end_block = from_block + PAGE_SIZE - 1;
+        from_block = to_block + 1;
+        to_block = from_block + PAGE_SIZE - 1;
     }
 
     flatten_events.sort_by_key(|event| event.deposit_index);
