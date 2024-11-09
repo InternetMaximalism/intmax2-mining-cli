@@ -73,6 +73,11 @@ pub async fn sync_trees(
                 if let Some(bin_deposit_tree) = bin_deposit_tree {
                     let (new_deposit_hash_tree, new_block_number) =
                         parse_and_validate_bin_deposit_tree(bin_deposit_tree).await?;
+                    log::info!(
+                        "Fetched deposit tree with {} leaves from block {}",
+                        new_deposit_hash_tree.tree.len(),
+                        new_block_number
+                    );
                     *deposit_hash_tree = new_deposit_hash_tree;
                     *last_deposit_block_number = new_block_number;
                 }
@@ -161,6 +166,7 @@ async fn sync_to_latest_deposit_tree(
     deposit_hash_tree: &mut DepositHashTree,
     from_block: u64,
 ) -> anyhow::Result<u64> {
+    log::info!("Syncing deposit tree from block {}", from_block);
     let events = get_deposit_leaf_inserted_event(from_block).await?;
     info!(
         "Syncing deposit tree from block {}, got {} events. Latest deposit_index={}",

@@ -81,28 +81,54 @@ pub struct DepositLeafInserted {
 pub async fn get_deposit_leaf_inserted_event(
     from_block: u64,
 ) -> Result<Vec<DepositLeafInserted>, BlockchainError> {
-    let int1 = get_int1_contract().await?;
-    let events = with_retry(|| async {
-        int1.deposit_leaf_inserted_filter()
-            .address(int1.address().into())
-            .from_block(from_block)
-            .query_with_meta()
-            .await
-    })
-    .await
-    .map_err(|_| {
-        BlockchainError::NetworkError("failed to get deposit leaf inserted event".to_string())
-    })?;
-    let mut events: Vec<DepositLeafInserted> = events
-        .into_iter()
-        .map(|(event, meta)| DepositLeafInserted {
-            deposit_index: event.deposit_index,
-            deposit_hash: Bytes32::from_bytes_be(&event.deposit_hash),
-            block_number: meta.block_number.as_u64(),
+    const PAGE_SIZE: u64 = 500000;
+
+    let latest_block_number = get_client()
+        .await?
+        .get_block_number()
+        .await
+        .map_err(|_| {
+            BlockchainError::NetworkError("failed to get latest block number".to_string())
+        })?
+        .as_u64();
+    let mut flatten_events = Vec::new();
+    let mut from_block = from_block;
+    let mut to_block = from_block + PAGE_SIZE - 1;
+    while from_block <= latest_block_number {
+        if to_block > latest_block_number {
+            to_block = latest_block_number;
+        }
+
+        let int1 = get_int1_contract().await?;
+        let events = with_retry(|| async {
+            int1.deposit_leaf_inserted_filter()
+                .address(int1.address().into())
+                .from_block(from_block)
+                .to_block(to_block)
+                .query_with_meta()
+                .await
         })
-        .collect();
-    events.sort_by_key(|event| event.deposit_index);
-    Ok(events)
+        .await
+        .map_err(|_| {
+            BlockchainError::NetworkError("failed to get deposit leaf inserted event".to_string())
+        })?;
+
+        let events: Vec<DepositLeafInserted> = events
+            .into_iter()
+            .map(|(event, meta)| DepositLeafInserted {
+                deposit_index: event.deposit_index,
+                deposit_hash: Bytes32::from_bytes_be(&event.deposit_hash),
+                block_number: meta.block_number.as_u64(),
+            })
+            .collect();
+        flatten_events.extend_from_slice(&events);
+
+        from_block = to_block + 1;
+        to_block = from_block + PAGE_SIZE - 1;
+    }
+
+    flatten_events.sort_by_key(|event| event.deposit_index);
+    Ok(flatten_events)
 }
 
 pub async fn get_latest_deposit_timestamp(sender: Address) -> Result<Option<u64>, BlockchainError> {
