@@ -16,6 +16,7 @@ chain_id = 1
 int1_address = "0x0Ac498bCA32B00E2584171844fb9A5943398D9c1"
 minter_address = "0x38DE07d2526Ae929f1903E5F109B70C50e12A8E0"
 token_address = "0xe24e207c6156241cAfb41D025B3b5F0677114C81"
+int1_deployed_block = 20856843
 single_deposit_gas = 88000
 single_claim_gas = 600000
 
