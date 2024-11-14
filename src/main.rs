@@ -81,7 +81,11 @@ async fn set_up(is_interactive: bool) -> anyhow::Result<()> {
     create_config_files()?;
 
     // check loading test
-    Settings::load()?;
+    let settings = Settings::load()?;
+    log::info!(
+        "Settings loaded: {}",
+        serde_json::to_string_pretty(&settings)?
+    );
 
     check_avaliability().await?;
     Ok(())

@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 
 use config::{Config, File};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 use crate::utils::network::get_network;
 
@@ -17,7 +17,7 @@ fn config_path(network: Network) -> PathBuf {
         .join(format!("config.{}.toml", network))
 }
 
-#[derive(Clone, Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Settings {
     pub api: Api,
     pub blockchain: Blockchain,
@@ -25,7 +25,7 @@ pub struct Settings {
     pub env: Env,
 }
 
-#[derive(Clone, Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Api {
     pub availability_server_url: String,
     pub withdrawal_gnark_prover_url: String,
@@ -40,7 +40,7 @@ pub struct Api {
     pub withdrawal_server_url: String,
 }
 
-#[derive(Clone, Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Blockchain {
     pub chain_id: u64,
     pub int1_address: String,
@@ -51,14 +51,14 @@ pub struct Blockchain {
     pub single_claim_gas: u64,
 }
 
-#[derive(Clone, Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Env {
     pub default_max_gas_price: String,
     pub default_mining_unit: String,
     pub default_mining_times: u64,
 }
 
-#[derive(Clone, Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Service {
     pub repository_url: String,
     pub mining_min_cooldown_in_sec: u64,
