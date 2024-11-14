@@ -67,17 +67,17 @@ pub async fn get_deposited_event_by_sender(
 
     let client = get_client().await?;
     let mut deposited_events = Vec::new();
-    let mut seen_tx_hashes = std::collections::HashSet::new();
+    let mut seen_deposit_id = std::collections::HashSet::new();
     for (event, meta) in events {
-        // get tx_nonce  because it is needed for getting deposit salt
-        let tx_hash = meta.transaction_hash;
-        // skip duplicated tx
-        if seen_tx_hashes.contains(&tx_hash) {
+        // skip duplicated deposit
+        let deposit_id = event.deposit_id;
+        if seen_deposit_id.contains(&deposit_id) {
             continue;
         } else {
-            seen_tx_hashes.insert(tx_hash);
+            seen_deposit_id.insert(deposit_id);
         }
 
+        let tx_hash = meta.transaction_hash;
         let tx = with_retry(|| async { client.get_transaction(tx_hash).await })
             .await
             .map_err(|_| BlockchainError::TxNotFound(tx_hash.to_string()))?
@@ -133,13 +133,14 @@ pub async fn get_deposit_leaf_inserted_event(
         }
     }
     let mut deposit_leaf_inserted_events = Vec::new();
-    let mut seen_tx_hashes = std::collections::HashSet::new();
+    let mut seen_deposit_indices = std::collections::HashSet::new();
     for (event, meta) in events {
-        // skip duplicated tx
-        if seen_tx_hashes.contains(&meta.transaction_hash) {
+        // skip duplicated deposit
+        let deposit_index = event.deposit_index;
+        if seen_deposit_indices.contains(&deposit_index) {
             continue;
         } else {
-            seen_tx_hashes.insert(meta.transaction_hash);
+            seen_deposit_indices.insert(deposit_index);
         }
         deposit_leaf_inserted_events.push(DepositLeafInserted {
             deposit_index: event.deposit_index,
