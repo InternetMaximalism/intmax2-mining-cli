@@ -47,6 +47,7 @@ pub async fn get_deposited_event_by_sender(
     let mut events = Vec::new();
     let mut from_block = settings.blockchain.int1_deployed_block;
     loop {
+        info!("get_deposited_event_by_sender: from_block={}", from_block);
         let new_events = with_retry(|| async {
             int1.deposited_filter()
                 .address(int1.address().into())
@@ -104,6 +105,7 @@ pub async fn get_deposit_leaf_inserted_event(
     let mut events = Vec::new();
     let mut from_block = from_block;
     loop {
+        log::info!("get_deposit_leaf_inserted_event: from_block={}", from_block);
         let int1 = get_int1_contract().await?;
         let new_events = with_retry(|| async {
             int1.deposit_leaf_inserted_filter()
