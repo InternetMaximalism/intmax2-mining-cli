@@ -63,8 +63,6 @@ async fn main() {
 }
 
 async fn set_up(is_interactive: bool) -> anyhow::Result<()> {
-    let version = env!("CARGO_PKG_VERSION");
-    println!("Mining CLI v{}", version);
     if is_interactive {
         // select network if in interactive mode
         let network = select_network()?;
