@@ -29,7 +29,6 @@ pub async fn mining_loop(
     mining_unit: U256,
     mining_times: u64,
 ) -> anyhow::Result<()> {
-    check_avaliability().await?;
     let key = Key::new(withdrawal_private_key, 0);
     print_log(format!(
         "Processing mining for deposit address {:?}",
@@ -44,6 +43,7 @@ pub async fn mining_loop(
     )
     .await?;
     loop {
+        check_avaliability().await?;
         let assets_status = state.sync_and_fetch_assets(&key).await?;
         let is_qualified = !get_circulation(key.deposit_address).await?.is_excluded;
         let will_deposit = assets_status.effective_deposit_times() < mining_times as usize
@@ -90,10 +90,10 @@ pub async fn mining_loop(
 }
 
 pub async fn exit_loop(state: &mut State, withdrawal_private_key: H256) -> anyhow::Result<()> {
-    check_avaliability().await?;
     let key = Key::new(withdrawal_private_key, 0);
     print_log(format!("Exit for deposit address{:?}", key.deposit_address));
     loop {
+        check_avaliability().await?;
         let assets_status = state.sync_and_fetch_assets(&key).await?;
         if assets_status.pending_indices.is_empty()
             && assets_status.rejected_indices.is_empty()
