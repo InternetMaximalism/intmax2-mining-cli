@@ -4,3 +4,4 @@ pub mod error;
 pub mod gas_estimation;
 pub mod gnark;
 pub mod withdrawal;
+pub mod header;

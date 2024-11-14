@@ -8,10 +8,13 @@ use plonky2::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::utils::{
-    config::Settings,
-    retry::with_retry,
-    time::{sleep_for, sleep_until},
+use crate::{
+    external_api::intmax::header::VersionHeader as _,
+    utils::{
+        config::Settings,
+        retry::with_retry,
+        time::{sleep_for, sleep_until},
+    },
 };
 
 use super::error::{IntmaxError, IntmaxErrorResponse};
@@ -88,6 +91,7 @@ pub async fn gnark_start_prove(
         reqwest::Client::new()
             .post(format!("{}/start-proof", base_url))
             .json(&input)
+            .with_version_header()
             .send()
             .await
     })
@@ -110,6 +114,7 @@ pub async fn gnark_get_proof(
     let response = with_retry(|| async {
         reqwest::Client::new()
             .get(format!("{}/get-proof?jobId={}", base_url, job_id))
+            .with_version_header()
             .send()
             .await
     })

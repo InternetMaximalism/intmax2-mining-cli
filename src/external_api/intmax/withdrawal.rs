@@ -10,7 +10,10 @@ use serde_json::Value;
 use std::str::FromStr;
 
 use crate::{
-    external_api::contracts::int1::{get_int1_contract_with_signer, int_1},
+    external_api::{
+        contracts::int1::{get_int1_contract_with_signer, int_1},
+        intmax::header::VersionHeader as _,
+    },
     utils::{
         config::Settings,
         network::{get_network, Network},
@@ -70,6 +73,7 @@ async fn start_withdrawal(
         reqwest::Client::new()
             .post(url.clone())
             .json(&input)
+            .with_version_header()
             .send()
             .await
     })
@@ -98,9 +102,15 @@ async fn query_withdrawal(withdrawal_id: &str) -> Result<QueryWithdrawalSuccess,
         "{}/{}/proof-status",
         settings.api.withdrawal_server_url, withdrawal_id
     );
-    let response = with_retry(|| async { reqwest::Client::new().get(url.clone()).send().await })
-        .await
-        .map_err(|_| IntmaxError::NetworkError("failed to query withdrawal server".to_string()))?;
+    let response = with_retry(|| async {
+        reqwest::Client::new()
+            .get(url.clone())
+            .with_version_header()
+            .send()
+            .await
+    })
+    .await
+    .map_err(|_| IntmaxError::NetworkError("failed to query withdrawal server".to_string()))?;
     let response: Value = response.json().await.map_err(|e| {
         IntmaxError::SerializeError(format!(
             "failed to parse response as json: {}",

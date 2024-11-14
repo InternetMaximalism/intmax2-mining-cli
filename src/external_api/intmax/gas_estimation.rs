@@ -1,7 +1,10 @@
 use log::info;
 use serde::{Deserialize, Serialize};
 
-use crate::utils::{config::Settings, retry::with_retry};
+use crate::{
+    external_api::intmax::header::VersionHeader as _,
+    utils::{config::Settings, retry::with_retry},
+};
 
 use super::error::{IntmaxError, IntmaxErrorResponse};
 
@@ -22,11 +25,15 @@ enum GasPriceResponse {
 pub async fn get_gas_estimation() -> Result<GasPriceSuccessResponse, IntmaxError> {
     info!("Getting gas price");
     let settings = Settings::load().unwrap();
-    let response = with_retry(|| async { reqwest::get(settings.api.gas_server_url.clone()).await })
-        .await
-        .map_err(|_| {
-            IntmaxError::NetworkError("failed to request circulation server".to_string())
-        })?;
+    let response = with_retry(|| async {
+        reqwest::Client::new()
+            .get(settings.api.gas_server_url.clone())
+            .with_version_header()
+            .send()
+            .await
+    })
+    .await
+    .map_err(|_| IntmaxError::NetworkError("failed to request circulation server".to_string()))?;
     let response_json: GasPriceResponse = response.json().await.map_err(|e| {
         IntmaxError::SerializeError(format!("failed to parse response: {}", e.to_string()))
     })?;
