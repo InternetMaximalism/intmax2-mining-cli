@@ -46,6 +46,7 @@ pub struct Blockchain {
     pub int1_address: String,
     pub minter_address: String,
     pub token_address: String,
+    pub int1_deployed_block: u64,
     pub single_deposit_gas: u64,
     pub single_claim_gas: u64,
 }

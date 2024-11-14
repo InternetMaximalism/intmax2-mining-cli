@@ -33,6 +33,15 @@ pub async fn get_client() -> Result<Arc<Provider<Http>>, BlockchainError> {
     Ok(client)
 }
 
+pub async fn get_latest_block_number() -> Result<u64, BlockchainError> {
+    info!("get_latest_block_number");
+    let client = get_client().await?;
+    let block_number = with_retry(|| async { client.get_block_number().await })
+        .await
+        .map_err(|_| BlockchainError::NetworkError("failed to get block number".to_string()))?;
+    Ok(block_number.as_u64())
+}
+
 pub async fn get_client_with_rpc_url(
     rpc_url: &str,
 ) -> Result<Arc<Provider<Http>>, BlockchainError> {
