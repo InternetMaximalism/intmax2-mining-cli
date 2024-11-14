@@ -40,9 +40,14 @@ pub async fn sleep_before_withdrawal(deposit_address: Address) -> anyhow::Result
 }
 
 async fn sleep_if_needed(target_time: u64, is_deposit: bool) {
+    log::info!(
+        "sleep_if_needed: target_time: {}, is_deposit: {}",
+        target_time,
+        is_deposit
+    );
     let now = chrono::Utc::now().timestamp() as u64;
     if now >= target_time {
-        info!("No need to sleep");
+        info!("No need to sleep: now={}, target_time={}", now, target_time);
         return; // no need to sleep
     }
     let sleep_from_now = target_time - now;
