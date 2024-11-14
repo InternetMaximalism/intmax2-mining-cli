@@ -13,7 +13,8 @@ use super::{
     utils::{get_client, u256_as_bytes_be},
 };
 
-const EVENT_BLOCK_RANGE: u64 = 10000;
+const EVENT_BLOCK_RANGE: u64 = 100000;
+
 #[derive(Clone, Debug)]
 pub struct Deposited {
     pub deposit_id: u64,
@@ -66,9 +67,17 @@ pub async fn get_deposited_event_by_sender(
 
     let client = get_client().await?;
     let mut deposited_events = Vec::new();
+    let mut seen_tx_hashes = std::collections::HashSet::new();
     for (event, meta) in events {
         // get tx_nonce  because it is needed for getting deposit salt
         let tx_hash = meta.transaction_hash;
+        // skip duplicated tx
+        if seen_tx_hashes.contains(&tx_hash) {
+            continue;
+        } else {
+            seen_tx_hashes.insert(tx_hash);
+        }
+
         let tx = with_retry(|| async { client.get_transaction(tx_hash).await })
             .await
             .map_err(|_| BlockchainError::TxNotFound(tx_hash.to_string()))?
@@ -123,19 +132,25 @@ pub async fn get_deposit_leaf_inserted_event(
             break;
         }
     }
-
-    let mut events: Vec<DepositLeafInserted> = events
-        .into_iter()
-        .map(|(event, meta)| DepositLeafInserted {
+    let mut deposit_leaf_inserted_events = Vec::new();
+    let mut seen_tx_hashes = std::collections::HashSet::new();
+    for (event, meta) in events {
+        // skip duplicated tx
+        if seen_tx_hashes.contains(&meta.transaction_hash) {
+            continue;
+        } else {
+            seen_tx_hashes.insert(meta.transaction_hash);
+        }
+        deposit_leaf_inserted_events.push(DepositLeafInserted {
             deposit_index: event.deposit_index,
             deposit_hash: Bytes32::from_bytes_be(&event.deposit_hash),
             block_number: meta.block_number.as_u64(),
-        })
-        .collect();
+        });
+    }
 
-    events.sort_by_key(|event| event.deposit_index);
+    deposit_leaf_inserted_events.sort_by_key(|event| event.deposit_index);
 
-    Ok(events)
+    Ok(deposit_leaf_inserted_events)
 }
 
 pub async fn get_latest_deposit_timestamp(sender: Address) -> Result<Option<u64>, BlockchainError> {
