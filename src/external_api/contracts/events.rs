@@ -5,10 +5,7 @@ use intmax2_zkp::{
 };
 use log::info;
 
-use crate::{
-    external_api::contracts::utils::{get_block, get_latest_block_number},
-    utils::retry::with_retry,
-};
+use crate::{external_api::contracts::utils::get_latest_block_number, utils::retry::with_retry};
 
 use super::{
     error::BlockchainError,
@@ -144,27 +141,40 @@ pub async fn get_deposit_leaf_inserted_event(
 pub async fn get_latest_deposit_timestamp(sender: Address) -> Result<Option<u64>, BlockchainError> {
     log::info!("get_latest_deposit_timestamp");
     let int1 = get_int1_contract().await?;
-    let events = with_retry(|| async {
-        int1.deposited_filter()
-            .from_block(0)
-            .address(int1.address().into())
-            .topic2(sender)
-            .query_with_meta()
-            .await
-    })
-    .await
-    .map_err(|_| BlockchainError::NetworkError("failed to get deposited event".to_string()))?;
-    let latest_block_number: Option<u64> = events
-        .into_iter()
-        .map(|(_, meta)| meta.block_number.as_u64())
-        .max();
-    let block_timestamp = if let Some(block_number) = latest_block_number {
-        let block = get_block(block_number).await?;
-        Some(block.unwrap().timestamp.as_u64())
-    } else {
-        None
-    };
-    Ok(block_timestamp)
+
+    let mut to_block = get_latest_block_number().await?;
+    let mut latest_event_block_number = None;
+    let int1_deployed_block = crate::utils::config::Settings::load()
+        .unwrap()
+        .blockchain
+        .int1_deployed_block;
+    loop {
+        let events = with_retry(|| async {
+            int1.deposited_filter()
+                .from_block(to_block.saturating_sub(EVENT_BLOCK_RANGE))
+                .to_block(to_block)
+                .address(int1.address().into())
+                .topic2(sender)
+                .query_with_meta()
+                .await
+        })
+        .await
+        .map_err(|_| BlockchainError::NetworkError("failed to get deposited event".to_string()))?;
+        let max_block_number: Option<u64> = events
+            .into_iter()
+            .map(|(_, meta)| meta.block_number.as_u64())
+            .max();
+        if max_block_number.is_some() {
+            latest_event_block_number = max_block_number;
+            break;
+        }
+        to_block = to_block.saturating_sub(EVENT_BLOCK_RANGE);
+        if to_block < int1_deployed_block {
+            break;
+        }
+    }
+
+    Ok(latest_event_block_number)
 }
 
 pub async fn get_latest_withdrawal_timestamp(
@@ -172,27 +182,39 @@ pub async fn get_latest_withdrawal_timestamp(
 ) -> Result<Option<u64>, BlockchainError> {
     log::info!("get_latest_withdrawal_timestamp");
     let int1 = get_int1_contract().await?;
-    let events = with_retry(|| async {
-        int1.withdrawn_filter()
-            .from_block(0)
-            .address(int1.address().into())
-            .topic1(recipient)
-            .query_with_meta()
-            .await
-    })
-    .await
-    .map_err(|_| BlockchainError::NetworkError("failed to get withdrawn event".to_string()))?;
-    let latest_block_number: Option<u64> = events
-        .into_iter()
-        .map(|(_, meta)| meta.block_number.as_u64())
-        .max();
-    let block_timestamp = if let Some(block_number) = latest_block_number {
-        let block = get_block(block_number).await?;
-        Some(block.unwrap().timestamp.as_u64())
-    } else {
-        None
-    };
-    Ok(block_timestamp)
+
+    let mut to_block = get_latest_block_number().await?;
+    let mut latest_event_block_number = None;
+    let int1_deployed_block = crate::utils::config::Settings::load()
+        .unwrap()
+        .blockchain
+        .int1_deployed_block;
+    loop {
+        let events = with_retry(|| async {
+            int1.withdrawn_filter()
+                .from_block(to_block.saturating_sub(EVENT_BLOCK_RANGE))
+                .to_block(to_block)
+                .address(int1.address().into())
+                .topic2(recipient)
+                .query_with_meta()
+                .await
+        })
+        .await
+        .map_err(|_| BlockchainError::NetworkError("failed to get withdrawn event".to_string()))?;
+        let max_block_number: Option<u64> = events
+            .into_iter()
+            .map(|(_, meta)| meta.block_number.as_u64())
+            .max();
+        if max_block_number.is_some() {
+            latest_event_block_number = max_block_number;
+            break;
+        }
+        to_block = to_block.saturating_sub(EVENT_BLOCK_RANGE);
+        if to_block < int1_deployed_block {
+            break;
+        }
+    }
+    Ok(latest_event_block_number)
 }
 
 #[cfg(test)]
