@@ -210,7 +210,7 @@ pub async fn get_latest_withdrawal_timestamp(
                 .from_block(to_block.saturating_sub(EVENT_BLOCK_RANGE))
                 .to_block(to_block)
                 .address(int1.address().into())
-                .topic2(recipient)
+                .topic1(recipient)
                 .query_with_meta()
                 .await
         })
