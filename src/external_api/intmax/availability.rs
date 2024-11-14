@@ -1,7 +1,10 @@
 use log::info;
 use serde::{Deserialize, Serialize};
 
-use crate::utils::{config::Settings, retry::with_retry};
+use crate::{
+    external_api::intmax::header::VersionHeader as _,
+    utils::{config::Settings, retry::with_retry},
+};
 
 use super::error::{IntmaxError, IntmaxErrorResponse};
 
@@ -24,11 +27,14 @@ pub async fn get_availability() -> Result<AvaliabilityServerSuccessResponse, Int
     let version = env!("CARGO_PKG_VERSION");
     let settings = Settings::load().unwrap();
     let response = with_retry(|| async {
-        reqwest::get(format!(
-            "{}?version={}",
-            settings.api.availability_server_url, version,
-        ))
-        .await
+        reqwest::Client::new()
+            .get(format!(
+                "{}?version={}",
+                settings.api.availability_server_url, version,
+            ))
+            .with_version_header()
+            .send()
+            .await
     })
     .await
     .map_err(|_| IntmaxError::NetworkError("failed to request availability server".to_string()))?;

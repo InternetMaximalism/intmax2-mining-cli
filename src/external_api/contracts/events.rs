@@ -5,7 +5,10 @@ use intmax2_zkp::{
 };
 use log::info;
 
-use crate::{external_api::contracts::utils::get_latest_block_number, utils::retry::with_retry};
+use crate::{
+    external_api::contracts::utils::{get_block, get_latest_block_number},
+    utils::retry::with_retry,
+};
 
 use super::{
     error::BlockchainError,
@@ -159,7 +162,6 @@ pub async fn get_latest_deposit_timestamp(sender: Address) -> Result<Option<u64>
     let int1 = get_int1_contract().await?;
 
     let mut to_block = get_latest_block_number().await?;
-    let mut latest_event_block_number = None;
     let int1_deployed_block = crate::utils::config::Settings::load()
         .unwrap()
         .blockchain
@@ -180,17 +182,15 @@ pub async fn get_latest_deposit_timestamp(sender: Address) -> Result<Option<u64>
             .into_iter()
             .map(|(_, meta)| meta.block_number.as_u64())
             .max();
-        if max_block_number.is_some() {
-            latest_event_block_number = max_block_number;
-            break;
+        if let Some(max_block_number) = max_block_number {
+            let block = get_block(max_block_number).await?;
+            return Ok(Some(block.unwrap().timestamp.as_u64()));
         }
         to_block = to_block.saturating_sub(EVENT_BLOCK_RANGE);
         if to_block < int1_deployed_block {
-            break;
+            return Ok(None);
         }
     }
-
-    Ok(latest_event_block_number)
 }
 
 pub async fn get_latest_withdrawal_timestamp(
@@ -200,7 +200,6 @@ pub async fn get_latest_withdrawal_timestamp(
     let int1 = get_int1_contract().await?;
 
     let mut to_block = get_latest_block_number().await?;
-    let mut latest_event_block_number = None;
     let int1_deployed_block = crate::utils::config::Settings::load()
         .unwrap()
         .blockchain
@@ -211,7 +210,7 @@ pub async fn get_latest_withdrawal_timestamp(
                 .from_block(to_block.saturating_sub(EVENT_BLOCK_RANGE))
                 .to_block(to_block)
                 .address(int1.address().into())
-                .topic2(recipient)
+                .topic1(recipient)
                 .query_with_meta()
                 .await
         })
@@ -221,16 +220,15 @@ pub async fn get_latest_withdrawal_timestamp(
             .into_iter()
             .map(|(_, meta)| meta.block_number.as_u64())
             .max();
-        if max_block_number.is_some() {
-            latest_event_block_number = max_block_number;
-            break;
+        if let Some(max_block_number) = max_block_number {
+            let block = get_block(max_block_number).await?;
+            return Ok(Some(block.unwrap().timestamp.as_u64()));
         }
         to_block = to_block.saturating_sub(EVENT_BLOCK_RANGE);
         if to_block < int1_deployed_block {
-            break;
+            return Ok(None);
         }
     }
-    Ok(latest_event_block_number)
 }
 
 #[cfg(test)]

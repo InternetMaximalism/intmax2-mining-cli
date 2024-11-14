@@ -2,7 +2,10 @@ use ethers::types::Address;
 use log::info;
 use serde::{Deserialize, Serialize};
 
-use crate::utils::{config::Settings, retry::with_retry};
+use crate::{
+    external_api::intmax::header::VersionHeader as _,
+    utils::{config::Settings, retry::with_retry},
+};
 
 use super::error::{IntmaxError, IntmaxErrorResponse};
 
@@ -23,11 +26,14 @@ pub async fn get_circulation(address: Address) -> Result<CirculationSuccessRespo
     info!("Getting circulation for address {:?}", address);
     let settings = Settings::load().unwrap();
     let response = with_retry(|| async {
-        reqwest::get(format!(
-            "{}/addresses/{:?}/exclusion",
-            settings.api.circulation_server_url, address,
-        ))
-        .await
+        reqwest::Client::new()
+            .get(format!(
+                "{}/addresses/{:?}/exclusion",
+                settings.api.circulation_server_url, address,
+            ))
+            .with_version_header()
+            .send()
+            .await
     })
     .await
     .map_err(|_| IntmaxError::NetworkError("failed to request circulation server".to_string()))?;
