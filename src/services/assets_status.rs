@@ -151,11 +151,12 @@ pub async fn fetch_assets_status(
     let mut long_term_not_claimed_indices = Vec::new();
     let mut long_term_claimable_amount = U256::zero();
 
-    for (&index, &amount) in &long_term_eligible_indices
+    for (&index, &amount) in long_term_eligible_indices
         .iter()
-        .zip(long_term_claimable_amount.iter())
+        .zip(long_term_eligible_amounts.iter())
     {
         let event = &senders_deposits[index];
+        let eligible_amount = U256::from_big_endian(&amount.to_bytes_be());
         let salt = derive_salt_from_private_key_nonce(deposit_private_key, event.tx_nonce);
         let nullifier = get_deposit_nullifier(&event.deposit(), salt);
         let is_exists = get_long_term_claim_nullifier_exists(nullifier).await?;
@@ -163,8 +164,6 @@ pub async fn fetch_assets_status(
             long_term_claimed_indices.push(index);
         } else {
             long_term_not_claimed_indices.push(index);
-            let eligible_amount =
-                U256::from_big_endian(&long_term_eligible_amounts[index].to_bytes_be());
             long_term_claimable_amount += eligible_amount;
         }
     }
