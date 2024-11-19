@@ -162,7 +162,7 @@ async fn parse_and_validate_bin_eligible_tree(
     Ok(eligible_tree_info.tree)
 }
 
-async fn sync_to_latest_deposit_tree(
+pub async fn sync_to_latest_deposit_tree(
     deposit_hash_tree: &mut DepositHashTree,
     from_block: u64,
 ) -> anyhow::Result<u64> {

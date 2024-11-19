@@ -10,6 +10,9 @@ use crate::{
     utils::{deposit_hash_tree::DepositHashTree, eligible_tree_with_map::EligibleTreeWithMap},
 };
 
+#[cfg(test)]
+pub mod deposit_tree;
+
 pub fn get_dummy_keys() -> Key {
     let deposit_private_key: H256 =
         "0xdf57089febbacf7ba0bc227dafbffa9fc08a93fdc68e1e42411a14efcf23656e"
