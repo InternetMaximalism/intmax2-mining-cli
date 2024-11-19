@@ -55,7 +55,7 @@ Before you begin, please ensure you have the following:
   <div align="center">
     <img src="../assets/mainnet-instruction/p1.png" width="600" alt="Mining CLI"></div>
 
-You can move the cursor with the arrow keys, select `mainnet` and press `Enter`.
+You can move the cursor with the arrow keys, select `base` and press `Enter`.
 
 ### First-Time User Setup
 
@@ -71,7 +71,8 @@ Here is the explanation of each setting:
 
 - **Max Gas Price**: The maximum gas price allowed when executing transactions. Setting a higher value will cause undesirable funds loss.
 - **Mining Unit**: The amount of ETH to send in one deposit. The default is 0.1 ETH.
-- **Mining Times**: Specifies how many times to mine. The default is 10 times for mainnet.
+- **Mining Times**: Specifies how many times to mine. The default is 10 times for base.
+
 You can also set your own values by pressing `n`, then entering the desired values.
 
 <div align="center"><img src="../assets/mainnet-instruction/b14.png" width="600" alt="Mining CLI"></div>
@@ -113,8 +114,7 @@ You would be shown a prompt saying only claiming and withdrawal is allowed for n
 ### Setup for Returning Users
 
 1. **Continue**:
-   After selecting `mainnet`, you'll see a screen like this:
-   After selecting `mainnet`, you'll see a screen like this:
+   After selecting `base`, you'll see a screen like this:
 
   <div align="center">
     <img src="../assets/mainnet-instruction/p3.png" width="600" alt="Mining CLI"></div>
@@ -126,7 +126,6 @@ Here is the explanation of each setting:
 - **Modify**: Modify some of the existing settings and change them, e.g, change withdrawal private key, etc. Note that when using this method, mining times and mining unit cannot be changed.
 
 2. **Enter password for the private key**:
-   If you choose to encrypt your password during setup, you'll be prompted to enter it. This step is optional and won't appear if you didn't set a password.
    If you choose to encrypt your password during setup, you'll be prompted to enter it. This step is optional and won't appear if you didn't set a password.
 
   <div align="center">
