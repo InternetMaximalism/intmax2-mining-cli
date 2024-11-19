@@ -21,6 +21,18 @@ Before you begin, please ensure you have the following:
 2. Download the ZIP file appropriate for your operating system.
 3. Extract the contents of the ZIP file.
 
+## Quick Links
+
+- [Set Up the Mining CLI](#setting-up-mining-cli)
+- [First-Time User Setup](#first-time-user-setup)
+- [Setup for Returning Users](#setup-for-returning-users)
+- [How Mining Works](#how-mining-works)
+- [Claim ITX Tokens](#claiming-itx-tokens)
+- [Withdraw Your ETH](#withdraw-eth)
+- [Export Deposit Private Keys](#exporting-deposit-private-keys)
+- [Check for CLI Updates](#check-available-cli-updates)
+- [Update CLI Version](#update-cli-version)
+
 ## Step-by-Step Instructions
 
 ### Setting Up Mining CLI
@@ -52,14 +64,13 @@ If you're setting up the CLI for the first time, select Create New Config, which
 
 Note: When mining on Base, each config file can only link one deposit address to one withdrawal address. To use multiple deposit addresses, you'll need to create separate config files. If you've already set one up previously, you'll be able to select from existing config files.
 
-### Setting Up - For First Time Users
+### First-Time User Setup
 
 If you choose `Create New Config`, this is the setup process:
 
 1. **Enter Alchemy API key**: Select `Alchemy` and enter your API key which you obtained from [How to get your Alchemy API key](./alchemy.md) guide. Your API key will not be displayed. Press `Enter` after pasting it.
 
 <div align="center"><img src="../assets/instruction/m6.png" width="600" alt="Mining CLI"></div>
-
 
 2. **Configure settings for the mining process**: Set `max gas price`, `mining unit`, and `mining times`. You can use the default values by pressing `Enter` or pressing `y`. You can also set your own values by pressing `n`, then entering the desired values. We recommend using the default values.
 
@@ -87,8 +98,7 @@ Note: It is recommended to use an empty wallet as your withdrawal address. Make 
 
 <div align="center"><img src="../assets/instruction/m11.png" width="600" alt="Mining CLI"></div>
 
-
-### Setting Up - For Existing Users
+### Setup for Returning Users
 
 1. **Select Config**:
 If you've already configured the CLI before, you'll see a screen like this:
@@ -116,8 +126,7 @@ If you choose to encrypt your password during setup, you'll be prompted to enter
    <div align="center">
      <img src="../assets/instruction/m3.png" width="600" alt="Mining CLI"></div>
 
-
-### Mining Process
+### How Mining Works
 
 1. **Select Mode**: Choose from the following modes using the arrows key: `Mining`, `Claim`, `Exit` or `Export`. For this time, select `Mining`.
 
@@ -159,11 +168,11 @@ The mining process will pause if
 
 You can safely close the CLI window or press `ctrl + c` to stop the mining process. When you restart the CLI, you can resume the mining process by selecting `Mining` mode.
 
-NOTE: After the number of `mining time` is reached, Press any key to go back to the mode options. If you stop the mining process when there is a balance in the intmax2, you can withdraw the balance by running in `Exit` mode, or you can continue the mining process by running in `Mining` mode. 
+NOTE: After the number of `mining time` is reached, Press any key to go back to the mode options. If you stop the mining process when there is a balance in the intmax2, you can withdraw the balance by running in `Exit` mode, or you can continue the mining process by running in `Mining` mode.
 
 ### Claiming ITX Tokens
 
-On testnet, the deposits eligible for ITX tokens are confirmed  every day at 3 AM UTC. After that, you claim ITX tokens.
+On testnet, the deposits eligible for ITX tokens are confirmed every day at 3 AM UTC. After that, you claim ITX tokens.
 
 1. **Select Mode**:
 To claim ITX token, select `Claim`. You can check whether an deposit address is eligible for rewards in the "Qualified" column after selecting the mode.
@@ -181,7 +190,7 @@ Check wallet to see tokens.
 
 Follow the CLI instructions and press any key to proceed.
 
-### Withdraw ETH 
+### Withdraw ETH
 
 You can retrieve the available ETH from the intmax2 Network to your withdrawal address.
 
@@ -234,6 +243,7 @@ Approve transfer by typing `Yes`.
      <img src="../assets/migrate/m15.png" width="600" alt="Mining CLI"></div>
 
 Repeat approval until ETH balance is insufficient. To end the process, press any key.
+
    <div align="center">
      <img src="../assets/migrate/m15.png" width="600" alt="Mining CLI"></div>
 
@@ -243,13 +253,47 @@ After withdrawal process is done, proceed by pressing any key as instructed by C
 
 1. **Select Mode**:
 Select `Check Update` to check if you are using the latest version.
-   <div align="center">
-     <img src="../assets/migrate/m23.png" width="600" alt="Mining CLI"></div>
+  <div align="center">
+    <img src="../assets/mainnet-instruction/p9.png" width="600" alt="Mining CLI"></div>
 
 2. **Confirm CLI Version**:
-Your current version should be same as the latest release to mine on Base. Navigate to the [Releases](https://github.com/InternetMaximalism/intmax2-mining-cli/releases) page of this repository to see the available latest version.
+   Your current version should be same as the latest release to mine. Navigate to the [Releases](https://github.com/InternetMaximalism/intmax2-mining-cli/releases) page of this repository to see the latest available version.
 
-   <div align="center">
-     <img src="../assets/migrate/m24.png" width="600" alt="Mining CLI"></div>
+  <div align="center">
+    <img src="../assets/migrate/m24.png" width="600" alt="Mining CLI"></div>
 
-To continue with other modes, press any key on your keyboard.
+To continue with other modes, press `Enter` key on your keyboard.
+
+### Update CLI Version
+
+1. **Select Mode**:
+Select `Check Update` to check if you are using the latest version.
+  <div align="center">
+    <img src="../assets/mainnet-instruction/c1.png" width="600" alt="Mining CLI"></div>
+
+2. **Confirm CLI Version**:
+
+If you see a newer version than your current version like the picture below, you can update your CLI version.
+
+  <div align="center">
+    <img src="../assets/mainnet-instruction/c2.png" width="600" alt="Mining CLI"></div>
+
+Press `Y` on your keyboard after you get the prompt. Choosing 'Y' would automatically update your CLI version to the latest version and replace the existing version.
+
+3. **Download New CLI Version**:
+
+After selectinng `Y`, patiently wait for the CLI to download the new version.
+
+  <div align="center">
+    <img src="../assets/mainnet-instruction/c4.png" width="600" alt="Mining CLI"></div>
+
+4. **Finish CLI Update**:
+
+After the download has been completed, you would get a prompt to press the Enter key on your keyboard to exit this command.
+
+  <div align="center">
+    <img src="../assets/mainnet-instruction/c3.png" width="600" alt="Mining CLI"></div>
+
+This shows that your update has been successful.
+
+_Note: If you select the check update command after updating and you still see the old version, close the terminal and open it again to see the new updated CLI version._
