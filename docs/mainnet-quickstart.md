@@ -32,6 +32,7 @@ Before you begin, please ensure you have the following:
 - [Export Deposit Private Keys](#exporting-deposit-private-keys)
 - [Check for CLI Updates](#check-available-cli-updates)
 - [Update CLI Version](#update-cli-version)
+- [Modify Existing Config File](#modify-existing-config-file)- [Update CLI Version](#update-cli-version)
 - [Modify Existing Config File](#modify-existing-config-file)
 
 ## Step-by-Step Instructions
@@ -54,7 +55,7 @@ Before you begin, please ensure you have the following:
   <div align="center">
     <img src="../assets/mainnet-instruction/p1.png" width="600" alt="Mining CLI"></div>
 
-You can move the cursor with the arrow keys, select `mainnet` and press `Enter`.
+You can move the cursor with the arrow keys, select `base` and press `Enter`.
 
 ### First-Time User Setup
 
@@ -62,7 +63,7 @@ You can move the cursor with the arrow keys, select `mainnet` and press `Enter`.
 
 <div align="center"><img src="../assets/mainnet-instruction/k1.png" width="600" alt="Mining CLI"></div>
 
-2. **Configure settings for the mining process**: Set `max gas price`, `mining unit`, and `mining times`. You can use the default values by pressing `Enter` or pressing `y`. You can also set your own values by pressing `n`, then entering the desired values. We recommend using the default values.
+2. **Configure settings for the mining process**: Set `max gas price`, `mining unit`, and `mining times`. You can use the default values by pressing `Enter` or pressing `y`. We recommend using the default values.
 
 <div align="center"><img src="../assets/mainnet-instruction/k3.png" width="600" alt="Mining CLI"></div>
 
@@ -70,7 +71,25 @@ Here is the explanation of each setting:
 
 - **Max Gas Price**: The maximum gas price allowed when executing transactions. Setting a higher value will cause undesirable funds loss.
 - **Mining Unit**: The amount of ETH to send in one deposit. The default is 0.1 ETH.
-- **Mining Times**: Specifies how many times to mine. The default is 10 times for mainnet.
+- **Mining Times**: Specifies how many times to mine. The default is 10 times for base.
+
+You can also set your own values by pressing `n`, then entering the desired values.
+
+<div align="center"><img src="../assets/mainnet-instruction/b14.png" width="600" alt="Mining CLI"></div>
+
+Enter your desired gas price. It’s recommended to keep the maximum gas price at the default value of 10 to avoid unnecessary loss of funds.
+
+<div align="center"><img src="../assets/mainnet-instruction/b15.png" width="600" alt="Mining CLI"></div>
+
+Select the mining unit per deposit: You can choose either 0.1 ETH or 1 ETH.
+
+<div align="center"><img src="../assets/mainnet-instruction/b16.png" width="600" alt="Mining CLI"></div>
+
+Choose the number of times to mine: It’s highly recommended to mine 10 times instead of just once.
+
+**Recommendation**: To maximize your earnings and enhance your privacy:
+- Split your funds into smaller deposits.
+- Mining in smaller increments (e.g., 10 deposits) can earn up to 300 times the reward of a single large deposit. For example: You can deposit and mine 0.1 ETH or 1 ETH in 10 smaller increments for better rewards and privacy.
 
 3. **Enter Withdrawal Private Key**: Enter the private key of the address you'll use to withdraw ETH and receive ITX tokens. Your withdrawal private key will not be displayed. Press `Enter` after pasting it.
 
@@ -95,7 +114,7 @@ You would be shown a prompt saying only claiming and withdrawal is allowed for n
 ### Setup for Returning Users
 
 1. **Continue**:
-   After selecting `mainnet`, you'll see a screen like this:
+   After selecting `base`, you'll see a screen like this:
 
   <div align="center">
     <img src="../assets/mainnet-instruction/p3.png" width="600" alt="Mining CLI"></div>
@@ -278,7 +297,8 @@ Here is the explanation of each of the settings you can modify:
 - **Gas Price**: This allows you to change the maximum gas price amount used in one transaction. The default and recommended gas price is 10.
 - **Withdrawal Private Key**: This allows you to change the withdraw address you'll use to withdraw ETH and receive ITX tokens.
 
-1. **Modify Alchemy API Key**: To change Api Key, type `y`. To ignore and move to the next setting option, type `N`.
+
+3. **Modify Alchemy API Key**: To change Api Key, type `y`. To ignore and move to the next setting option, type `N`.
 
 <div align="center"><img src="../assets/mainnet-instruction/b5.png" width="600" alt="Mining CLI"></div>
 
@@ -290,7 +310,7 @@ Note that your API key will not be displayed. Press `Enter` after pasting it.
 
 <div align="center"><img src="../assets/mainnet-instruction/b7.png" width="600" alt="Mining CLI"></div>
 
-2. **Modify Gas price**: To modify gas price, type `y`. To ignore and move to the next setting option, type `N`.
+4. **Modify Gas price**: To modify gas price, type `y`. To ignore and move to the next setting option, type `N`.
 
 <div align="center"><img src="../assets/mainnet-instruction/b8.png" width="600" alt="Mining CLI"></div>
 
@@ -298,7 +318,7 @@ It is recommended to leave the maximum gas price at default value which is 10 al
 
 <div align="center"><img src="../assets/mainnet-instruction/b9.png" width="600" alt="Mining CLI"></div>
 
-3. **Modify Withdrawal Private Key**: To change the withdrawal wallet, type `y`. To ignore and move to the next setting option, type `N`.
+5. **Modify Withdrawal Private Key**: To change the withdrawal wallet, type `y`. To ignore and move to the next setting option, type `N`.
 
 <div align="center"><img src="../assets/mainnet-instruction/b10.png" width="600" alt="Mining CLI"></div>
 
