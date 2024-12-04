@@ -1,49 +1,96 @@
-# How to get your Infura API key
+# Infura Guide
 
-1. Go to <a href="https://www.alchemy.com" target="_blank">Alchemy</a> and click on `Get your API key` button.
-<div align="center"><img src="../assets/alchemy/a0.png" width="800"/></div>
+## Quick Links
 
-2. Sign up for an account or log in if you already have one.
+- [How to get your Infura API key](#how-to-get-your-infura-api-key)
+- [How to Switch from Alchemy Key to Infura Key Using CLI](#how-to-switch-from-alchemy-key-to-infura-key-using-cli)
 
-<div align="center"><img src="../assets/alchemy/a1.png" width="800"/></div>
+## How to get your Infura API key
 
-3. If you are a new user, you will be asked to fill in your details. Select Personal and click on `Next`.
+1. Go to <a href="https://www.infura.io/" target="_blank">Infura</a> and click on `Get Started` button.
+<div align="center"><img src="../assets/infura/a1.png" width="800"/></div>
 
-<div align="center"><img src="../assets/alchemy/a2.png" width="800"/></div>
+2. Click on `Sign up today` for an account or log in if you already have one.
 
-4. Select the plan. In this case, we will select the free plan. Click on `Next`.
+<div align="center"><img src="../assets/infura/a2.png" width="800"/></div>
 
-<div align="center"><img src="../assets/alchemy/a3.png" width="800"/></div>
+3. If you are a new user, you will be asked to fill in your details. Fill all the boxes and click on `Create a free account` button.
 
-5. You will be ask payment details. However, you can skip this step by clicking on `Skip bonus`.
+<div align="center"><img src="../assets/infura/a3.png" width="800"/></div>
 
-<div align="center"><img src="../assets/alchemy/a4.png" width="800"/></div>
+4. Verify that you are a human being by clicking on the checkbox.
 
-6. You will be redirected to the dashboard. In the center of the page, you will see your API key. Copy it and paste it to the CLI when asked.
+<div align="center"><img src="../assets/infura/a4.png" width="800"/></div>
 
-<div align="center"><img src="../assets/alchemy/a5.png" width="800"/></div>
+5. Select option and answer as shown in the image below.
 
-That's it! You have successfully obtained your Alchemy API key.
+<div align="center"><img src="../assets/infura/a5.png" width="800"/></div>
 
-Note: If you're using Base network and encounter an error like invalid API Key or any API-related issue, it’s likely because your Alchemy app is not properly configured. By default, Alchemy only enables the network you selected when creating the app and disables all other networks. To fix this, you need to update your Alchemy app settings and configure the API key for the Base network. Here's how to do it.
+6. Select category as shown in the image below.
 
-1. In the sidebar, click on the `Overview` button to open the Overview tab. Under `My Apps`, select the app you created.
-<div align="center"><img src="../assets/alchemy/a6.png" width="800"/></div>
+<div align="center"><img src="../assets/infura/a6.png" width="800"/></div>
 
-2. In the `Network` tab, check the status of the networks. If the networks are greyed out, they are currently disabled.
-<div align="center"><img src="../assets/alchemy/a7.png" width="800"/></div>
+7. Select the plan. In this case, we will select the free plan. Click on `Start building`.
 
-3. Click on the `Configure` button.
-<div align="center"><img src="../assets/alchemy/a8.png" width="800"/></div>
+<div align="center"><img src="../assets/infura/a7.png" width="800"/></div>
 
-4. To enable only the Base network, scroll down, toggle the switch for Base(mainnet and testnet), and save your changes.
-<div align="center"><img src="../assets/alchemy/a9.png" width="800"/></div>
+8. You will be redirected to the dashboard. In the center of the page, you will see the dropdown box to select network.
 
-5. To enable all networks, check the `Enable All` option and save.
-<div align="center"><img src="../assets/alchemy/a10.png" width="800"/></div>
+<div align="center"><img src="../assets/infura/a8.png" width="800"/></div>
 
-6. Go back to the Network tab, and you should see the selected network (or all networks) now enabled.
-<div align="center"><img src="../assets/alchemy/a11.png" width="800"/></div>
+9. Choose `base`, then click the `next` button.
 
-7. At the top of the page, you'll find your API key. Copy it and use it in the CLI when prompted.
-<div align="center"><img src="../assets/alchemy/a12.png" width="800"/></div>
+<div align="center"><img src="../assets/infura/a9.png" width="800"/></div>
+
+10. In the center of the page, you will see your API key. Copy it and paste it to the CLI when asked.
+
+<div align="center"><img src="../assets/infura/a10.png" width="800"/></div>
+
+That's it! You have successfully obtained your Infura API key.
+
+
+# How to Switch from Alchemy Key to Infura Key Using CLI
+
+1. **Select Network**:
+   When you open the CLI, you'll see a screen like this, select `base`:
+
+  <div align="center">
+    <img src="../assets/infura/b1.png" width="600" alt="Mining CLI"></div>
+
+2. **Modify Option**:
+   After selecting `base`, you'll see a screen like this:
+
+  <div align="center">
+    <img src="../assets/infura/b2.png" width="600" alt="Mining CLI"></div>
+
+  If you choose to encrypt your password during setup, you'll be prompted to enter it. This step is optional and won't appear if you didn't set a password.
+
+3. **Modify API Key**: Type `y` to change Api Key.
+
+<div align="center"><img src="../assets/infura/b3.png" width="600" alt="Mining CLI"></div>
+
+
+4. **Select Infura**: Select `Infura`.
+
+<div align="center"><img src="../assets/infura/b4.png" width="600" alt="Mining CLI"></div>
+
+
+5. **Select Infura**: Enter your new API key which you obtained from [How to get your Infura API key](#how-to-get-your-infura-api-key) guide above.
+
+<div align="center"><img src="../assets/infura/b5.png" width="600" alt="Mining CLI"></div>
+
+Note: Copy just the API key.
+
+<div align="center"><img src="../assets/infura/b6.png" width="600" alt="Mining CLI"></div>
+
+Note that your API key will not be displayed. Press `Enter` after pasting it.
+
+<div align="center"><img src="../assets/infura/b7.png" width="600" alt="Mining CLI"></div>
+
+To modify other options such as the gas price or withdrawal address, type `n`.
+
+You can also choose to encrypt your private key by setting a password. Encryption is highly recommended for security. Press `y` or `Enter` to encrypt the private key, or `n` to save it as plain text.
+
+6. **Continue Mining Activity**: The API key has been successfully switched from Alchemy to Infura. You can now proceed with the mining options.
+
+<div align="center"><img src="../assets/infura/b8.png" width="600" alt="Mining CLI"></div>
