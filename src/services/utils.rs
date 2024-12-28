@@ -56,13 +56,21 @@ pub async fn handle_contract_call<S: ToString>(
                     tx_name.to_string(),
                     pending_tx.tx_hash()
                 ));
-                let tx_receipt = pending_tx.await?.unwrap();
-                ensure!(
-                    tx_receipt.status.unwrap() == 1.into(),
-                    "{} tx failed",
-                    from_name.to_string()
-                );
-                return Ok(tx_receipt.transaction_hash);
+                match pending_tx.await? {
+                    Some(tx_receipt) => {
+                        ensure!(
+                            tx_receipt.status.unwrap() == 1.into(),
+                            "{} tx failed",
+                            from_name.to_string()
+                        );
+                        return Ok(tx_receipt.transaction_hash);
+                    }
+                    None => {
+                        return Err(anyhow::anyhow!(
+                            "Transaction receipt is None. The transaction may not have been mined."
+                        ));
+                    }
+                }
             }
             Err(e) => {
                 let error_message = e.to_string();
