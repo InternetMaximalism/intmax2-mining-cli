@@ -50,7 +50,12 @@ impl DepositHashTree {
     pub fn push(&mut self, hash: Bytes32) {
         let index = self.tree.len();
         self.tree.push(DepositHash(hash));
-        self.hashes.insert(hash, index as u32);
+        if self.hashes.contains_key(&hash) {
+            // don't overwrite the index if the hash already exists
+            return;
+        } else {
+            self.hashes.insert(hash, index as u32);
+        }
     }
 
     pub fn contains(&self, hash: Bytes32) -> bool {
