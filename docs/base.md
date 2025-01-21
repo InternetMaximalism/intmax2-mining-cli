@@ -19,7 +19,8 @@
 | ----------- | ----------- |
 | Network | Address |
 | Base Sepolia | 0x2699CD7f883DecC464171a7A92f4CcC4eF220fa2 |
-| Base Mainnet | 0xf95117e3a5B7968703CeD3B66A9CbE0Bc9e1D8bf |
+| Old Base Mainnet | 0x58f434698571346f77Bc755cfDC89c5708E7b184 |
+| New Base Mainnet | 0xf95117e3a5B7968703CeD3B66A9CbE0Bc9e1D8bf |
 
 ## Add Base Sepolia testnet to your MetaMask
 
