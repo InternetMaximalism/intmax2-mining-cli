@@ -4,49 +4,68 @@ A CLI tool for automatic mining of ITX tokens.
 
 ## Overview
 
-mining-cli is a tool that allows users to mine ITX tokens by participating in a simplified version of Intmax2. By utilizing a simplified version of Intmax2 that focuses on deposit and private withdrawal functions, users can contribute to enhancing Ethereum's privacy while earning rewards in ITX tokens.
+mining-cli is a tool that allows users to mine ITX tokens, leveraging a simplified version of Intmax2. By utilizing a simplified version of Intmax2 that focuses on deposit and private withdrawal functions, users can contribute to enhancing Ethereum's privacy while earning rewards in ITX tokens.
 
-For more information on mining, please refer to [this article](https://hackmd.io/zNLtkMXXSCernbkTf1BTrQ).
+Learn more about mining [here](https://hackmd.io/zNLtkMXXSCernbkTf1BTrQ).
 
-### Minimum Requirements
+## System Requirements
 
-- Memory: 8GB or more
-- CPU: 4 cores or more, with a clock speed of 2 GHz or higher.
-  _Note: Some Windows version might have issues while mining. Refer to this [guide](docs/windows.md) to fix it._
+Before you begin, ensure your system meets the following minimum specifications:
 
+- **Memory**: 8GB RAM or more
 
-## Quick Links
+- **CPU**: 4 cores, 2 GHz or higher
 
-You can find detailed information on how to use the CLI in the following documents:
+- **Operating System**: Windows, macOS, or Linux
 
-### [Quick Start for Beginners - Base Mainnet](docs/mainnet-quickstart.md)
-_Base Mainnet will be available from 19th Oct 00:00 UTC_
+> **Note**: Some versions of Windows may encounter compatibility issues. For troubleshooting, refer to the [Windows guide](docs/windows.md).
 
-### [Quick Start for Beginners - Base Testnet](docs/quickstart.md)
+## Getting Started
 
-### [How To Migrate From Ethereum Mainnet To Base](docs/migrate.md)
+1. Download the CLI
 
-### [Detailed Documents](docs/developer.md)
+   - Go to the [Releases](https://github.com/InternetMaximalism/intmax2-mining-cli/releases) page.
 
-### [Terms of Use](docs/terms.md)
+   - Download the ZIP file for your operating system.
+
+   - Extract the ZIP file content.
+
+2. Choose a Network to Start Mining:
+
+   - [Quick Start for Base Mainnet](docs/mainnet-quickstart.md) (Available since 19th Oct, 2024 00:00 UTC)
+
+   - [Quick Start for Base Testnet](docs/quickstart.md)
+
+3. Additional Resources:
+
+   - [How to Add ITX Token to Your Wallet](docs/adding-token-to-wallet.md)
+
+   - [Migration Guide (Ethereum Mainnet → Base)](docs/migrate.md)
+
+   - [Developer Documentation](docs/developer.md)
+
+   - [Terms of Use](docs/terms.md)
+     <br><br>
 
 ## How It Works
+
+1. **Automated Deposits and Withdrawals**: The CLI automatically transfers funds from your deposit address into a simplified Intmax2 system. After a random delay, the funds are withdrawn to your withdrawal address. Through Zero-Knowledge Proofs , the relationship between your deposit and withdrawal addresses remains confidential.
+
+2. **Reward Mechanism**: By participating in these private asset transfers, you contribute to enhancing Ethereum's privacy ecosystem. As a reward for your contribution, you earn ITX tokens. These tokens are distributed every Monday at 00:00 UTC to your withdrawal address. However, please note that rewards are subject to a two-week delay. For example, mining activities completed on a Sunday will not be eligible for claiming on the following Monday but on the Monday two weeks later.
 
 <div align="center">
   <img src="assets/diagram.png" width="800" alt="Mining diagram">
 </div>
-
-1. **Automated Deposits and Withdrawals**: The CLI automatically transfers funds from your deposit address into a simplified Intmax2 system. After a random delay, the funds are withdrawn to your withdrawal address. Through Zero-Knowledge Proofs , the relationship between your deposit and withdrawal addresses remains confidential.
-
-2. **Reward Mechanism**: By participating in these private asset transfers, you contribute to enhancing Ethereum's privacy ecosystem. As a reward for your contribution, you earn ITX tokens. These tokens are distributed weekly to your withdrawal address, available every Monday at 00:00 UTC. Note that rewards are subject to a one-week delay. For instance, mining activities completed on a Sunday will be eligible for claiming not on the immediately following Monday, but on the Monday eight days later.
+   <br><br>
 
 ## About Pending Deposits
 
 ETH enters a pending state immediately after deposit. The admin evaluates it according to AML criteria, and if there are no issues, it is deposited into the simplified intmax2. Deposits rejected by AML criteria are automatically refunded to the deposit address during mining. Pending deposits can be cancelled by running in exit mode.
+<br><br>
 
-## Status
+## Status Updates
 
-During mining, a status message like the following will be displayed. This indicates the state of the deposit account:
+While mining, you’ll see status updates like the following. This indicates the state of the deposit account:
 
 ```
 
@@ -57,22 +76,30 @@ Deposits: 3 (success: 2 pending: 1 rejected: 0 cancelled: 0) Withdrawn: 2 Eligib
 The status message components are:
 
 - Deposits: Total number of deposits
-- Success: Number of successful deposits
-- Pending: Number of deposits awaiting AML analysis
-- Rejected: Number of deposits rejected by AML analysis
-- Cancelled: Number of cancelled deposits
-- Withdrawn: Number of withdrawals
-- Eligible: Number of deposits eligible for ITX rewards
-- Claimed: Number of deposits for which rewards have been claimed
 
-## Important Notes
+- Success: Number of successful deposits
+
+- Pending: Number of deposits awaiting AML analysis
+
+- Rejected: Number of deposits rejected by AML analysis
+
+- Cancelled: Number of cancelled deposits
+
+- Withdrawn: Number of withdrawals
+
+- Eligible: Number of deposits eligible for ITX rewards
+
+- Claimed: Number of deposits for which rewards have been claimed
+  <br><br>
+
+## Important Notes⚠️
 
 ### AML Verification
 
 Money deposited into the simplified version of Intmax2 undergoes AML (Anti-Money Laundering) verification. Deposits from suspicious addresses or those made through mixing services like Tornado Cash will be rejected.
-You can recover rejected funds by launching the CLI in mining mode or exit mode.
+You can recover rejected funds by launching the CLI exit mode.
 
-### Token Eligibility
+### Reward Eligibility
 
 This mining is privacy mining, and addresses that compromise the privacy gained through mining **will be ineligible for mining rewards**.
 Specifically, if there are direct or indirect transfers between deposit addresses and withdrawal addresses, the deposit address used for that mining will not be eligible for rewards. You can check whether an deposit address is eligible for rewards in the "Qualified" column after selecting the mode.
@@ -88,6 +115,7 @@ Here are examples of actions that would make an address **ineligible** for rewar
 <div align="center">
   <img src="assets/diagram2.jpg" width="800" alt="Mining diagram">
 </div>
+<br><br>
 
 ## FAQs
 
@@ -108,3 +136,5 @@ A: To stop the CLI, simply press Ctrl+C in the terminal where it's running. This
 
 Q: An error occurred during execution. What should I do?<br>
 A: Feel free to run it again. It's designed to be safe for re-execution.
+
+_[Find more FAQs here](docs/faq.md)_
