@@ -17,9 +17,9 @@
 
   | ITX Contract | Address |
 | ----------- | ----------- |
-| Network | Address |
 | Base Sepolia | 0x2699CD7f883DecC464171a7A92f4CcC4eF220fa2 |
-| Base Mainnet | 0x58f434698571346f77Bc755cfDC89c5708E7b184 |
+| Old Base Mainnet | 0x58f434698571346f77Bc755cfDC89c5708E7b184 |
+| New Base Mainnet(From 18/01/2025) | 0xf95117e3a5B7968703CeD3B66A9CbE0Bc9e1D8bf |
 
 ## Add Base Sepolia testnet to your MetaMask
 
@@ -148,8 +148,8 @@
 Token Contract Address: `0x2699CD7f883DecC464171a7A92f4CcC4eF220fa2`
 Token Symbol: `ITX`
 
-**For the Mainnet**:<br>
-Token Contract Address: `0x58f434698571346f77Bc755cfDC89c5708E7b184`
+**For the Base Mainnet**:<br>
+Token Contract Address: `0xf95117e3a5B7968703CeD3B66A9CbE0Bc9e1D8bf`
 Token Symbol:`ITX`
 
 3. Click “Next”
@@ -157,7 +157,7 @@ Token Symbol:`ITX`
 <div align="center">
   <img src="../assets/base/b8.png" width="400"></div>
 
-4. Click “Import” and the process completed.
+4. Click “Import” and the process is completed.
 
 <div align="center">
   <img src="../assets/base/b9.png" width="400"></div>
@@ -178,8 +178,8 @@ Token Symbol:`ITX`
 Token Contract Address: `0x2699CD7f883DecC464171a7A92f4CcC4eF220fa2`
 Token Symbol: `ITX`
 
-**For the Mainnet**:<br>
-Token Contract Address: `0x58f434698571346f77Bc755cfDC89c5708E7b184`
+**For the Base Mainnet**:<br>
+Token Contract Address: `0xf95117e3a5B7968703CeD3B66A9CbE0Bc9e1D8bf`
 Token Symbol:`ITX`
 
 3. You can see the ITX token in your wallet.
