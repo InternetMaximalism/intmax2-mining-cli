@@ -95,6 +95,28 @@ pub async fn modify_config(config: &EnvConfig) -> anyhow::Result<EnvConfig> {
         config.max_gas_price
     };
 
+    let modify_mining_unit = Confirm::new()
+        .with_prompt(format!(
+            "Modify mining unit {}?", config.mining_unit))
+        .default(false)
+        .interact()?;
+    let mining_unit = if modify_mining_unit {
+        input_mining_unit()?
+    } else {
+        config.mining_unit
+    };
+
+    let modify_mining_times = Confirm::new()
+        .with_prompt(format!(
+            "Modify mining times {}?", config.mining_times))
+        .default(false)
+        .interact()?;
+    let mining_times = if modify_mining_times {
+        input_mining_times()?
+    } else {
+        config.mining_times
+    };
+
     let modify_withdrawal_address = Confirm::new()
         .with_prompt(format!("Modify withdrawal account {:?}?", get_address(key)))
         .default(false)
@@ -114,8 +136,8 @@ pub async fn modify_config(config: &EnvConfig) -> anyhow::Result<EnvConfig> {
         withdrawal_address,
         withdrawal_private_key: keys,
         encrypted_withdrawal_private_key: encrypted_keys,
-        mining_unit: config.mining_unit,
-        mining_times: config.mining_times,
+        mining_unit: mining_unit,
+        mining_times: mining_times,
     };
     Ok(config)
 }
