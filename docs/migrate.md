@@ -15,8 +15,8 @@ https://discord.gg/nByKNNhyvn
 
 Before you begin, please ensure you have the following:
 
-- **Add Base Network To Your Wallet**: Refer to the Base [Network](./base.md) guide to add Base testnet and mainnet.
-- **Your Alchemy API key enables Base Network**: Please refer to the [How to get your Alchemy API key](./alchemy.md) guide to ensure your API key supports Base Network.
+- **Add Base Network To Your Wallet**: Refer to the Base [Network](./add_token_to_wallet.md) guide to add Base testnet and mainnet.
+- **Your Alchemy API key enables Base Network**: Please refer to the [How to get your Alchemy API key](./alchemy_guide.md) guide to ensure your API key supports Base Network.
 
 ## Step-by-Step Instructions
 
@@ -84,7 +84,7 @@ To claim ITX token, select `Claim`. You can check whether an deposit address is 
      <img src="../assets/migrate/m25.png" width="600" alt="Mining CLI"></div>
 
 2. **Claim ITX Token To Withdrawal Address**:
-If `Claim` was selected and your address qualifies for ITX tokens, the CLI automatically transfers your available ITX tokens to your withdrawal wallet immediately or when the token availablity time reaches. To see the tokens in your wallet, ensure to add the ITX mainnet token contract address to your wallet using the Network [guide](./holesky.md).
+If `Claim` was selected and your address qualifies for ITX tokens, the CLI automatically transfers your available ITX tokens to your withdrawal wallet immediately or when the token availablity time reaches. To see the tokens in your wallet, ensure to add the ITX mainnet token contract address to your wallet using the Network [guide](./add_token_to_wallet.md).
 
    <div align="center">
      <img src="../assets/migrate/m6.png" width="600" alt="Mining CLI"></div>

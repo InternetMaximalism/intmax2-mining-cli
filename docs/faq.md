@@ -29,7 +29,7 @@ This could be caused by several factors. Open CLI and try claiming again. If iss
 
 ### 7. When I claim my tokens, Why can’t I find them in my wallet?
 
-Note that after mining, rewards are made available after 2 weeks. Import the token contract address to your wallet to see your tokens. Get contract address [here](https://github.com/cloudy-afk/intmax2-mining-cli/blob/main/docs/base.md).
+Note that after mining, rewards are made available after 2 weeks. Import the token contract address to your wallet to see your tokens. Get contract address [here](/docs/add_token_to_wallet.md).
 
 
 ### 8. Why do other people get more tokens than others even though they are mining the same way?

@@ -18,7 +18,7 @@ Before you begin, ensure your system meets the following minimum specifications:
 
 - **Operating System**: Windows, macOS, or Linux
 
-> **Note**: Some versions of Windows may encounter compatibility issues. For troubleshooting, refer to the [Windows guide](docs/windows.md).
+> **Note**: Some versions of Windows may encounter compatibility issues. For troubleshooting, refer to the [Windows guide](docs/windows_guide.md).
 
 ## Getting Started
 
@@ -32,19 +32,19 @@ Before you begin, ensure your system meets the following minimum specifications:
 
 2. Choose a Network to Start Mining:
 
-   - [Quick Start for Base Mainnet](docs/mainnet-quickstart.md) (Available since 19th Oct, 2024 00:00 UTC)
+   - [Quick Start for Base Mainnet](docs/base_mainnet_quickstart.md) (Available since 19th Oct, 2024 00:00 UTC)
 
-   - [Quick Start for Base Testnet](docs/quickstart.md)
+   - [Quick Start for Base Testnet](docs/base_sepolia_quickstart.md)
 
 3. Additional Resources:
 
-   - [How to Add ITX Token to Your Wallet](docs/adding-token-to-wallet.md)
+   - [How to Add ITX Token to Your Wallet](docs/add-token-to-wallet.md)
 
    - [Migration Guide (Ethereum Mainnet → Base)](docs/migrate.md)
 
-   - [Developer Documentation](docs/developer.md)
+   - [Developer Documentation](docs/developer_docs.md)
 
-   - [Terms of Use](docs/terms.md)
+   - [Terms of Use](docs/terms_of_use.md)
      <br><br>
 
 ## How It Works
