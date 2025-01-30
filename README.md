@@ -38,7 +38,7 @@ Before you begin, ensure your system meets the following minimum specifications:
 
 3. Additional Resources:
 
-   - [How to Add ITX Token to Your Wallet](docs/add-token-to-wallet.md)
+   - [How to Add ITX Token to Your Wallet](docs/add_token_to_wallet.md)
 
    - [Migration Guide (Ethereum Mainnet → Base)](docs/migrate.md)
 
