@@ -65,4 +65,4 @@ Return to the Virus & threat protection settings window (follow Step 1 and Step 
 
 Click the toggle switch to turn Real-time protection On again. This will reactivate Windows Defender's continuous protection and keep your system secure.
 
-You may now proceed to begin mining activities on [mainnet](./mainnet-quickstart.md) or [testnet](./quickstart.md).
+You may now proceed to begin mining activities on [base mainnet](./base_mainnet_quickstart.md) or [base sepolia testnet](./base_sepolia_quickstart.md).
