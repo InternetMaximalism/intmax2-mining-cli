@@ -9,7 +9,7 @@ use term_of_use::make_agreement;
 
 use crate::{
     external_api::contracts::utils::get_address,
-    services::{claim_loop, exit_loop, mining_loop},
+    services::{claim_loop, exit_loop, legacy_claim_loop, mining_loop},
     state::{mode::RunMode, state::State},
     utils::{
         env_config::EnvConfig,
@@ -100,7 +100,11 @@ async fn mode_loop(
                 press_enter_to_continue();
             }
             RunMode::Claim => {
-                claim_loop(state, withdrawal_private_key).await?;
+                if is_legacy() {
+                    legacy_claim_loop(state, withdrawal_private_key).await?;
+                } else {
+                    claim_loop(state, withdrawal_private_key).await?;
+                }
                 press_enter_to_continue();
             }
             RunMode::Exit => {
