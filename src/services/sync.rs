@@ -4,7 +4,7 @@ use crate::{
             events::get_deposit_leaf_inserted_event,
             int1::{get_deposit_root, get_deposit_root_exits},
         },
-        raw_github::{fetch_latest_tree_from_github, BinTrees},
+        github::{fetch_latest_tree_from_github, BinTrees},
     },
     utils::{
         bin_parser::{BinDepositTree, BinEligibleTree, DepositTreeInfo, EligibleTreeInfo},
@@ -67,36 +67,29 @@ pub async fn sync_trees(
                 .map_err(|e| {
                     Error::NetworkError(format!("Failed to fetch latest tree from github: {}", e))
                 })?;
-
             // retry if TreeRootSyncError occurs
             let update = || async {
-                if let Some(bin_deposit_tree) = bin_deposit_tree {
-                    let (new_deposit_hash_tree, new_block_number) =
-                        parse_and_validate_bin_deposit_tree(bin_deposit_tree).await?;
-                    log::info!(
-                        "Fetched deposit tree with {} leaves from block {}",
-                        new_deposit_hash_tree.tree.len(),
-                        new_block_number
-                    );
-                    *deposit_hash_tree = new_deposit_hash_tree;
-                    *last_deposit_block_number = new_block_number;
-                }
-                if let Some(bin_short_term_eligible_tree) = bin_short_term_eligible_tree {
-                    *short_term_eligible_tree =
-                        parse_and_validate_bin_eligible_tree(true, bin_short_term_eligible_tree)
-                            .await?;
-                }
-                if let Some(bin_long_term_eligible_tree) = bin_long_term_eligible_tree {
-                    *long_term_eligible_tree =
-                        parse_and_validate_bin_eligible_tree(false, bin_long_term_eligible_tree)
-                            .await?;
-                }
+                let (new_deposit_hash_tree, new_block_number) =
+                    parse_and_validate_bin_deposit_tree(bin_deposit_tree).await?;
+                log::info!(
+                    "Fetched deposit tree with {} leaves from block {}",
+                    new_deposit_hash_tree.tree.len(),
+                    new_block_number
+                );
+                *deposit_hash_tree = new_deposit_hash_tree;
+                *last_deposit_block_number = new_block_number;
+                *short_term_eligible_tree =
+                    parse_and_validate_bin_eligible_tree(true, bin_short_term_eligible_tree)
+                        .await?;
+                *long_term_eligible_tree =
+                    parse_and_validate_bin_eligible_tree(false, bin_long_term_eligible_tree)
+                        .await?;
                 Result::<(), Error>::Ok(())
             };
             match update().await {
                 Ok(()) => break,
                 Err(e) => {
-                    warn!("Feched tree is invalid in try {}: {}", try_number, e);
+                    warn!("Fetched tree is invalid in try {}: {}", try_number, e);
                     try_number += 1;
                     sleep_for(30);
                 }

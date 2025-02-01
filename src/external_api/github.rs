@@ -17,9 +17,9 @@ pub enum GithubError {
 
 #[derive(Debug)]
 pub struct BinTrees {
-    pub bin_deposit_tree: Option<BinDepositTree>,
-    pub bin_short_term_eligible_tree: Option<BinEligibleTree>,
-    pub bin_long_term_eligible_tree: Option<BinEligibleTree>,
+    pub bin_deposit_tree: BinDepositTree,
+    pub bin_short_term_eligible_tree: BinEligibleTree,
+    pub bin_long_term_eligible_tree: BinEligibleTree,
     pub latest_update: NaiveDate,
 }
 
@@ -90,9 +90,9 @@ pub async fn fetch_latest_tree_from_github(
 
     let latest_update = Utc::now().naive_utc().date();
     Ok(BinTrees {
-        bin_deposit_tree: Some(bin_deposit_tree),
-        bin_short_term_eligible_tree: Some(bin_short_term_eligible_tree),
-        bin_long_term_eligible_tree: Some(bin_long_term_eligible_tree),
+        bin_deposit_tree,
+        bin_short_term_eligible_tree,
+        bin_long_term_eligible_tree,
         latest_update,
     })
 }
