@@ -29,7 +29,7 @@ async fn fetch_bytes_content(url: &str) -> Result<Vec<u8>, GithubError> {
     let response = with_retry(|| async {
         client
             .get(url)
-            .header("User-Agent", "Mozilla/5.0") // GitHubはUser-Agentヘッダーを要求することがあります
+            .header("User-Agent", "Mozilla/5.0")
             .send()
             .await
     })
