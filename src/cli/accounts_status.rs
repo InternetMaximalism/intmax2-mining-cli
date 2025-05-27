@@ -32,7 +32,7 @@ pub async fn accounts_status(
     let mut total_long_term_claimable_amount = U256::default();
     loop {
         let key = Key::new(withdrawal_private_key, key_number);
-        if !is_address_used(key.deposit_address).await {
+        if !is_address_used(&state.provider,key.deposit_address).await? {
             println!(
                 "Total short term claimable amount: {} ITX",
                 pretty_format_u256(total_short_term_claimable_amount)

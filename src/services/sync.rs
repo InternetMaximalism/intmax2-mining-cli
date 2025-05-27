@@ -1,11 +1,5 @@
 use crate::{
-    external_api::{
-        contracts::{
-            events::get_deposit_leaf_inserted_event,
-            int1::{get_deposit_root, get_deposit_root_exits},
-        },
-        github::{fetch_latest_tree_from_github, BinTrees},
-    },
+    external_api::github::{fetch_latest_tree_from_github, BinTrees},
     utils::{
         bin_parser::{BinDepositTree, BinEligibleTree, DepositTreeInfo, EligibleTreeInfo},
         config::Settings,

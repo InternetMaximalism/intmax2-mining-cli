@@ -29,7 +29,7 @@ pub async fn validate_deposit_address_balance(
     let single_deposit_gas = U256::from(settings.blockchain.single_deposit_gas);
     let min_balance =
         (mining_unit + gas_price * single_deposit_gas) * U256::from(remaining_deposits);
-    insufficient_balance_instruction(deposit_address, min_balance, "deposit").await?;
+    insufficient_balance_instruction(provider, deposit_address, min_balance, "deposit").await?;
     Ok(())
 }
 
@@ -44,6 +44,7 @@ pub async fn validate_withdrawal_address_balance(
     let gas_price = U256::from(provider.get_gas_price().await?);
     let single_claim_gas = U256::from(settings.blockchain.single_claim_gas);
     let min_balance = single_claim_gas * gas_price * U256::from(num_claim_tx);
-    insufficient_balance_instruction(withdrawal_address, min_balance, "withdrawal").await?;
+    insufficient_balance_instruction(provider, withdrawal_address, min_balance, "withdrawal")
+        .await?;
     Ok(())
 }

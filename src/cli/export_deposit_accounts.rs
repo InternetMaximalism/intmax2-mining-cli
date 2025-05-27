@@ -80,7 +80,7 @@ pub async fn legacy_export_deposit_accounts(
     let mut key_number = 0;
     loop {
         let key = Key::new(withdrawal_private_key, key_number);
-        if !is_address_used(key.deposit_address).await {
+        if !is_address_used(provider, key.deposit_address).await? {
             if key_number == 0 {
                 println!("No deposit accounts found.");
                 return Ok(());
