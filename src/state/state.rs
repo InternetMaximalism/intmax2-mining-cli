@@ -13,7 +13,7 @@ pub struct State {
     pub deposit_hash_tree: DepositHashTree,
     pub short_term_eligible_tree: EligibleTreeWithMap,
     pub long_term_eligible_tree: EligibleTreeWithMap,
-    pub last_tree_feched_at: NaiveDateTime,
+    pub last_tree_fetched_at: NaiveDateTime,
     pub last_deposit_synced_block: u64,
     pub prover: Prover,
 }
@@ -24,7 +24,7 @@ impl State {
             deposit_hash_tree: DepositHashTree::new(),
             short_term_eligible_tree: EligibleTreeWithMap::new(),
             long_term_eligible_tree: EligibleTreeWithMap::new(),
-            last_tree_feched_at: NaiveDateTime::default(),
+            last_tree_fetched_at: NaiveDateTime::default(),
             last_deposit_synced_block: 0,
             prover: Prover::new(),
         }
@@ -33,7 +33,7 @@ impl State {
     pub async fn sync_trees(&mut self) -> anyhow::Result<()> {
         sync_trees(
             &mut self.last_deposit_synced_block,
-            &mut self.last_tree_feched_at,
+            &mut self.last_tree_fetched_at,
             &mut self.deposit_hash_tree,
             &mut self.short_term_eligible_tree,
             &mut self.long_term_eligible_tree,
