@@ -69,7 +69,7 @@ pub async fn mining_task(
 
     // withdrawal
     if !assets_status.not_withdrawn_indices.is_empty() {
-        sleep_before_withdrawal(key.deposit_address).await?;
+        sleep_before_withdrawal(&state.graph_client, key.deposit_address).await?;
         for &index in assets_status.not_withdrawn_indices.iter() {
             let event = assets_status.senders_deposits[index].clone();
             withdrawal_task(state, key, event)
@@ -82,7 +82,7 @@ pub async fn mining_task(
 
     // deposit
     if new_deposit {
-        sleep_before_deposit(key.withdrawal_address).await?;
+        sleep_before_deposit(&state.graph_client, key.withdrawal_address).await?;
         let deposit_address = key.deposit_address;
         let account = state.provider.get_account(deposit_address).await?;
         let nonce = account.nonce;

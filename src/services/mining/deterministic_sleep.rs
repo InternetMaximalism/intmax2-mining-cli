@@ -5,13 +5,18 @@ use rand_chacha::ChaCha20Rng;
 
 use crate::{
     cli::console::print_log,
+    external_api::graph::client::GraphClient,
     utils::{config::Settings, encryption::keccak256_hash, time::sleep_for},
 };
 
 /// Random sleep before deposit to improve privacy.
-pub async fn sleep_before_deposit(withdrawal_address: Address) -> anyhow::Result<()> {
-    // let last_withdrawal_time = get_latest_withdrawal_timestamp(withdrawal_address).await?;
-    let last_withdrawal_time: Option<u64> = todo!();
+pub async fn sleep_before_deposit(
+    graph_client: &GraphClient,
+    withdrawal_address: Address,
+) -> anyhow::Result<()> {
+    let last_withdrawal_time = graph_client
+        .get_latest_withdrawal_timestamp(withdrawal_address)
+        .await?;
     info!("last_withdrawal_time: {:?}", last_withdrawal_time);
     if last_withdrawal_time.is_none() {
         return Ok(()); // no withdrawal yet
@@ -24,8 +29,13 @@ pub async fn sleep_before_deposit(withdrawal_address: Address) -> anyhow::Result
 }
 
 /// Random sleep before withdrawal to improve privacy.  
-pub async fn sleep_before_withdrawal(deposit_address: Address) -> anyhow::Result<()> {
-    let last_deposit_time: Option<u64> = todo!();
+pub async fn sleep_before_withdrawal(
+    graph_client: &GraphClient,
+    deposit_address: Address,
+) -> anyhow::Result<()> {
+    let last_deposit_time: Option<u64> = graph_client
+        .get_latest_deposit_timestamp(deposit_address)
+        .await?;
     info!("last_deposit_time: {:?}", last_deposit_time);
     if last_deposit_time.is_none() {
         return Ok(()); // no deposit yet

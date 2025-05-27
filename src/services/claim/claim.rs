@@ -156,7 +156,7 @@ async fn from_step5(state: &State, key: &Key) -> anyhow::Result<()> {
             &pis,
             proof,
         )
-        .await;
+        .await?;
     Ok(())
 }
 

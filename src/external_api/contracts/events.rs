@@ -3,7 +3,6 @@ use intmax2_zkp::{
     common::deposit::Deposit,
     ethereum_types::{bytes32::Bytes32, u256::U256},
 };
-const EVENT_BLOCK_RANGE: u64 = 100000;
 
 #[derive(Clone, Debug)]
 pub struct Deposited {

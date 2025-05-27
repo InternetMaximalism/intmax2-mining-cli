@@ -40,4 +40,20 @@ impl GraphClient {
         // todo! fetch from the graph
         Ok(vec![])
     }
+
+    pub async fn get_latest_deposit_timestamp(
+        &self,
+        _sender: Address,
+    ) -> Result<Option<u64>, GraphClientError> {
+        // todo! fetch from the graph
+        Ok(None)
+    }
+
+    pub async fn get_latest_withdrawal_timestamp(
+        &self,
+        _recipient: Address,
+    ) -> Result<Option<u64>, GraphClientError> {
+        // todo! fetch from the graph
+        Ok(None)
+    }
 }

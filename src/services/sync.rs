@@ -2,7 +2,7 @@ use crate::{
     external_api::{
         contracts::{int1::Int1Contract, minter::MinterContract},
         github::{fetch_latest_tree_from_github, BinTrees},
-        graph::{self, client::GraphClient},
+        graph::client::GraphClient,
     },
     utils::{
         bin_parser::{BinDepositTree, BinEligibleTree, DepositTreeInfo, EligibleTreeInfo},
