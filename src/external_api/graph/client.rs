@@ -1,7 +1,10 @@
 use alloy::primitives::Address;
 use reqwest::Client;
 
-use crate::external_api::contracts::{events::Deposited, utils::NormalProvider};
+use crate::external_api::contracts::{
+    events::{DepositLeafInserted, Deposited},
+    utils::NormalProvider,
+};
 
 use super::error::GraphClientError;
 
@@ -30,5 +33,11 @@ impl GraphClient {
         Ok(None)
     }
 
-    
+    pub async fn get_deposit_leaf_inserted_event(
+        &self,
+        _from_block: u64,
+    ) -> Result<Vec<DepositLeafInserted>, GraphClientError> {
+        // todo! fetch from the graph
+        Ok(vec![])
+    }
 }

@@ -32,12 +32,15 @@ pub async fn export_deposit_accounts(
         .default(true)
         .interact()?;
     if do_transfer {
-        transfer_instruction(withdrawal_private_key).await?;
+        transfer_instruction(provider, withdrawal_private_key).await?;
     }
     Ok(())
 }
 
-async fn transfer_instruction(withdrawal_private_key: B256) -> anyhow::Result<()> {
+async fn transfer_instruction(
+    provider: &NormalProvider,
+    withdrawal_private_key: B256,
+) -> anyhow::Result<()> {
     let key = Key::new(withdrawal_private_key, 0);
     let to_address: Address = dialoguer::Input::<String>::new()
         .with_prompt("Enter the address to transfer to")
@@ -68,7 +71,7 @@ async fn transfer_instruction(withdrawal_private_key: B256) -> anyhow::Result<()
     if !is_ok {
         return Ok(());
     } else {
-        balance_transfer(key.deposit_private_key, to_address).await?;
+        balance_transfer(provider, key.deposit_private_key, to_address).await?;
     }
     Ok(())
 }
@@ -105,12 +108,13 @@ pub async fn legacy_export_deposit_accounts(
         .interact()?;
 
     if do_transfer {
-        legacy_transfer_instruction(withdrawal_private_key, key_number).await?;
+        legacy_transfer_instruction(provider, withdrawal_private_key, key_number).await?;
     }
     Ok(())
 }
 
 async fn legacy_transfer_instruction(
+    provider: &NormalProvider,
     withdrawal_private_key: B256,
     up_to_key_number: u64,
 ) -> anyhow::Result<()> {
@@ -162,7 +166,7 @@ async fn legacy_transfer_instruction(
         if !is_ok {
             continue;
         } else {
-            balance_transfer(key.deposit_private_key, to_address).await?;
+            balance_transfer(provider, key.deposit_private_key, to_address).await?;
         }
         let do_more = Confirm::new()
             .with_prompt("Do you want to make more transfers?")

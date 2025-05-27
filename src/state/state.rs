@@ -51,6 +51,9 @@ impl State {
 
     pub async fn sync_trees(&mut self) -> anyhow::Result<()> {
         sync_trees(
+            &self.graph_client,
+            &self.int1,
+            &self.minter,
             &mut self.last_deposit_synced_block,
             &mut self.last_tree_fetched_at,
             &mut self.deposit_hash_tree,

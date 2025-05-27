@@ -36,6 +36,7 @@ pub async fn mining_loop(
     ));
     let assets_status = state.sync_and_fetch_assets(&key).await?;
     validate_deposit_address_balance(
+        &state.provider,
         &assets_status,
         key.deposit_address,
         mining_unit,
@@ -101,7 +102,7 @@ pub async fn exit_loop(state: &mut State, withdrawal_private_key: B256) -> anyho
         {
             break;
         }
-        mining_task(state, &key, &assets_status, false, true, 0.into()).await?;
+        mining_task(state, &key, &assets_status, false, true, U256::default()).await?;
         common_loop_cool_down();
     }
     print_status(format!(
@@ -119,7 +120,7 @@ pub async fn legacy_exit_loop(
     loop {
         check_availability().await?;
         let key = Key::new(withdrawal_private_key, key_number);
-        if !is_address_used(key.deposit_address).await {
+        if !is_address_used(&state.provider, key.deposit_address).await? {
             print_status("exit loop finished".to_string());
             return Ok(());
         }
@@ -140,7 +141,7 @@ pub async fn legacy_exit_loop(
                 key_number += 1;
                 break;
             }
-            mining_task(state, &key, &assets_status, false, true, 0.into()).await?;
+            mining_task(state, &key, &assets_status, false, true, U256::default()).await?;
 
             common_loop_cool_down();
         }
@@ -151,7 +152,7 @@ pub async fn claim_loop(state: &mut State, withdrawal_private_key: B256) -> anyh
     let key = Key::new(withdrawal_private_key, 0);
     for is_short_term in [true, false] {
         check_availability().await?;
-        if !is_address_used(key.deposit_address).await {
+        if !is_address_used(&state.provider, key.deposit_address).await? {
             print_status("claim loop finished".to_string());
             return Ok(());
         }
@@ -160,7 +161,12 @@ pub async fn claim_loop(state: &mut State, withdrawal_private_key: B256) -> anyh
             if is_short_term { "short" } else { "long" }
         ));
         let assets_status = state.sync_and_fetch_assets(&key).await?;
-        validate_withdrawal_address_balance(&assets_status, key.withdrawal_address).await?;
+        validate_withdrawal_address_balance(
+            &state.provider,
+            &assets_status,
+            key.withdrawal_address,
+        )
+        .await?;
         claim_task(state, &key, is_short_term, &assets_status).await?;
         common_loop_cool_down();
     }
@@ -180,7 +186,7 @@ pub async fn legacy_claim_loop(
         for is_short_term in [true, false] {
             check_availability().await?;
             let key = Key::new(withdrawal_private_key, key_number);
-            if !is_address_used(key.deposit_address).await {
+            if !is_address_used(&state.provider, key.deposit_address).await? {
                 print_status("claim loop finished".to_string());
                 return Ok(());
             }
@@ -191,7 +197,12 @@ pub async fn legacy_claim_loop(
                 if is_short_term { "short" } else { "long" }
             ));
             let assets_status = state.sync_and_fetch_assets(&key).await?;
-            validate_withdrawal_address_balance(&assets_status, key.withdrawal_address).await?;
+            validate_withdrawal_address_balance(
+                &state.provider,
+                &assets_status,
+                key.withdrawal_address,
+            )
+            .await?;
             let assets_status = state.sync_and_fetch_assets(&key).await?;
             claim_task(state, &key, is_short_term, &assets_status).await?;
             common_loop_cool_down();
