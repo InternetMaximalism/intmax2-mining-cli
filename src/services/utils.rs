@@ -4,7 +4,7 @@ use ethers::{
     middleware::SignerMiddleware,
     providers::{Http, Middleware, Provider},
     signers::Wallet,
-    types::{Address, H256, U256},
+    types::{Address, B256, U256},
 };
 
 use crate::{
@@ -45,7 +45,7 @@ pub async fn handle_contract_call<S: ToString>(
     from_address: Address,
     from_name: S,
     tx_name: S,
-) -> anyhow::Result<H256> {
+) -> anyhow::Result<B256> {
     loop {
         let result = tx.send().await;
         match result {

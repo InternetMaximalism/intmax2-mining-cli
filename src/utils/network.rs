@@ -1,7 +1,6 @@
-use std::{env, fmt::Display, str::FromStr};
-
 use serde::{Deserialize, Serialize};
-use strum::EnumIter;
+use std::{env, fmt::Display, str::FromStr};
+use strum_macros::EnumIter;
 
 #[derive(Debug, Copy, Clone, Serialize, Deserialize, PartialEq, EnumIter)]
 pub enum Network {
@@ -56,6 +55,3 @@ pub fn get_network() -> Network {
 pub fn is_legacy() -> bool {
     get_network() == Network::Mainnet || get_network() == Network::Holesky
 }
-
-#[cfg(test)]
-mod tests {}

@@ -3,7 +3,7 @@ use std::io::{self, Read as _};
 use ::console::{style, Term};
 use configure::recover_withdrawal_private_key;
 use console::initialize_console;
-use ethers::types::H256;
+use ethers::types::B256;
 use mode_selection::{legacy_select_mode, select_mode};
 use term_of_use::make_agreement;
 
@@ -84,7 +84,7 @@ async fn mode_loop(
     mode: &mut RunMode,
     state: &mut State,
     config: &EnvConfig,
-    withdrawal_private_key: H256,
+    withdrawal_private_key: B256,
     is_interactive: bool,
 ) -> anyhow::Result<()> {
     loop {

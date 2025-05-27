@@ -6,7 +6,7 @@ use ethers::{
     middleware::SignerMiddleware,
     providers::{Http, Provider},
     signers::Wallet,
-    types::{Address, H256},
+    types::{Address, B256},
 };
 use intmax2_zkp::ethereum_types::{bytes32::Bytes32, u32limb_trait::U32LimbTrait};
 
@@ -28,7 +28,7 @@ pub async fn get_minter_contract() -> Result<minter_v1::MinterV1<Provider<Http>>
 }
 
 pub async fn get_minter_contract_with_signer(
-    private_key: H256,
+    private_key: B256,
 ) -> Result<
     minter_v1::MinterV1<SignerMiddleware<Provider<Http>, Wallet<SigningKey>>>,
     BlockchainError,

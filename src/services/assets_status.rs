@@ -1,4 +1,4 @@
-use ethers::types::{Address, H256, U256};
+use ethers::types::{Address, B256, U256};
 use intmax2_zkp::{
     common::deposit::get_pubkey_salt_hash, ethereum_types::u32limb_trait::U32LimbTrait,
     utils::leafable::Leafable as _,
@@ -41,7 +41,7 @@ pub struct AssetsStatus {
 pub async fn fetch_assets_status(
     state: &State,
     deposit_address: Address,
-    deposit_private_key: H256,
+    deposit_private_key: B256,
 ) -> anyhow::Result<AssetsStatus> {
     let senders_deposits = get_deposited_event_by_sender(deposit_address).await?;
 

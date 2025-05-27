@@ -1,4 +1,4 @@
-use ethers::types::Address;
+use alloy::primitives::Address;
 use intmax2_zkp::wrapper_config::plonky2_config::PoseidonBN128GoldilocksConfig;
 
 use log::info;

@@ -2,7 +2,7 @@ use std::str::FromStr;
 
 use ethers::{
     signers::Signer as _,
-    types::{Address, Bytes, H256, U256},
+    types::{Address, Bytes, B256, U256},
 };
 use intmax2_zkp::ethereum_types::u32limb_trait::U32LimbTrait;
 use log::info;
@@ -18,7 +18,7 @@ use crate::{
 };
 
 pub async fn claim_tokens(
-    claim_key: H256,
+    claim_key: B256,
     is_short_term: bool,
     claims: &[MiningClaim],
     pis: ClaimPublicInputs,

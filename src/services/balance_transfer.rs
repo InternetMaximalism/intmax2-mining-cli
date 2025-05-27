@@ -1,6 +1,6 @@
 use ethers::{
     providers::Middleware,
-    types::{Address, Eip1559TransactionRequest, H256},
+    types::{Address, Eip1559TransactionRequest, B256},
 };
 use log::info;
 
@@ -16,7 +16,7 @@ use crate::{
 };
 
 pub async fn balance_transfer(
-    deposit_private_key: H256,
+    deposit_private_key: B256,
     to_address: Address,
 ) -> Result<(), BlockchainError> {
     let deposit_address = get_address(deposit_private_key);

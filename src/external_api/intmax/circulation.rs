@@ -1,4 +1,4 @@
-use ethers::types::Address;
+use alloy::primitives::Address;
 use log::info;
 use serde::{Deserialize, Serialize};
 

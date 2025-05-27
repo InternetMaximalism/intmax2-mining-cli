@@ -1,6 +1,6 @@
 use std::{env, io::BufReader, path::PathBuf, str::FromStr as _};
 
-use ethers::types::{Address, H256, U256};
+use ethers::types::{Address, B256, U256};
 use serde::{Deserialize, Serialize};
 
 use super::{
@@ -28,7 +28,7 @@ pub struct EnvConfig {
     pub max_gas_price: U256,
     pub encrypt: bool,
     pub withdrawal_address: Address,
-    pub withdrawal_private_key: Option<H256>,
+    pub withdrawal_private_key: Option<B256>,
     pub encrypted_withdrawal_private_key: Option<Vec<u8>>,
     pub mining_unit: U256,
     pub mining_times: u64,
@@ -179,7 +179,7 @@ impl EnvConfig {
             .map_err(|_| anyhow::anyhow!("failed to parse WITHDRAWAL_ADDRESS"))?;
 
         let withdrawal_private_key = if !encrypt {
-            let withdrawal_private_key: H256 = value
+            let withdrawal_private_key: B256 = value
                 .withdrawal_private_key
                 .as_ref()
                 .unwrap()
@@ -250,7 +250,7 @@ mod tests {
 
     #[test]
     fn test_env_config_string_conversion() {
-        let key = ethers::types::H256::random();
+        let key = ethers::types::B256::random();
         let address = get_address(key);
         let env_config = super::EnvConfig {
             network: Network::Holesky,
@@ -270,7 +270,7 @@ mod tests {
 
     #[test]
     fn test_export_and_import_config() {
-        let key = ethers::types::H256::random();
+        let key = ethers::types::B256::random();
         let address = get_address(key);
         let env_config = super::EnvConfig {
             network: Network::Holesky,

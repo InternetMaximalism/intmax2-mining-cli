@@ -1,5 +1,3 @@
-use ethers::types::{H256, U256};
-
 use crate::{
     external_api::{
         contracts::{
@@ -18,7 +16,7 @@ use crate::{
 pub async fn accounts_status(
     state: &mut State,
     mining_times: u64,
-    withdrawal_private_key: H256,
+    withdrawal_private_key: B256,
 ) -> anyhow::Result<()> {
     println!("Network: {}", get_network());
     let withdrawal_address = get_address(withdrawal_private_key);

@@ -1,5 +1,5 @@
 use chrono::NaiveDateTime;
-use ethers::types::H256;
+use ethers::types::B256;
 use intmax2_zkp::ethereum_types::u256::U256;
 use mining_circuit_v1::eligible_tree::EligibleLeaf;
 use num_bigint::BigUint;
@@ -11,7 +11,7 @@ use crate::{
 };
 
 pub fn get_dummy_keys() -> Key {
-    let deposit_private_key: H256 =
+    let deposit_private_key: B256 =
         "0xdf57089febbacf7ba0bc227dafbffa9fc08a93fdc68e1e42411a14efcf23656e"
             .parse()
             .unwrap();

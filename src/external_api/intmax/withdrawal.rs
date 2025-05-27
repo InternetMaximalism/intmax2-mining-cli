@@ -1,13 +1,12 @@
 use ethers::{
     providers::{Http, PendingTransaction},
-    types::{Address, Bytes, H256, U256},
+    types::{Address, Bytes, B256, U256},
 };
 use intmax2_zkp::ethereum_types::u32limb_trait::U32LimbTrait;
 use log::info;
 use mining_circuit_v1::withdrawal::simple_withraw_circuit::SimpleWithdrawalPublicInputs;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use std::str::FromStr;
 
 use crate::{
     external_api::{
@@ -131,7 +130,7 @@ async fn query_withdrawal(withdrawal_id: &str) -> Result<QueryWithdrawalSuccess,
 pub async fn submit_withdrawal(
     pis: SimpleWithdrawalPublicInputs,
     proof: &str,
-) -> Result<H256, IntmaxError> {
+) -> Result<B256, IntmaxError> {
     info!("submit_withdrawal with args {:?} proof {}", pis, proof);
     let tx_hash = if get_network() == Network::Localnet {
         let tx_hash = localnet_withdrawal(pis, proof).await.unwrap();
@@ -157,7 +156,7 @@ pub async fn submit_withdrawal(
                     sleep_for(cooldown);
                 }
                 "completed" => {
-                    let tx_hash = H256::from_str(&status.transaction_hash.unwrap()).unwrap();
+                    let tx_hash = B256::from_str(&status.transaction_hash.unwrap()).unwrap();
                     break tx_hash;
                 }
                 "failed" => {
@@ -187,10 +186,10 @@ pub async fn submit_withdrawal(
 async fn localnet_withdrawal(
     pis: SimpleWithdrawalPublicInputs,
     proof: &str,
-) -> anyhow::Result<H256> {
+) -> anyhow::Result<B256> {
     // Hardhat's default private key for withdrawal
     let local_private_key =
-        H256::from_str("0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a")
+        B256::from_str("0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a")
             .unwrap();
     let int1 = get_int1_contract_with_signer(local_private_key).await?;
     let public_inputs = int_1::WithdrawalPublicInputs {

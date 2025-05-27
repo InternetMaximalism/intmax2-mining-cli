@@ -11,7 +11,7 @@ use crate::{
     utils::{config::Settings, time::sleep_for},
 };
 use claim::claim_task;
-use ethers::types::{H256, U256};
+use ethers::types::{B256, U256};
 use mining::mining_task;
 use utils::is_address_used;
 
@@ -25,7 +25,7 @@ pub mod utils;
 // note: in legacy environment, there is no mining loop
 pub async fn mining_loop(
     state: &mut State,
-    withdrawal_private_key: H256,
+    withdrawal_private_key: B256,
     mining_unit: U256,
     mining_times: u64,
 ) -> anyhow::Result<()> {
@@ -89,7 +89,7 @@ pub async fn mining_loop(
     Ok(())
 }
 
-pub async fn exit_loop(state: &mut State, withdrawal_private_key: H256) -> anyhow::Result<()> {
+pub async fn exit_loop(state: &mut State, withdrawal_private_key: B256) -> anyhow::Result<()> {
     let key = Key::new(withdrawal_private_key, 0);
     print_log(format!("Exit for deposit address{:?}", key.deposit_address));
     loop {
@@ -113,7 +113,7 @@ pub async fn exit_loop(state: &mut State, withdrawal_private_key: H256) -> anyho
 
 pub async fn legacy_exit_loop(
     state: &mut State,
-    withdrawal_private_key: H256,
+    withdrawal_private_key: B256,
 ) -> anyhow::Result<()> {
     let mut key_number = 0;
     loop {
@@ -147,7 +147,7 @@ pub async fn legacy_exit_loop(
     }
 }
 
-pub async fn claim_loop(state: &mut State, withdrawal_private_key: H256) -> anyhow::Result<()> {
+pub async fn claim_loop(state: &mut State, withdrawal_private_key: B256) -> anyhow::Result<()> {
     let key = Key::new(withdrawal_private_key, 0);
     for is_short_term in [true, false] {
         check_avaliability().await?;
@@ -173,7 +173,7 @@ pub async fn claim_loop(state: &mut State, withdrawal_private_key: H256) -> anyh
 
 pub async fn legacy_claim_loop(
     state: &mut State,
-    withdrawal_private_key: H256,
+    withdrawal_private_key: B256,
 ) -> anyhow::Result<()> {
     let mut key_number = 0;
     loop {

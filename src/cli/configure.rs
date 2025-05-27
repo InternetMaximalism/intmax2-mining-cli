@@ -3,7 +3,7 @@ use std::{collections::HashMap, str::FromStr};
 use anyhow::bail;
 use console::style;
 use dialoguer::{Confirm, Input, Password, Select};
-use ethers::types::{Address, H256, U256};
+use ethers::types::{Address, B256, U256};
 use strum::IntoEnumIterator as _;
 
 use crate::{
@@ -54,7 +54,7 @@ pub async fn new_config(network: Network) -> anyhow::Result<EnvConfig> {
         let mining_times = input_mining_times()?;
         (max_gas_price, mining_unit, mining_times)
     };
-    let withdrawal_private_key: H256 = input_withdrawal_private_key(&rpc_url).await?;
+    let withdrawal_private_key: B256 = input_withdrawal_private_key(&rpc_url).await?;
     let withdrawal_address = get_address(withdrawal_private_key);
     let (encrypt, keys, encrypted_keys) = input_encryption(withdrawal_private_key)?;
     let config = EnvConfig {
@@ -267,13 +267,13 @@ fn input_mining_times() -> anyhow::Result<u64> {
     Ok(mining_times)
 }
 
-async fn input_withdrawal_private_key(rpc_url: &str) -> anyhow::Result<H256> {
+async fn input_withdrawal_private_key(rpc_url: &str) -> anyhow::Result<B256> {
     loop {
         let withdrawal_private_key: String = Password::new()
             .with_prompt(format!("Withdrawal private key of {}", get_network()))
             .validate_with(|input: &String| validate_private_key_with_duplication_check(&[], input))
             .interact()?;
-        let withdrawal_private_key: H256 = withdrawal_private_key.parse().unwrap();
+        let withdrawal_private_key: B256 = withdrawal_private_key.parse().unwrap();
         let withdrawal_address = get_address(withdrawal_private_key);
         println!("Withdrawal Address: {:?}", withdrawal_address);
 
@@ -328,8 +328,8 @@ fn is_withdrawal_address_duplicated(withdrawal_addres: Address) -> anyhow::Resul
 }
 
 fn input_encryption(
-    withdrawal_private_key: H256,
-) -> anyhow::Result<(bool, Option<H256>, Option<Vec<u8>>)> {
+    withdrawal_private_key: B256,
+) -> anyhow::Result<(bool, Option<B256>, Option<Vec<u8>>)> {
     let do_encrypt = Confirm::new()
         .with_prompt("Do you set password to encrypt private keys?")
         .default(true)
@@ -353,13 +353,13 @@ fn input_encryption(
 }
 
 fn validate_private_key_with_duplication_check(
-    private_keys: &[H256],
+    private_keys: &[B256],
     input: &str,
 ) -> Result<(), &'static str> {
-    let result: Result<H256, _> = input.parse();
+    let result: Result<B256, _> = input.parse();
     match result {
         Ok(x) => {
-            if x == H256::zero() {
+            if x == B256::zero() {
                 return Err("Invalid private key");
             }
             if private_keys.contains(&x) {
@@ -371,7 +371,7 @@ fn validate_private_key_with_duplication_check(
     }
 }
 
-pub fn recover_withdrawal_private_key(config: &EnvConfig) -> anyhow::Result<H256> {
+pub fn recover_withdrawal_private_key(config: &EnvConfig) -> anyhow::Result<B256> {
     let key = if !config.encrypt {
         config.withdrawal_private_key.clone().unwrap()
     } else {

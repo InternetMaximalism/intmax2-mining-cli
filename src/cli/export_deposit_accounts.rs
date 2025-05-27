@@ -1,5 +1,5 @@
 use dialoguer::{Confirm, Select};
-use ethers::types::{Address, H256};
+use ethers::types::{Address, B256};
 
 use crate::{
     external_api::contracts::utils::get_balance,
@@ -10,7 +10,7 @@ use crate::{
     state::key::Key,
 };
 
-pub async fn export_deposit_accounts(withdrawal_private_key: H256) -> anyhow::Result<()> {
+pub async fn export_deposit_accounts(withdrawal_private_key: B256) -> anyhow::Result<()> {
     let key = Key::new(withdrawal_private_key, 0);
     let balance = get_balance(key.deposit_address).await?;
     println!();
@@ -31,7 +31,7 @@ pub async fn export_deposit_accounts(withdrawal_private_key: H256) -> anyhow::Re
     Ok(())
 }
 
-async fn transfer_instruction(withdrawal_private_key: H256) -> anyhow::Result<()> {
+async fn transfer_instruction(withdrawal_private_key: B256) -> anyhow::Result<()> {
     let key = Key::new(withdrawal_private_key, 0);
     let to_address: Address = dialoguer::Input::<String>::new()
         .with_prompt("Enter the address to transfer to")
@@ -67,7 +67,7 @@ async fn transfer_instruction(withdrawal_private_key: H256) -> anyhow::Result<()
     Ok(())
 }
 
-pub async fn legacy_export_deposit_accounts(withdrawal_private_key: H256) -> anyhow::Result<()> {
+pub async fn legacy_export_deposit_accounts(withdrawal_private_key: B256) -> anyhow::Result<()> {
     let mut key_number = 0;
     loop {
         let key = Key::new(withdrawal_private_key, key_number);
@@ -102,7 +102,7 @@ pub async fn legacy_export_deposit_accounts(withdrawal_private_key: H256) -> any
 }
 
 async fn legacy_transfer_instruction(
-    withdrawal_private_key: H256,
+    withdrawal_private_key: B256,
     up_to_key_number: u64,
 ) -> anyhow::Result<()> {
     let deposit_addresses = (0..up_to_key_number)
