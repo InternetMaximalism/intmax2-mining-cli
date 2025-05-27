@@ -1,7 +1,11 @@
-use alloy::primitives::{Address, B256};
+use alloy::{
+    primitives::{Address, B256},
+    providers::Provider as _,
+};
 use dialoguer::{Confirm, Select};
 
 use crate::{
+    external_api::contracts::utils::NormalProvider,
     services::{
         balance_transfer::balance_transfer,
         utils::{is_address_used, pretty_format_u256},
@@ -9,9 +13,12 @@ use crate::{
     state::key::Key,
 };
 
-pub async fn export_deposit_accounts(withdrawal_private_key: B256) -> anyhow::Result<()> {
+pub async fn export_deposit_accounts(
+    provider: &NormalProvider,
+    withdrawal_private_key: B256,
+) -> anyhow::Result<()> {
     let key = Key::new(withdrawal_private_key, 0);
-    let balance = get_balance(key.deposit_address).await?;
+    let balance = provider.get_balance(key.deposit_address).await?;
     println!();
     println!(
         "Deposit Address: {:?} ({} ETH)",
@@ -66,7 +73,10 @@ async fn transfer_instruction(withdrawal_private_key: B256) -> anyhow::Result<()
     Ok(())
 }
 
-pub async fn legacy_export_deposit_accounts(withdrawal_private_key: B256) -> anyhow::Result<()> {
+pub async fn legacy_export_deposit_accounts(
+    provider: &NormalProvider,
+    withdrawal_private_key: B256,
+) -> anyhow::Result<()> {
     let mut key_number = 0;
     loop {
         let key = Key::new(withdrawal_private_key, key_number);
@@ -77,7 +87,7 @@ pub async fn legacy_export_deposit_accounts(withdrawal_private_key: B256) -> any
             }
             break;
         }
-        let balance = get_balance(key.deposit_address).await?;
+        let balance = provider.get_balance(key.deposit_address).await?;
         println!();
         println!(
             "Deposit Address #{}: {:?} ({} ETH)",

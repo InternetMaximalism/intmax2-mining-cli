@@ -1,7 +1,7 @@
 use std::io::{self, Read as _};
 
-use alloy::primitives::B256;
 use ::console::{style, Term};
+use alloy::primitives::B256;
 use configure::recover_withdrawal_private_key;
 use console::initialize_console;
 use mode_selection::{legacy_select_mode, select_mode};
@@ -113,11 +113,17 @@ async fn mode_loop(
             }
             RunMode::Export => {
                 if is_legacy() {
-                    export_deposit_accounts::legacy_export_deposit_accounts(withdrawal_private_key)
-                        .await?;
+                    export_deposit_accounts::legacy_export_deposit_accounts(
+                        &state.provider,
+                        withdrawal_private_key,
+                    )
+                    .await?;
                 } else {
-                    export_deposit_accounts::export_deposit_accounts(withdrawal_private_key)
-                        .await?;
+                    export_deposit_accounts::export_deposit_accounts(
+                        &state.provider,
+                        withdrawal_private_key,
+                    )
+                    .await?;
                 }
                 press_enter_to_continue();
             }

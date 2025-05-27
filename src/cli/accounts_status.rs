@@ -1,4 +1,4 @@
-use alloy::primitives::{B256, U256};
+use alloy::{primitives::{B256, U256}, providers::Provider as _};
 
 use crate::{
     external_api::{
@@ -18,8 +18,8 @@ pub async fn accounts_status(
 ) -> anyhow::Result<()> {
     println!("Network: {}", get_network());
     let withdrawal_address = get_address_from_private_key(withdrawal_private_key);
-    let withdrawal_balance = get_balance(withdrawal_address).await?;
-    let withdrawal_token_balance = get_token_balance(withdrawal_address).await?;
+    let withdrawal_balance = state.provider.get_balance(withdrawal_address).await?;
+    let withdrawal_token_balance = state.token.get_token_balance(withdrawal_address).await?;
     println!(
         "Withdrawal address(don’t deposit Ether to this): {} {} ETH {} ITX",
         withdrawal_address,
@@ -45,7 +45,7 @@ pub async fn accounts_status(
         }
         let assets_status = state.sync_and_fetch_assets(&key).await?;
         let is_qualified = !get_circulation(key.deposit_address).await?.is_excluded;
-        let deposit_balance = get_balance(key.deposit_address).await?;
+        let deposit_balance = state.provider.get_balance(key.deposit_address).await?;
         println!(
             "Deposit address #{}: {:?} {} ETH. Qualified: {}. Deposits: {}/{}. Claimable Short: {} ITX, Claimable Long: {} ITX",    
             key_number,

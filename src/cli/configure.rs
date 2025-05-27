@@ -1,8 +1,11 @@
 use std::{collections::HashMap, str::FromStr};
 
-use alloy::primitives::{
-    utils::{format_units, parse_ether, parse_units},
-    Address, B256, U256,
+use alloy::{
+    primitives::{
+        utils::{format_units, parse_ether, parse_units},
+        Address, B256, U256,
+    },
+    providers::Provider as _,
 };
 use anyhow::bail;
 use console::style;
@@ -10,7 +13,7 @@ use dialoguer::{Confirm, Input, Password, Select};
 use strum::IntoEnumIterator as _;
 
 use crate::{
-    external_api::contracts::utils::get_address_from_private_key,
+    external_api::contracts::utils::{get_address_from_private_key, get_provider},
     utils::{
         config::Settings,
         encryption::{decrypt, encrypt},
@@ -288,7 +291,8 @@ async fn input_withdrawal_private_key(rpc_url: &str) -> anyhow::Result<B256> {
 
         // non-balance check
         {
-            let balance = get_balance_with_rpc(rpc_url, withdrawal_address).await?;
+            let provider = get_provider(rpc_url)?;
+            let balance = provider.get_balance(withdrawal_address).await?;
             if balance != U256::default() {
                 let colored_message = format!(
                 "{} {}",
