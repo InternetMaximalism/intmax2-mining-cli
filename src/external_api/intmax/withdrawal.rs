@@ -125,7 +125,7 @@ pub async fn submit_withdrawal(
     int1: &Int1Contract,
     pis: SimpleWithdrawalPublicInputs,
     proof: &str,
-) -> Result<(), IntmaxError> {
+) -> Result<TxHash, IntmaxError> {
     info!("submit_withdrawal with args {:?} proof {}", pis, proof);
     if get_network() == Network::Localnet {
         let local_private_key: B256 =
@@ -133,8 +133,10 @@ pub async fn submit_withdrawal(
                 .parse()
                 .unwrap();
         let proof_hex = Bytes::from_str(proof).unwrap();
-        int1.withdrawal(local_private_key, &pis, proof_hex.to_vec())
+        let tx_hash = int1
+            .withdrawal(local_private_key, &pis, proof_hex.to_vec())
             .await?;
+        Ok(tx_hash)
     } else {
         let withdrawal_id = start_withdrawal(pis, proof).await?;
         let max_try = 5;
@@ -155,7 +157,7 @@ pub async fn submit_withdrawal(
                     info!("withdrawal is processing");
                     sleep_for(cooldown);
                 }
-                "completed" => {}
+                "completed" => return Ok(status.transaction_hash.unwrap()),
                 "failed" => {
                     return Err(IntmaxError::InternalError(format!(
                         "withdrawal failed: {}",
@@ -177,7 +179,6 @@ pub async fn submit_withdrawal(
             }
         }
     }
-    Ok(())
 }
 
 // #[cfg(test)]

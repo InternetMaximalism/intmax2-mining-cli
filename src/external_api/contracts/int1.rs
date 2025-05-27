@@ -5,11 +5,12 @@ use super::{
     utils::{get_provider_with_signer, NormalProvider},
 };
 use alloy::{
-    primitives::{Address, B256, U256},
+    primitives::{Address, TxHash, B256, U256},
     sol,
 };
 use intmax2_zkp::ethereum_types::{bytes32::Bytes32, u32limb_trait::U32LimbTrait};
 use mining_circuit_v1::withdrawal::simple_withraw_circuit::SimpleWithdrawalPublicInputs;
+use DepositLib::Deposit;
 use IInt1::WithdrawalPublicInputs;
 
 sol!(
@@ -81,7 +82,7 @@ impl Int1Contract {
         signer_private_key: B256,
         pis: &SimpleWithdrawalPublicInputs,
         proof: Vec<u8>,
-    ) -> Result<(), BlockchainError> {
+    ) -> Result<TxHash, BlockchainError> {
         let signer = get_provider_with_signer(&self.provider, signer_private_key);
         let contract = Int1::new(self.address, signer.clone());
         let public_inputs = WithdrawalPublicInputs {
@@ -94,7 +95,63 @@ impl Int1Contract {
         let tx_request = contract
             .withdraw(public_inputs, proof.into())
             .into_transaction_request();
-        send_transaction_with_gas_bump(signer, tx_request, "withdrawal").await?;
-        Ok(())
+        let tx_hash = send_transaction_with_gas_bump(signer, tx_request, "withdrawal").await?;
+        Ok(tx_hash)
+    }
+
+    pub async fn cancel_deposit(
+        &self,
+        signer_private_key: B256,
+        deposit_id: u64,
+        recipient_salt_hash: Bytes32,
+        token_index: u32,
+        amount: U256,
+    ) -> Result<TxHash, BlockchainError> {
+        let signer = get_provider_with_signer(&self.provider, signer_private_key);
+        let contract = Int1::new(self.address, signer.clone());
+        let deposit = Deposit {
+            recipientSaltHash: convert_bytes32_to_b256(recipient_salt_hash),
+            tokenIndex: token_index,
+            amount,
+        };
+        let tx_request = contract
+            .cancelDeposit(U256::from(deposit_id), deposit)
+            .into_transaction_request();
+        let tx_hash = send_transaction_with_gas_bump(signer, tx_request, "cancel_deposit").await?;
+        Ok(tx_hash)
+    }
+
+    pub async fn deposit_native_token(
+        &self,
+        signer_private_key: B256,
+        recipient_salt_hash: Bytes32,
+        value: U256,
+    ) -> Result<TxHash, BlockchainError> {
+        let signer = get_provider_with_signer(&self.provider, signer_private_key);
+        let contract = Int1::new(self.address, signer.clone());
+        let tx_request = contract
+            .depositNativeToken(convert_bytes32_to_b256(recipient_salt_hash))
+            .value(value)
+            .into_transaction_request();
+        let tx_hash =
+            send_transaction_with_gas_bump(signer, tx_request, "deposit_native_token").await?;
+        Ok(tx_hash)
     }
 }
+
+//  let deposit_address = key.deposit_address;
+//     let nonce = get_account_nonce(deposit_address).await?;
+//     let salt = derive_salt_from_private_key_nonce(key.deposit_private_key, nonce);
+//     let pubkey = derive_pubkey_from_private_key(key.deposit_private_key);
+//     let pubkey_salt_hash: [u8; 32] = get_pubkey_salt_hash(pubkey, salt)
+//         .to_bytes_be()
+//         .try_into()
+//         .unwrap();
+
+//     let deposit_address = key.deposit_address;
+
+//     await_until_low_gas_price().await?;
+//     let int1 = get_int1_contract_with_signer(key.deposit_private_key).await?;
+//     let mut tx = int1
+//         .deposit_native_token(pubkey_salt_hash)
+//         .value(mining_unit);

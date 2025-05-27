@@ -2,8 +2,11 @@ use chrono::NaiveDateTime;
 
 use super::{key::Key, prover::Prover};
 use crate::{
-    external_api::contracts::{
-        int1::Int1Contract, minter::MinterContract, token::TokenContract, utils::NormalProvider,
+    external_api::{
+        contracts::{
+            int1::Int1Contract, minter::MinterContract, token::TokenContract, utils::NormalProvider,
+        },
+        graph::client::GraphClient,
     },
     services::{
         assets_status::{fetch_assets_status, AssetsStatus},
@@ -25,6 +28,8 @@ pub struct State {
     pub minter: MinterContract,
     pub token: TokenContract,
     pub provider: NormalProvider,
+
+    pub graph_client: GraphClient,
 }
 
 impl State {
@@ -40,6 +45,7 @@ impl State {
             minter: todo!(),
             token: todo!(),
             provider: todo!(),
+            graph_client: todo!(),
         }
     }
 

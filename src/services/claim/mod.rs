@@ -8,7 +8,6 @@ use crate::{
 use super::assets_status::AssetsStatus;
 
 pub mod claim;
-pub mod contract;
 pub mod temp;
 pub mod witness_generation;
 

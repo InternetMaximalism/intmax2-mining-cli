@@ -44,6 +44,7 @@ pub async fn get_dummy_state() -> State {
         minter: todo!(),
         token: todo!(),
         provider: todo!(),
+        graph_client: todo!(),
     };
     state
 }
