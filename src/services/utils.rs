@@ -1,99 +1,10 @@
 use anyhow::ensure;
-use ethers::{
-    core::k256::ecdsa::SigningKey,
-    middleware::SignerMiddleware,
-    providers::{Http, Middleware, Provider},
-    signers::Wallet,
-    types::{Address, B256, U256},
-};
 
 use crate::{
     cli::console::{print_status, print_warning},
-    external_api::{
-        contracts::utils::{get_account_nonce, get_balance, get_client, get_gas_price},
-        intmax::gas_estimation::get_gas_estimation,
-    },
+    external_api::intmax::gas_estimation::get_gas_estimation,
     utils::{config::Settings, env_config::EnvConfig, network::is_legacy, time::sleep_for},
 };
-
-pub async fn set_gas_price(
-    tx: &mut ethers::contract::builders::ContractCall<
-        SignerMiddleware<Provider<Http>, Wallet<SigningKey>>,
-        (),
-    >,
-) -> anyhow::Result<()> {
-    if is_legacy() {
-        return Ok(()); // gas server does not support legacy environment.
-    }
-    let result = get_gas_estimation().await?;
-    let inner_tx = tx
-        .tx
-        .as_eip1559_mut()
-        .ok_or(anyhow::anyhow!("EIP-1559 tx expected"))?;
-    *inner_tx = inner_tx
-        .clone()
-        .max_priority_fee_per_gas(result.max_priority_fee_per_gas)
-        .max_fee_per_gas(result.max_fee_per_gas);
-    Ok(())
-}
-
-pub async fn handle_contract_call<S: ToString>(
-    tx: ethers::contract::builders::ContractCall<
-        SignerMiddleware<Provider<Http>, Wallet<SigningKey>>,
-        (),
-    >,
-    from_address: Address,
-    from_name: S,
-    tx_name: S,
-) -> anyhow::Result<B256> {
-    loop {
-        let result = tx.send().await;
-        match result {
-            Ok(tx) => {
-                let pending_tx = tx;
-                print_status(format!(
-                    "{} tx hash: {:?}",
-                    tx_name.to_string(),
-                    pending_tx.tx_hash()
-                ));
-                match pending_tx.await? {
-                    Some(tx_receipt) => {
-                        ensure!(
-                            tx_receipt.status.unwrap() == 1.into(),
-                            "{} tx failed",
-                            from_name.to_string()
-                        );
-                        return Ok(tx_receipt.transaction_hash);
-                    }
-                    None => {
-                        return Err(anyhow::anyhow!(
-                            "Transaction receipt is None. The transaction may not have been mined."
-                        ));
-                    }
-                }
-            }
-            Err(e) => {
-                let error_message = e.to_string();
-                // insufficient balance
-                if error_message.contains("-32000") {
-                    let estimate_gas = tx.estimate_gas().await?;
-                    let gas_price = get_client().await?.get_gas_price().await?;
-                    let value = tx.tx.value().cloned().unwrap_or_default();
-                    let necessary_balance = estimate_gas * gas_price + value;
-                    insuffient_balance_instruction(
-                        from_address,
-                        necessary_balance,
-                        &from_name.to_string(),
-                    )
-                    .await?;
-                    print_status(format!("Retrying {} transaction...", tx_name.to_string()));
-                } else {
-                    return Err(anyhow::anyhow!("Error sending transaction: {:?}", e));
-                }
-            }
-        }
-    }
-}
 
 pub async fn insuffient_balance_instruction(
     address: Address,

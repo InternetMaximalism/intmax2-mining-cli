@@ -1,9 +1,16 @@
-use super::{convert::convert_bytes32_to_b256, error::BlockchainError, utils::NormalProvider};
+use super::{
+    convert::{convert_address_to_alloy, convert_bytes32_to_b256, convert_u256_to_alloy},
+    error::BlockchainError,
+    handlers::send_transaction_with_gas_bump,
+    utils::{get_provider_with_signer, NormalProvider},
+};
 use alloy::{
-    primitives::{Address, U256},
+    primitives::{Address, B256, U256},
     sol,
 };
 use intmax2_zkp::ethereum_types::{bytes32::Bytes32, u32limb_trait::U32LimbTrait};
+use mining_circuit_v1::withdrawal::simple_withraw_circuit::SimpleWithdrawalPublicInputs;
+use IInt1::WithdrawalPublicInputs;
 
 sol!(
     #[sol(rpc)]
@@ -67,5 +74,27 @@ impl Int1Contract {
         let int1 = Int1::new(self.address, self.provider.clone());
         let id = int1.getLastProcessedDepositId().call().await?;
         Ok(id.to())
+    }
+
+    pub async fn withdrawal(
+        &self,
+        signer_private_key: B256,
+        pis: &SimpleWithdrawalPublicInputs,
+        proof: Vec<u8>,
+    ) -> Result<(), BlockchainError> {
+        let signer = get_provider_with_signer(&self.provider, signer_private_key);
+        let contract = Int1::new(self.address, signer.clone());
+        let public_inputs = WithdrawalPublicInputs {
+            depositRoot: convert_bytes32_to_b256(pis.deposit_root),
+            nullifier: convert_bytes32_to_b256(pis.nullifier),
+            recipient: convert_address_to_alloy(pis.recipient),
+            tokenIndex: pis.token_index,
+            amount: convert_u256_to_alloy(pis.amount),
+        };
+        let tx_request = contract
+            .withdraw(public_inputs, proof.into())
+            .into_transaction_request();
+        send_transaction_with_gas_bump(signer, tx_request, "withdrawal").await?;
+        Ok(())
     }
 }
