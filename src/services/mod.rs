@@ -1,6 +1,6 @@
 use crate::{
     cli::{
-        availability::check_avaliability,
+        availability::check_availability,
         balance_validation::{
             validate_deposit_address_balance, validate_withdrawal_address_balance,
         },
@@ -10,8 +10,8 @@ use crate::{
     state::{key::Key, state::State},
     utils::{config::Settings, time::sleep_for},
 };
+use alloy::primitives::{B256, U256};
 use claim::claim_task;
-use ethers::types::{B256, U256};
 use mining::mining_task;
 use utils::is_address_used;
 
@@ -43,7 +43,7 @@ pub async fn mining_loop(
     )
     .await?;
     loop {
-        check_avaliability().await?;
+        check_availability().await?;
         let assets_status = state.sync_and_fetch_assets(&key).await?;
         let is_qualified = !get_circulation(key.deposit_address).await?.is_excluded;
         let will_deposit = assets_status.effective_deposit_times() < mining_times as usize
@@ -93,7 +93,7 @@ pub async fn exit_loop(state: &mut State, withdrawal_private_key: B256) -> anyho
     let key = Key::new(withdrawal_private_key, 0);
     print_log(format!("Exit for deposit address{:?}", key.deposit_address));
     loop {
-        check_avaliability().await?;
+        check_availability().await?;
         let assets_status = state.sync_and_fetch_assets(&key).await?;
         if assets_status.pending_indices.is_empty()
             && assets_status.rejected_indices.is_empty()
@@ -117,7 +117,7 @@ pub async fn legacy_exit_loop(
 ) -> anyhow::Result<()> {
     let mut key_number = 0;
     loop {
-        check_avaliability().await?;
+        check_availability().await?;
         let key = Key::new(withdrawal_private_key, key_number);
         if !is_address_used(key.deposit_address).await {
             print_status("exit loop finished".to_string());
@@ -150,7 +150,7 @@ pub async fn legacy_exit_loop(
 pub async fn claim_loop(state: &mut State, withdrawal_private_key: B256) -> anyhow::Result<()> {
     let key = Key::new(withdrawal_private_key, 0);
     for is_short_term in [true, false] {
-        check_avaliability().await?;
+        check_availability().await?;
         if !is_address_used(key.deposit_address).await {
             print_status("claim loop finished".to_string());
             return Ok(());
@@ -178,7 +178,7 @@ pub async fn legacy_claim_loop(
     let mut key_number = 0;
     loop {
         for is_short_term in [true, false] {
-            check_avaliability().await?;
+            check_availability().await?;
             let key = Key::new(withdrawal_private_key, key_number);
             if !is_address_used(key.deposit_address).await {
                 print_status("claim loop finished".to_string());

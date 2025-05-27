@@ -1,8 +1,7 @@
+use alloy::primitives::{Address, B256};
 use dialoguer::{Confirm, Select};
-use ethers::types::{Address, B256};
 
 use crate::{
-    external_api::contracts::utils::get_balance,
     services::{
         balance_transfer::balance_transfer,
         utils::{is_address_used, pretty_format_u256},

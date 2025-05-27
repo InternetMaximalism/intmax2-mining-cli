@@ -1,10 +1,8 @@
+use alloy::primitives::{B256, U256};
+
 use crate::{
     external_api::{
-        contracts::{
-            token::get_token_balance,
-            utils::{get_address, get_balance},
-        },
-        intmax::circulation::get_circulation,
+        contracts::utils::get_address_from_private_key, intmax::circulation::get_circulation
     },
     services::utils::{is_address_used, pretty_format_u256},
     state::{key::Key, state::State},
@@ -19,7 +17,7 @@ pub async fn accounts_status(
     withdrawal_private_key: B256,
 ) -> anyhow::Result<()> {
     println!("Network: {}", get_network());
-    let withdrawal_address = get_address(withdrawal_private_key);
+    let withdrawal_address = get_address_from_private_key(withdrawal_private_key);
     let withdrawal_balance = get_balance(withdrawal_address).await?;
     let withdrawal_token_balance = get_token_balance(withdrawal_address).await?;
     println!(
@@ -30,8 +28,8 @@ pub async fn accounts_status(
     );
 
     let mut key_number = 0;
-    let mut total_short_term_claimable_amount = U256::zero();
-    let mut total_long_term_claimable_amount = U256::zero();
+    let mut total_short_term_claimable_amount = U256::default();
+    let mut total_long_term_claimable_amount = U256::default();
     loop {
         let key = Key::new(withdrawal_private_key, key_number);
         if !is_address_used(key.deposit_address).await {

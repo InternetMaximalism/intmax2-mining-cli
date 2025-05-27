@@ -1,6 +1,6 @@
 use clap::{arg, command, Parser};
 use cli::{
-    availability::check_avaliability, configure::select_network, console::print_error,
+    availability::check_availability, configure::select_network, console::print_error,
     press_enter_to_continue, run,
 };
 use dotenv::dotenv;
@@ -87,6 +87,6 @@ async fn set_up(is_interactive: bool) -> anyhow::Result<()> {
         serde_json::to_string_pretty(&settings)?
     );
 
-    check_avaliability().await?;
+    check_availability().await?;
     Ok(())
 }

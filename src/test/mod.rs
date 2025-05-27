@@ -40,6 +40,10 @@ pub async fn get_dummy_state() -> State {
         last_tree_fetched_at: NaiveDateTime::default(),
         last_deposit_synced_block: 0,
         prover: Prover::new(),
+        int1: todo!(),
+        minter: todo!(),
+        token: todo!(),
+        provider: todo!(),
     };
     state
 }

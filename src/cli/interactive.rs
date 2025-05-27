@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 
+use alloy::primitives::Address;
 use console::style;
 use dialoguer::Select;
-use ethers::types::Address;
 use strum::IntoEnumIterator;
 
 use crate::utils::{
@@ -43,7 +43,6 @@ fn address_duplication_check() -> anyhow::Result<()> {
             }
         }
     }
-
     Ok(())
 }
 

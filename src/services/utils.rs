@@ -1,12 +1,11 @@
-use anyhow::ensure;
+use alloy::primitives::{Address, U256};
 
 use crate::{
     cli::console::{print_status, print_warning},
-    external_api::intmax::gas_estimation::get_gas_estimation,
-    utils::{config::Settings, env_config::EnvConfig, network::is_legacy, time::sleep_for},
+    utils::{config::Settings, env_config::EnvConfig, time::sleep_for},
 };
 
-pub async fn insuffient_balance_instruction(
+pub async fn insufficient_balance_instruction(
     address: Address,
     required_balance: U256,
     name: &str,

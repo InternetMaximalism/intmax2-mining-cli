@@ -2,6 +2,9 @@ use chrono::NaiveDateTime;
 
 use super::{key::Key, prover::Prover};
 use crate::{
+    external_api::contracts::{
+        int1::Int1Contract, minter::MinterContract, token::TokenContract, utils::NormalProvider,
+    },
     services::{
         assets_status::{fetch_assets_status, AssetsStatus},
         sync::sync_trees,
@@ -16,6 +19,12 @@ pub struct State {
     pub last_tree_fetched_at: NaiveDateTime,
     pub last_deposit_synced_block: u64,
     pub prover: Prover,
+
+    // block chain state
+    pub int1: Int1Contract,
+    pub minter: MinterContract,
+    pub token: TokenContract,
+    pub provider: NormalProvider,
 }
 
 impl State {
@@ -27,6 +36,10 @@ impl State {
             last_tree_fetched_at: NaiveDateTime::default(),
             last_deposit_synced_block: 0,
             prover: Prover::new(),
+            int1: todo!(),
+            minter: todo!(),
+            token: todo!(),
+            provider: todo!(),
         }
     }
 

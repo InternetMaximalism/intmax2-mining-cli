@@ -1,14 +1,14 @@
 use std::io::{self, Read as _};
 
+use alloy::primitives::B256;
 use ::console::{style, Term};
 use configure::recover_withdrawal_private_key;
 use console::initialize_console;
-use ethers::types::B256;
 use mode_selection::{legacy_select_mode, select_mode};
 use term_of_use::make_agreement;
 
 use crate::{
-    external_api::contracts::utils::get_address,
+    external_api::contracts::utils::get_address_from_private_key,
     services::{claim_loop, exit_loop, legacy_claim_loop, mining_loop},
     state::{mode::RunMode, state::State},
     utils::{
@@ -40,7 +40,7 @@ pub async fn run(mode: Option<RunMode>) -> anyhow::Result<()> {
 
     let config = EnvConfig::import_from_env()?;
     let withdrawal_private_key = recover_withdrawal_private_key(&config)?;
-    if config.withdrawal_address != get_address(withdrawal_private_key) {
+    if config.withdrawal_address != get_address_from_private_key(withdrawal_private_key) {
         anyhow::bail!("Withdrawal address does not match the address derived from the private key");
     }
     validate_env_config(&config).await?;
