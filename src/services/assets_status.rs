@@ -231,6 +231,10 @@ mod tests {
     #[ignore]
     async fn test_assets_status() {
         dotenv::dotenv().ok();
+        let _ = env_logger::builder()
+            .filter_level(log::LevelFilter::Info)
+            .try_init();
+
         let env_config = EnvConfig::import_from_env().unwrap();
         let mut state = crate::test::get_dummy_state(&env_config.rpc_url).await;
         state.sync_trees().await.unwrap();
