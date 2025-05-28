@@ -11,11 +11,21 @@ use super::error::GraphClientError;
 // A wrapper around TheGraphClient that provides additional functionality for interacting with the L1 and L2 providers.
 #[derive(Clone, Debug)]
 pub struct GraphClient {
+    pub url: String,
     pub client: Client,
     pub provider: NormalProvider,
 }
 
 impl GraphClient {
+    pub fn new(provider: NormalProvider, url: &str) -> Self {
+        let client = Client::new();
+        GraphClient {
+            client,
+            provider,
+            url: url.to_string(),
+        }
+    }
+
     // get all deposited events by sender address
     pub async fn get_deposited_event_by_sender(
         &self,

@@ -32,7 +32,6 @@ pub async fn get_dummy_state() -> State {
             amount: U256::try_from(BigUint::from(10u32).pow(18)).unwrap(),
         });
     }
-
     let state = State {
         deposit_hash_tree: DepositHashTree::new(),
         short_term_eligible_tree: eligible_tree.clone(),
