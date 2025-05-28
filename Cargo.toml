@@ -37,5 +37,7 @@ self_update = {version="0.41.0", features=["archive-zip", "compression-zip-defla
 rand_chacha = "0.3.1"
 alloy = "1.0.7"
 tower = "0.5.2"
+serde_qs = "0.15.0"
 futures = "0.3.31"
+serde_with = "3.12.0"
 

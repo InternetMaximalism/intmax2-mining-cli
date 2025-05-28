@@ -54,7 +54,7 @@ impl State {
             provider.clone(),
             settings.blockchain.token_address.parse().unwrap(),
         );
-        let graph_client = GraphClient::new(provider.clone(), &settings.blockchain.graph_url);
+        let graph_client = GraphClient::new(provider.clone(), &settings.blockchain.graph_url, None);
 
         Self {
             deposit_hash_tree: DepositHashTree::new(),

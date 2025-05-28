@@ -13,7 +13,7 @@ gnark_get_proof_cooldown_in_sec = 60
 
 [blockchain]
 chain_id = 1
-graph_url = "http://localhost:8000/subgraphs/name/prod-int1"
+graph_url = "http://localhost:8000/subgraphs/name/legacy-int1"
 int1_address = "0x0Ac498bCA32B00E2584171844fb9A5943398D9c1"
 minter_address = "0x38DE07d2526Ae929f1903E5F109B70C50e12A8E0"
 token_address = "0xe24e207c6156241cAfb41D025B3b5F0677114C81"

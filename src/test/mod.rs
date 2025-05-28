@@ -55,7 +55,7 @@ pub async fn get_dummy_state() -> State {
         provider.clone(),
         settings.blockchain.token_address.parse().unwrap(),
     );
-    let graph_client = GraphClient::new(provider.clone(), &settings.blockchain.graph_url);
+    let graph_client = GraphClient::new(provider.clone(), &settings.blockchain.graph_url, None);
 
     let state = State {
         deposit_hash_tree: DepositHashTree::new(),
