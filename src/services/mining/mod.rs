@@ -84,8 +84,10 @@ pub async fn mining_task(
     if new_deposit {
         sleep_before_deposit(&state.graph_client, key.withdrawal_address).await?;
         let deposit_address = key.deposit_address;
-        let account = state.provider.get_account(deposit_address).await?;
-        let nonce = account.nonce;
+        let nonce = state
+            .provider
+            .get_transaction_count(deposit_address)
+            .await?;
         let salt = derive_salt_from_private_key_nonce(key.deposit_private_key, nonce);
         let pubkey = derive_pubkey_from_private_key(key.deposit_private_key);
         let pubkey_salt_hash = get_pubkey_salt_hash(pubkey, salt);

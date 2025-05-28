@@ -67,9 +67,8 @@ pub async fn is_address_used(
     provider: &NormalProvider,
     deposit_address: Address,
 ) -> anyhow::Result<bool> {
-    let account = provider.get_account(deposit_address).await?;
-    let nonce = account.nonce;
-    let balance = account.balance;
+    let nonce = provider.get_transaction_count(deposit_address).await?;
+    let balance = provider.get_balance(deposit_address).await?;
     Ok(nonce > 0 || balance > U256::default())
 }
 
