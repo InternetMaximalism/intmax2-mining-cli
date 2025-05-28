@@ -61,7 +61,6 @@ pub async fn get_dummy_state(rpc_url: &str) -> State {
         short_term_eligible_tree: eligible_tree.clone(),
         long_term_eligible_tree: eligible_tree.clone(),
         last_tree_fetched_at: NaiveDateTime::default(),
-        last_deposit_synced_block: 0,
         prover: Prover::new(),
         int1,
         minter,

@@ -26,7 +26,6 @@ pub struct State {
     pub short_term_eligible_tree: EligibleTreeWithMap,
     pub long_term_eligible_tree: EligibleTreeWithMap,
     pub last_tree_fetched_at: NaiveDateTime,
-    pub last_deposit_synced_block: u64,
     pub prover: Prover,
 
     // block chain state
@@ -61,7 +60,6 @@ impl State {
             short_term_eligible_tree: EligibleTreeWithMap::new(),
             long_term_eligible_tree: EligibleTreeWithMap::new(),
             last_tree_fetched_at: NaiveDateTime::default(),
-            last_deposit_synced_block: 0,
             prover: Prover::new(),
             int1,
             minter,
@@ -76,7 +74,6 @@ impl State {
             &self.graph_client,
             &self.int1,
             &self.minter,
-            &mut self.last_deposit_synced_block,
             &mut self.last_tree_fetched_at,
             &mut self.deposit_hash_tree,
             &mut self.short_term_eligible_tree,

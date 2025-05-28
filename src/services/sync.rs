@@ -12,7 +12,6 @@ use crate::{
         time::sleep_for,
     },
 };
-
 use anyhow::ensure;
 use chrono::{NaiveDateTime, Utc};
 use log::{info, warn};
@@ -37,7 +36,6 @@ pub async fn sync_trees(
     graph_client: &GraphClient,
     int1: &Int1Contract,
     minter: &MinterContract,
-    last_deposit_block_number: &mut u64,
     last_update: &mut NaiveDateTime,
     deposit_hash_tree: &mut DepositHashTree,
     short_term_eligible_tree: &mut EligibleTreeWithMap,
@@ -80,7 +78,6 @@ pub async fn sync_trees(
                         new_block_number
                     );
                     *deposit_hash_tree = new_deposit_hash_tree;
-                    *last_deposit_block_number = new_block_number;
                 }
                 if let Some(bin_short_term_eligible_tree) = bin_short_term_eligible_tree {
                     *short_term_eligible_tree = parse_and_validate_bin_eligible_tree(
@@ -111,16 +108,11 @@ pub async fn sync_trees(
         }
     }
     // sync deposit tree only
-    *last_deposit_block_number = sync_to_latest_deposit_tree(
-        graph_client,
-        int1,
-        deposit_hash_tree,
-        *last_deposit_block_number,
-    )
-    .await
-    .map_err(|e| {
-        Error::SyncDepositTreeFromEventsError(format!("Failed to sync deposit tree: {}", e))
-    })?;
+    sync_to_latest_deposit_tree(graph_client, int1, deposit_hash_tree)
+        .await
+        .map_err(|e| {
+            Error::SyncDepositTreeFromEventsError(format!("Failed to sync deposit tree: {}", e))
+        })?;
     *last_update = now; // update last_update to now
     Ok(())
 }
@@ -132,7 +124,6 @@ async fn parse_and_validate_bin_deposit_tree(
     let deposit_tree_info: DepositTreeInfo = bin_deposit_tree
         .try_into()
         .map_err(|e: anyhow::Error| Error::TreeDeserializationError(e.to_string()))?;
-    // check roots
     let deposit_root_exists = int1
         .get_deposit_root_exits(deposit_tree_info.root)
         .await
@@ -176,16 +167,13 @@ async fn sync_to_latest_deposit_tree(
     graph_client: &GraphClient,
     int1: &Int1Contract,
     deposit_hash_tree: &mut DepositHashTree,
-    from_block: u64,
-) -> anyhow::Result<u64> {
-    log::info!("Syncing deposit tree from block {}", from_block);
+) -> anyhow::Result<()> {
     let next_deposit_index = deposit_hash_tree.tree.len();
     let events = graph_client
         .get_deposit_leaf_inserted_event(next_deposit_index as u32)
         .await?;
     info!(
-        "Syncing deposit tree from block {}, got {} events. Latest deposit_index={}",
-        from_block,
+        "Syncing deposit tree, got {} events. Latest deposit_index={}",
         events.len(),
         events.last().map(|event| event.deposit_index).unwrap_or(0)
     );
@@ -195,7 +183,6 @@ async fn sync_to_latest_deposit_tree(
         .collect::<Vec<_>>();
     to_append.sort_by_key(|event| event.deposit_index);
 
-    let mut to_block_number = from_block;
     for event in to_append {
         ensure!(
             event.deposit_index as usize == deposit_hash_tree.tree.len(),
@@ -204,9 +191,13 @@ async fn sync_to_latest_deposit_tree(
             event.deposit_index
         );
         deposit_hash_tree.push(event.deposit_hash);
-        to_block_number = event.block_number;
     }
     let local_root = deposit_hash_tree.get_root();
+    log::info!(
+        "Local deposit root: {}, total leaves: {}",
+        local_root,
+        deposit_hash_tree.tree.len()
+    );
     let is_exists = int1.get_deposit_root_exits(local_root).await?;
     ensure!(
         is_exists,
@@ -221,7 +212,7 @@ async fn sync_to_latest_deposit_tree(
             local_root, current_root
         );
     }
-    Ok(to_block_number)
+    Ok(())
 }
 
 #[cfg(test)]
@@ -237,15 +228,15 @@ mod tests {
             .try_init();
 
         let env_config = EnvConfig::import_from_env().unwrap();
+        dbg!(&env_config);
+
         let mut state = crate::test::get_dummy_state(&env_config.rpc_url).await;
 
-        let mut last_deposit_block_number = 0;
         let mut last_update = chrono::NaiveDateTime::default();
         super::sync_trees(
             &state.graph_client,
             &state.int1,
             &state.minter,
-            &mut last_deposit_block_number,
             &mut last_update,
             &mut state.deposit_hash_tree,
             &mut state.short_term_eligible_tree,
