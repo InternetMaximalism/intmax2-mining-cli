@@ -103,7 +103,7 @@ pub async fn sync_trees(
             match update().await {
                 Ok(()) => break,
                 Err(e) => {
-                    warn!("Feched tree is invalid in try {}: {}", try_number, e);
+                    warn!("Fetched tree is invalid in try {}: {}", try_number, e);
                     try_number += 1;
                     sleep_for(30);
                 }

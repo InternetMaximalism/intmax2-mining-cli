@@ -31,7 +31,6 @@ pub struct Api {
     pub withdrawal_gnark_prover_url: String,
     pub claim_gnark_prover_url: String,
     pub circulation_server_url: String,
-    pub gas_server_url: String,
     pub tree_data_repository: String,
     pub tree_data_directory: String,
     pub tree_data_branch: String,
