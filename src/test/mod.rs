@@ -5,7 +5,15 @@ use mining_circuit_v1::eligible_tree::EligibleLeaf;
 use num_bigint::BigUint;
 
 use crate::{
-    external_api::contracts::utils::get_address_from_private_key,
+    external_api::{
+        contracts::{
+            int1::Int1Contract,
+            minter::MinterContract,
+            token::TokenContract,
+            utils::{get_address_from_private_key, get_provider},
+        },
+        graph::client::GraphClient,
+    },
     state::{key::Key, prover::Prover, state::State},
     utils::{deposit_hash_tree::DepositHashTree, eligible_tree_with_map::EligibleTreeWithMap},
 };
@@ -32,6 +40,23 @@ pub async fn get_dummy_state() -> State {
             amount: U256::try_from(BigUint::from(10u32).pow(18)).unwrap(),
         });
     }
+    let settings = crate::utils::config::Settings::load().unwrap();
+    // todo: set the rpc url from settings
+    let provider = get_provider("").unwrap();
+    let int1 = Int1Contract::new(
+        provider.clone(),
+        settings.blockchain.int1_address.parse().unwrap(),
+    );
+    let minter = MinterContract::new(
+        provider.clone(),
+        settings.blockchain.minter_address.parse().unwrap(),
+    );
+    let token = TokenContract::new(
+        provider.clone(),
+        settings.blockchain.token_address.parse().unwrap(),
+    );
+    let graph_client = GraphClient::new(provider.clone(), &settings.blockchain.graph_url);
+
     let state = State {
         deposit_hash_tree: DepositHashTree::new(),
         short_term_eligible_tree: eligible_tree.clone(),
@@ -39,11 +64,11 @@ pub async fn get_dummy_state() -> State {
         last_tree_fetched_at: NaiveDateTime::default(),
         last_deposit_synced_block: 0,
         prover: Prover::new(),
-        int1: todo!(),
-        minter: todo!(),
-        token: todo!(),
-        provider: todo!(),
-        graph_client: todo!(),
+        int1,
+        minter,
+        token,
+        provider,
+        graph_client,
     };
     state
 }

@@ -2,17 +2,18 @@
 availability_server_url = "https://base-sepolia.v1.mining-gateway.intmax.xyz/v1/availability"
 withdrawal_gnark_prover_url = "https://base-sepolia.v1.mining-gateway.intmax.xyz/v1/gnark-withdraw-circuit"
 claim_gnark_prover_url = "https://base-sepolia.v1.mining-gateway.intmax.xyz/v1/gnark-claim-circuit"
-withdrawal_server_url="https://base-sepolia.v1.mining-gateway.intmax.xyz/v1/withdrawal"
-circulation_server_url="https://base-sepolia.v1.mining-gateway.intmax.xyz/v1/mining"
-gas_server_url="https://base-sepolia.v1.mining-gateway.intmax.xyz/v1/mining/gas-fee/estimate"
-tree_data_repository="InternetMaximalism/intmax2-v1-mining-mock"
-tree_data_directory="base-sepolia-data"
-tree_data_branch="main"
+withdrawal_server_url = "https://base-sepolia.v1.mining-gateway.intmax.xyz/v1/withdrawal"
+circulation_server_url = "https://base-sepolia.v1.mining-gateway.intmax.xyz/v1/mining"
+gas_server_url = "https://base-sepolia.v1.mining-gateway.intmax.xyz/v1/mining/gas-fee/estimate"
+tree_data_repository = "InternetMaximalism/intmax2-v1-mining-mock"
+tree_data_directory = "base-sepolia-data"
+tree_data_branch = "main"
 sync_tree_data_interval_in_sec = 3600
 gnark_get_proof_cooldown_in_sec = 60
 
 [blockchain]
 chain_id = 84532
+graph_url = "http://localhost:8000/subgraphs/name/stage-int1"
 int1_address = "0x5dfa05aAdbE75a92f6153508950533fC1bed98BE"
 minter_address = "0xeF9CBc6F2f602AF19b0fEc2cc4F217177730858E"
 token_address = "0x2699CD7f883DecC464171a7A92f4CcC4eF220fa2"
@@ -22,12 +23,12 @@ single_claim_gas = 600000
 
 [service]
 repository_url = "https://github.com/InternetMaximalism/intmax2-mining-cli"
-mining_min_cooldown_in_sec = 20 
-mining_max_cooldown_in_sec = 200 
+mining_min_cooldown_in_sec = 20
+mining_max_cooldown_in_sec = 200
 loop_cooldown_in_sec = 10
-high_gas_retry_inverval_in_sec = 10
+high_gas_retry_interval_in_sec = 10
 
 [env]
-default_max_gas_price ="100"
-default_mining_times="5"
-default_mining_unit="0.1"
+default_max_gas_price = "100"
+default_mining_times = "5"
+default_mining_unit = "0.1"

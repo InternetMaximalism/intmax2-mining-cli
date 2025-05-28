@@ -4,7 +4,10 @@ use super::{key::Key, prover::Prover};
 use crate::{
     external_api::{
         contracts::{
-            int1::Int1Contract, minter::MinterContract, token::TokenContract, utils::NormalProvider,
+            int1::Int1Contract,
+            minter::MinterContract,
+            token::TokenContract,
+            utils::{get_provider, NormalProvider},
         },
         graph::client::GraphClient,
     },
@@ -12,7 +15,10 @@ use crate::{
         assets_status::{fetch_assets_status, AssetsStatus},
         sync::sync_trees,
     },
-    utils::{deposit_hash_tree::DepositHashTree, eligible_tree_with_map::EligibleTreeWithMap},
+    utils::{
+        config::Settings, deposit_hash_tree::DepositHashTree,
+        eligible_tree_with_map::EligibleTreeWithMap,
+    },
 };
 
 pub struct State {
@@ -33,7 +39,23 @@ pub struct State {
 }
 
 impl State {
-    pub fn new() -> Self {
+    pub fn new(rpc_url: &str) -> Self {
+        let settings = Settings::load().unwrap();
+        let provider = get_provider(rpc_url).unwrap();
+        let int1 = Int1Contract::new(
+            provider.clone(),
+            settings.blockchain.int1_address.parse().unwrap(),
+        );
+        let minter = MinterContract::new(
+            provider.clone(),
+            settings.blockchain.minter_address.parse().unwrap(),
+        );
+        let token = TokenContract::new(
+            provider.clone(),
+            settings.blockchain.token_address.parse().unwrap(),
+        );
+        let graph_client = GraphClient::new(provider.clone(), &settings.blockchain.graph_url);
+
         Self {
             deposit_hash_tree: DepositHashTree::new(),
             short_term_eligible_tree: EligibleTreeWithMap::new(),
@@ -41,11 +63,11 @@ impl State {
             last_tree_fetched_at: NaiveDateTime::default(),
             last_deposit_synced_block: 0,
             prover: Prover::new(),
-            int1: todo!(),
-            minter: todo!(),
-            token: todo!(),
-            provider: todo!(),
-            graph_client: todo!(),
+            int1,
+            minter,
+            token,
+            provider,
+            graph_client,
         }
     }
 

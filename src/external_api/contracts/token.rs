@@ -15,8 +15,8 @@ pub struct TokenContract {
 }
 
 impl TokenContract {
-    pub async fn new(provider: NormalProvider, address: Address) -> Result<Self, BlockchainError> {
-        Ok(Self { provider, address })
+    pub fn new(provider: NormalProvider, address: Address) -> Self {
+        Self { provider, address }
     }
 
     pub async fn get_token_balance(&self, address: Address) -> Result<U256, BlockchainError> {

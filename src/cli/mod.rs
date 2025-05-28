@@ -3,7 +3,7 @@ use std::io::{self, Read as _};
 use ::console::{style, Term};
 use alloy::primitives::B256;
 use configure::recover_withdrawal_private_key;
-use console::initialize_console;
+use console::clear_console;
 use mode_selection::{legacy_select_mode, select_mode};
 use term_of_use::make_agreement;
 
@@ -61,14 +61,14 @@ pub async fn run(mode: Option<RunMode>) -> anyhow::Result<()> {
         mode.unwrap()
     };
 
-    let mut state = State::new();
+    let mut state = State::new(&config.rpc_url);
 
     // prints the status of the accounts if mutable mode
     if mode == RunMode::Mining || mode == RunMode::Claim || mode == RunMode::Exit {
         accounts_status::accounts_status(&mut state, config.mining_times, withdrawal_private_key)
             .await?;
     }
-    initialize_console();
+    clear_console();
     mode_loop(
         &mut mode,
         &mut state,

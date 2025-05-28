@@ -41,7 +41,7 @@ pub async fn insufficient_balance_instruction(
 pub async fn await_until_low_gas_price(provider: &NormalProvider) -> anyhow::Result<()> {
     let max_gas_price = EnvConfig::import_from_env()?.max_gas_price;
     let settings = Settings::load()?;
-    let high_gas_retry_inverval_in_sec = settings.service.high_gas_retry_inverval_in_sec;
+    let high_gas_retry_interval_in_sec = settings.service.high_gas_retry_interval_in_sec;
     let _url = settings.service.repository_url;
     loop {
         let current_gas_price = U256::from(provider.get_gas_price().await?);
@@ -58,7 +58,7 @@ pub async fn await_until_low_gas_price(provider: &NormalProvider) -> anyhow::Res
             format_units(current_gas_price.clone(), "gwei").unwrap(),
             format_units(max_gas_price.clone(), "gwei").unwrap(),
         ));
-        sleep_for(high_gas_retry_inverval_in_sec);
+        sleep_for(high_gas_retry_interval_in_sec);
     }
     Ok(())
 }
