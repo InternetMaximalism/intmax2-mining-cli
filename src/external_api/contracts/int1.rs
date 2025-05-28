@@ -40,7 +40,7 @@ impl Int1Contract {
     pub async fn get_deposit_root(&self) -> Result<Bytes32, BlockchainError> {
         let int1 = Int1::new(self.address, self.provider.clone());
         let root = int1.getDepositRoot().call().await?;
-        Ok(Bytes32::from_bytes_be(&root.to_vec()))
+        Ok(Bytes32::from_bytes_be(root.as_ref()))
     }
 
     pub async fn get_deposit_root_exits(&self, root: Bytes32) -> Result<bool, BlockchainError> {
@@ -54,7 +54,7 @@ impl Int1Contract {
         let int1 = Int1::new(self.address, self.provider.clone());
         let data = int1.getDepositData(U256::from(deposit_id)).call().await?;
         let data = DepositData {
-            deposit_hash: Bytes32::from_bytes_be(&data.depositHash.to_vec()),
+            deposit_hash: Bytes32::from_bytes_be(data.depositHash.as_ref()),
             sender: data.sender,
             is_rejected: data.isRejected,
         };

@@ -75,7 +75,7 @@ async fn start_withdrawal(
     let response: Value = response.json().await.map_err(|e| {
         IntmaxError::SerializeError(format!(
             "failed to parse response as json: {}",
-            e.to_string()
+            e
         ))
     })?;
     let response: SubmitWithdrawalResponse =
@@ -107,7 +107,7 @@ async fn query_withdrawal(withdrawal_id: &str) -> Result<QueryWithdrawalSuccess,
     let response: Value = response.json().await.map_err(|e| {
         IntmaxError::SerializeError(format!(
             "failed to parse response as json: {}",
-            e.to_string()
+            e
         ))
     })?;
     let response: QueryWithdrawalResponse =

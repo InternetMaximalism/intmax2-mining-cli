@@ -45,7 +45,7 @@ impl TryFrom<BinEligibleTree> for EligibleTreeInfo {
             });
         }
         let expected_root = Bytes32::from_bytes_be(&bin_tree.root_hash);
-        let actual_root: Bytes32 = tree.get_root().try_into()?;
+        let actual_root = tree.get_root();
         ensure!(
             actual_root == expected_root,
             "Root hash mismatch: expected {}, got {}",
@@ -113,7 +113,7 @@ impl TryFrom<BinDepositTree> for DepositTreeInfo {
             tree.push(leaf_hash);
         }
         let expected_root = Bytes32::from_bytes_be(&bin_tree.root_hash);
-        let actual_root: Bytes32 = tree.get_root().try_into()?;
+        let actual_root = tree.get_root();
         ensure!(
             actual_root == expected_root,
             "Root hash mismatch: expected {}, got {}",

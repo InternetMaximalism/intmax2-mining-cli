@@ -3,20 +3,17 @@ use std::{env, fmt::Display, str::FromStr};
 use strum_macros::EnumIter;
 
 #[derive(Debug, Copy, Clone, Serialize, Deserialize, PartialEq, EnumIter)]
+#[derive(Default)]
 pub enum Network {
     Localnet,
     Sepolia,
     Holesky,
+    #[default]
     BaseSepolia,
     Base,
     Mainnet,
 }
 
-impl Default for Network {
-    fn default() -> Self {
-        Network::BaseSepolia
-    }
-}
 
 impl Display for Network {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {

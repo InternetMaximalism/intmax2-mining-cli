@@ -7,6 +7,7 @@ use crate::{
 
 use super::assets_status::AssetsStatus;
 
+#[allow(clippy::module_inception)]
 pub mod claim;
 pub mod temp;
 pub mod witness_generation;
@@ -23,7 +24,7 @@ pub async fn claim_task(
         .get_not_claimed_events(is_short_term)
         .chunks(MAX_CLAIMS)
     {
-        single_claim_task(state, key, is_short_term, &events)
+        single_claim_task(state, key, is_short_term, events)
             .await
             .map_err(|e| CLIError::InternalError(format!("Failed to claim: {:#}", e)))?;
     }

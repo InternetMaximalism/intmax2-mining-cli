@@ -98,7 +98,7 @@ pub async fn gnark_start_prove(
     .await
     .map_err(|_| IntmaxError::NetworkError("failed to request gnark server".to_string()))?;
     let output: GnarkStartProofResponse = response.json().await.map_err(|e| {
-        IntmaxError::SerializeError(format!("failed to parse response: {}", e.to_string()))
+        IntmaxError::SerializeError(format!("failed to parse response: {}", e))
     })?;
     match output {
         GnarkStartProofResponse::Success(success) => Ok(success),
@@ -121,7 +121,7 @@ pub async fn gnark_get_proof(
     .await
     .map_err(|_| IntmaxError::NetworkError("failed to request gnark server".to_string()))?;
     let output: GnarkGetProofResponse = response.json().await.map_err(|e| {
-        IntmaxError::SerializeError(format!("failed to parse response: {}", e.to_string()))
+        IntmaxError::SerializeError(format!("failed to parse response: {}", e))
     })?;
     match output {
         GnarkGetProofResponse::Success(success) => Ok(success),

@@ -38,7 +38,7 @@ pub async fn get_circulation(address: Address) -> Result<CirculationSuccessRespo
     .await
     .map_err(|_| IntmaxError::NetworkError("failed to request circulation server".to_string()))?;
     let response_json: CirculationResponse = response.json().await.map_err(|e| {
-        IntmaxError::SerializeError(format!("failed to parse response: {}", e.to_string()))
+        IntmaxError::SerializeError(format!("failed to parse response: {}", e))
     })?;
     match response_json {
         CirculationResponse::Success(success) => Ok(success),

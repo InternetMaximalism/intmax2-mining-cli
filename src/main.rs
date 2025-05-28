@@ -43,7 +43,7 @@ async fn main() {
     match set_up(is_interactive).await {
         Ok(_) => {}
         Err(e) => {
-            print_error(format!("Error during setup: {}", e.to_string()));
+            print_error(format!("Error during setup: {}", e));
             press_enter_to_continue();
             return;
         }
@@ -53,7 +53,7 @@ async fn main() {
     match run(mode).await {
         Ok(_) => {}
         Err(e) => {
-            print_error(format!("{}", e.to_string()));
+            print_error(format!("{}", e));
             if is_interactive {
                 // Because Windows closes the console window immediately, we need to wait for the user to see the error message
                 press_enter_to_continue();

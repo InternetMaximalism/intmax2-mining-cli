@@ -136,7 +136,7 @@ async fn from_step5(state: &State, _key: &Key) -> anyhow::Result<()> {
     ensure!(receipt.is_some(), "Transaction receipt not found");
     let receipt = receipt.unwrap();
     ensure!(receipt.status(), "Transaction failed");
-    print_status(format!("Successfully withdrawn"));
+    print_status("Successfully withdrawn".to_string());
     Ok(())
 }
 
@@ -154,7 +154,7 @@ mod tests {
         let dummy_key = get_dummy_keys();
         let assets_status = state.sync_and_fetch_assets(&dummy_key).await.unwrap();
         let events = assets_status.get_not_withdrawn_events();
-        assert!(events.len() > 0);
+        assert!(!events.is_empty());
 
         super::withdrawal_task(&mut state, &dummy_key, events[0].clone())
             .await

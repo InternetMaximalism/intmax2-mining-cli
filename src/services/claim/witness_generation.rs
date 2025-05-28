@@ -20,7 +20,7 @@ pub async fn generate_claim_witness(
         "Generating claim witness for {:?}. is_short_term = {}",
         events, is_short_term
     );
-    ensure!(events.len() > 0, "No event to generate witness");
+    ensure!(!events.is_empty(), "No event to generate witness");
     ensure!(
         events.len() <= MAX_CLAIMS,
         format!("Max {} events to generate witness", MAX_CLAIMS)
@@ -32,7 +32,7 @@ pub async fn generate_claim_witness(
         &state.long_term_eligible_tree
     };
 
-    let eligible_tree_root: Bytes32 = eligible_tree.get_root().into();
+    let eligible_tree_root: Bytes32 = eligible_tree.get_root();
     let pubkey = derive_pubkey_from_private_key(key.deposit_private_key);
     let recipient = convert_address_to_intmax(key.withdrawal_address);
     let mut witnesses = Vec::new();

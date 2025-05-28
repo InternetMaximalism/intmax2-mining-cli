@@ -46,7 +46,7 @@ pub async fn mining_task(
     }
 
     // cancel rejected deposits
-    for &index in assets_status.rejected_indices.iter() {
+    if let Some(&index) = assets_status.rejected_indices.first() {
         print_warning(format!(
             "Deposit address {:?} is rejected because of AML check. For more information, please refer to the documentation.",
          key.deposit_address

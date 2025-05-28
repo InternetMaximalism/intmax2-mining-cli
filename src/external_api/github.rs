@@ -143,7 +143,7 @@ fn filter_file(
     if latest_file.is_none() || latest_date <= prev_date {
         return (prev_date, None); // no new file
     }
-    return (latest_date, latest_file);
+    (latest_date, latest_file)
 }
 
 async fn fetch_content(client: &reqwest::Client, file: &Value) -> Result<Vec<u8>, Error> {

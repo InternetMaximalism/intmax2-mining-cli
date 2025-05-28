@@ -85,6 +85,6 @@ impl State {
 
     pub async fn sync_and_fetch_assets(&mut self, key: &Key) -> anyhow::Result<AssetsStatus> {
         self.sync_trees().await?;
-        fetch_assets_status(&self, key.deposit_address, key.deposit_private_key).await
+        fetch_assets_status(self, key.deposit_address, key.deposit_private_key).await
     }
 }

@@ -31,8 +31,8 @@ pub async fn validate_env_config(env: &EnvConfig) -> anyhow::Result<()> {
 }
 
 fn validate_mining_unit(mining_unit: U256) -> anyhow::Result<()> {
-    let one_tenth: U256 = parse_ether("0.1").unwrap().into();
-    let one: U256 = parse_ether("1").unwrap().into();
+    let one_tenth: U256 = parse_ether("0.1").unwrap();
+    let one: U256 = parse_ether("1").unwrap();
     if mining_unit != one_tenth && mining_unit != one {
         anyhow::bail!("MINING_UNIT environment variable must be either '1' or '0.1'");
     }

@@ -177,7 +177,7 @@ mod tests {
 
         let is_short_term = true;
         let not_claimed_events = assets_status.get_not_claimed_events(is_short_term);
-        assert!(not_claimed_events.len() > 0);
+        assert!(!not_claimed_events.is_empty());
 
         single_claim_task(&mut state, &dummy_key, is_short_term, &not_claimed_events)
             .await

@@ -48,15 +48,15 @@ pub async fn await_until_low_gas_price(provider: &NormalProvider) -> anyhow::Res
         if current_gas_price <= max_gas_price {
             log::info!(
                 "Current gas price: {} GWei is lower than max gas price: {} GWei",
-                format_units(current_gas_price.clone(), "gwei").unwrap(),
-                format_units(max_gas_price.clone(), "gwei").unwrap(),
+                format_units(current_gas_price, "gwei").unwrap(),
+                format_units(max_gas_price, "gwei").unwrap(),
             );
             break;
         }
         print_warning(format!(
             "Current gas price: {} Gwei > max gas price: {} Gwei. Waiting for gas price to drop...",
-            format_units(current_gas_price.clone(), "gwei").unwrap(),
-            format_units(max_gas_price.clone(), "gwei").unwrap(),
+            format_units(current_gas_price, "gwei").unwrap(),
+            format_units(max_gas_price, "gwei").unwrap(),
         ));
         sleep_for(high_gas_retry_interval_in_sec);
     }

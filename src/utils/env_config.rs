@@ -52,7 +52,7 @@ impl EnvConfig {
     }
 
     pub fn load_from_file(network: Network, i: usize) -> anyhow::Result<Self> {
-        let file = std::fs::File::open(&env_config_path(network, i)).map_err(|_| {
+        let file = std::fs::File::open(env_config_path(network, i)).map_err(|_| {
             anyhow::anyhow!(
                 "Faield to open the config file at {:?}",
                 env_config_path(network, i)
@@ -140,7 +140,7 @@ impl EnvConfig {
         let encrypted_withdrawal_private_key = self
             .encrypted_withdrawal_private_key
             .clone()
-            .map(|key| hex::encode(key));
+            .map(hex::encode);
         let mining_unit = format_units(self.mining_unit, "ether").unwrap();
         let mining_times = self.mining_times.to_string();
         Ok(EnvConfigString {

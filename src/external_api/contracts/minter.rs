@@ -34,13 +34,13 @@ impl MinterContract {
     pub async fn get_short_term_eligible_root(&self) -> Result<Bytes32, BlockchainError> {
         let minter = MinterV1::new(self.address, self.provider.clone());
         let root = minter.shortTermEligibleTreeRoot().call().await?;
-        Ok(Bytes32::from_bytes_be(&root.to_vec()))
+        Ok(Bytes32::from_bytes_be(root.as_ref()))
     }
 
     pub async fn get_long_term_eligible_root(&self) -> Result<Bytes32, BlockchainError> {
         let minter = MinterV1::new(self.address, self.provider.clone());
         let root = minter.longTermEligibleTreeRoot().call().await?;
-        Ok(Bytes32::from_bytes_be(&root.to_vec()))
+        Ok(Bytes32::from_bytes_be(root.as_ref()))
     }
 
     pub async fn get_short_term_claim_nullifier_exists(

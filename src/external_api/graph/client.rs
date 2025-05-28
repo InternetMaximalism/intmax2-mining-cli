@@ -173,9 +173,9 @@ impl GraphClient {
         let mut depositeds = self.get_deposited_event_by_sender(sender).await?;
         depositeds.sort_by_key(|d| d.timestamp);
         if let Some(latest_deposit) = depositeds.last() {
-            return Ok(Some(latest_deposit.timestamp));
+            Ok(Some(latest_deposit.timestamp))
         } else {
-            return Ok(None);
+            Ok(None)
         }
     }
 

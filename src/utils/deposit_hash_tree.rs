@@ -35,6 +35,12 @@ pub struct DepositHashTree {
     pub hashes: HashMap<Bytes32, u32>,
 }
 
+impl Default for DepositHashTree {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl DepositHashTree {
     pub fn new() -> Self {
         Self {
@@ -50,11 +56,10 @@ impl DepositHashTree {
     pub fn push(&mut self, hash: Bytes32) {
         let index = self.tree.len();
         self.tree.push(DepositHash(hash));
-        if self.hashes.contains_key(&hash) {
-            // don't overwrite the index if the hash already exists
-            return;
+        if let std::collections::hash_map::Entry::Vacant(e) = self.hashes.entry(hash) {
+            e.insert(index as u32);
         } else {
-            self.hashes.insert(hash, index as u32);
+            // don't overwrite the index if the hash already exists
         }
     }
 

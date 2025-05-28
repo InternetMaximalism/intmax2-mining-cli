@@ -133,7 +133,7 @@ async fn handle_response<R: DeserializeOwned>(
                 .unwrap_or_default()
         };
         return Err(RequestError::RequestError(
-            status.into(),
+            status,
             error_message,
             url.to_string(),
             abr_request,

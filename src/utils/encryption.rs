@@ -2,7 +2,7 @@ use aes_gcm::{aead::Aead, NewAead as _};
 use serde::Serialize;
 use sha3::{Digest, Keccak256};
 
-const NONCE: &'static str = "intmaxmining";
+const NONCE: &str = "intmaxmining";
 
 pub fn encrypt<T: Serialize>(password: &str, value: &T) -> anyhow::Result<Vec<u8>> {
     let password_hash = keccak256_hash(password);

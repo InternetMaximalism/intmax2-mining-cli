@@ -110,7 +110,7 @@ pub async fn fetch_assets_status(
                 .tree
                 .get_leaf(leaf_index as usize);
             short_term_eligible_amounts.push(leaf.amount);
-            short_term_eligible_indices.push(index as usize);
+            short_term_eligible_indices.push(index);
         }
         if let Some(leaf_index) = state.long_term_eligible_tree.get_leaf_index(deposit_index) {
             let leaf = state
@@ -118,7 +118,7 @@ pub async fn fetch_assets_status(
                 .tree
                 .get_leaf(leaf_index as usize);
             long_term_eligible_amounts.push(leaf.amount);
-            long_term_eligible_indices.push(index as usize);
+            long_term_eligible_indices.push(index);
         }
     }
 
