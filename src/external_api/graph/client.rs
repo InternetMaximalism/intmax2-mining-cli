@@ -50,6 +50,7 @@ impl GraphClient {
             sender
             tokenIndex
             transactionHash
+            blockTimestamp
             depositId
             recipientSaltHash
             amount
@@ -87,6 +88,7 @@ impl GraphClient {
                 recipient_salt_hash: event.recipient_salt_hash,
                 amount: event.amount,
                 tx_nonce: tx.nonce(),
+                timestamp: event.block_timestamp,
             });
         }
 
@@ -162,18 +164,52 @@ impl GraphClient {
 
     pub async fn get_latest_deposit_timestamp(
         &self,
-        _sender: Address,
+        sender: Address,
     ) -> Result<Option<u64>, GraphClientError> {
-        // todo! fetch from the graph
-        Ok(None)
+        let mut depositeds = self.get_deposited_event_by_sender(sender).await?;
+        depositeds.sort_by_key(|d| d.timestamp);
+        if let Some(latest_deposit) = depositeds.last() {
+            return Ok(Some(latest_deposit.timestamp));
+        } else {
+            return Ok(None);
+        }
     }
 
     pub async fn get_latest_withdrawal_timestamp(
         &self,
-        _recipient: Address,
+        recipient: Address,
     ) -> Result<Option<u64>, GraphClientError> {
-        // todo! fetch from the graph
-        Ok(None)
+        let query = r#"
+        query MyQuery($recipientAddress: String!) {
+        withdrawns(
+            where: { recipient: $recipientAddress },
+            orderBy: blockTimestamp,
+            orderDirection: desc,
+            first: 1
+        ) {
+            blockTimestamp
+        }
+        }
+        "#;
+        let request = json!({
+            "query": query,
+            "variables": {
+                "recipientAddress": recipient,
+            }
+        });
+        let response: GraphQLResponse<WithdrawnData> = post_request_with_bearer_token(
+            &self.url,
+            "",
+            self.bearer_token.clone(),
+            Some(&request),
+        )
+        .await?;
+        let timestamp = response
+            .data
+            .withdrawns
+            .first()
+            .map(|entry| entry.block_timestamp);
+        Ok(timestamp)
     }
 }
 
@@ -201,6 +237,8 @@ pub struct DepositedEntry {
     pub token_index: u32,
     pub amount: U256,
     pub transaction_hash: TxHash,
+    #[serde_as(as = "DisplayFromStr")]
+    pub block_timestamp: u64,
 }
 
 #[derive(Debug, Deserialize, Clone)]
@@ -218,6 +256,20 @@ pub struct DepositLeafInsertedEntry {
     pub deposit_hash: Bytes32,
     #[serde_as(as = "DisplayFromStr")]
     pub block_number: u64,
+}
+
+#[derive(Debug, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct WithdrawnData {
+    pub withdrawns: Vec<WithdrawnEntry>,
+}
+
+#[serde_as]
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct WithdrawnEntry {
+    #[serde_as(as = "DisplayFromStr")]
+    pub block_timestamp: u64,
 }
 
 #[cfg(test)]
@@ -253,8 +305,33 @@ mod tests {
     #[tokio::test]
     async fn test_graph_client_deposit_leaf_inserted_event() {
         let client = get_client().unwrap();
+        let result = client.get_deposit_leaf_inserted_event(0).await.unwrap();
+        dbg!(&result.len());
+    }
+
+    #[tokio::test]
+    async fn test_graph_client_get_latest_deposit_timestamp() {
+        let client = get_client().unwrap();
         let result = client
-            .get_deposit_leaf_inserted_event_inner(500, 10)
+            .get_latest_deposit_timestamp(
+                "0x4c5187eea6df32a4a2eadb3459a395c83309f0be"
+                    .parse()
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        dbg!(&result);
+    }
+
+    #[tokio::test]
+    async fn test_graph_client_get_latest_withdrawal_timestamp() {
+        let client = get_client().unwrap();
+        let result = client
+            .get_latest_withdrawal_timestamp(
+                "0xC2233d8937d2581F374caB4C2E89257828bB1BF8"
+                    .parse()
+                    .unwrap(),
+            )
             .await
             .unwrap();
         dbg!(&result);
