@@ -66,16 +66,16 @@ pub async fn sync_trees(
                 .map_err(|e| {
                     Error::NetworkError(format!("Failed to fetch latest tree from github: {}", e))
                 })?;
+            log::info!("fetched bin trees from github");
 
             // retry if TreeRootSyncError occurs
             let update = || async {
                 if let Some(bin_deposit_tree) = bin_deposit_tree {
-                    let (new_deposit_hash_tree, new_block_number) =
+                    let new_deposit_hash_tree =
                         parse_and_validate_bin_deposit_tree(int1, bin_deposit_tree).await?;
                     log::info!(
-                        "Fetched deposit tree with {} leaves from block {}",
+                        "Fetched deposit tree with {} leaves",
                         new_deposit_hash_tree.tree.len(),
-                        new_block_number
                     );
                     *deposit_hash_tree = new_deposit_hash_tree;
                 }
@@ -120,7 +120,7 @@ pub async fn sync_trees(
 async fn parse_and_validate_bin_deposit_tree(
     int1: &Int1Contract,
     bin_deposit_tree: BinDepositTree,
-) -> Result<(DepositHashTree, u64), Error> {
+) -> Result<DepositHashTree, Error> {
     let deposit_tree_info: DepositTreeInfo = bin_deposit_tree
         .try_into()
         .map_err(|e: anyhow::Error| Error::TreeDeserializationError(e.to_string()))?;
@@ -134,7 +134,7 @@ async fn parse_and_validate_bin_deposit_tree(
             deposit_tree_info.root
         )));
     }
-    Ok((deposit_tree_info.tree, deposit_tree_info.block_number))
+    Ok(deposit_tree_info.tree)
 }
 
 async fn parse_and_validate_bin_eligible_tree(
