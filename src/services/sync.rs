@@ -179,8 +179,11 @@ async fn sync_to_latest_deposit_tree(
     from_block: u64,
 ) -> anyhow::Result<u64> {
     log::info!("Syncing deposit tree from block {}", from_block);
+
+    // todo!
+    let next_deposit_index = deposit_hash_tree.tree.len();
     let events = graph_client
-        .get_deposit_leaf_inserted_event(from_block)
+        .get_deposit_leaf_inserted_event(next_deposit_index as u32)
         .await?;
     info!(
         "Syncing deposit tree from block {}, got {} events. Latest deposit_index={}",
@@ -188,8 +191,6 @@ async fn sync_to_latest_deposit_tree(
         events.len(),
         events.last().map(|event| event.deposit_index).unwrap_or(0)
     );
-
-    let next_deposit_index = deposit_hash_tree.tree.len();
     let mut to_append = events
         .iter()
         .filter(|event| event.deposit_index as usize >= next_deposit_index)

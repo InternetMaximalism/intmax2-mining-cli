@@ -93,20 +93,71 @@ impl GraphClient {
         Ok(deposited)
     }
 
-    pub async fn get_last_processed_deposit_id(
-        &self,
-        _deposit_address: Address,
-    ) -> Result<Option<u64>, GraphClientError> {
-        // todo!
-        Ok(None)
-    }
-
     pub async fn get_deposit_leaf_inserted_event(
         &self,
-        _from_block: u64,
+        next_deposit_index: u32,
     ) -> Result<Vec<DepositLeafInserted>, GraphClientError> {
-        // todo! fetch from the graph
-        Ok(vec![])
+        let limit = 1000; // Adjust the limit as needed
+        let mut deposit_leaf_inserteds = Vec::new();
+        let mut current_index = next_deposit_index;
+        loop {
+            let entries = self
+                .get_deposit_leaf_inserted_event_inner(current_index, limit)
+                .await?;
+            if entries.is_empty() {
+                break;
+            }
+            deposit_leaf_inserteds.extend(entries);
+            current_index = deposit_leaf_inserteds.last().unwrap().deposit_index + 1;
+        }
+        Ok(deposit_leaf_inserteds)
+    }
+
+    async fn get_deposit_leaf_inserted_event_inner(
+        &self,
+        next_deposit_index: u32,
+        limit: u64,
+    ) -> Result<Vec<DepositLeafInserted>, GraphClientError> {
+        let query = r#"
+        query MyQuery($nextDepositIndex: BigInt!, $limit: Int!) {
+        depositLeafInserteds(
+            where: { depositIndex_gte: $nextDepositIndex },
+            orderBy: depositIndex,
+            orderDirection: asc,
+            first: $limit
+        ) {
+            blockNumber
+            depositIndex
+            depositHash
+        }
+        }
+        "#;
+        let request = json!({
+            "query": query,
+            "variables": {
+                "nextDepositIndex": next_deposit_index,
+                "limit": limit,
+            }
+        });
+        let response: GraphQLResponse<DepositLeafInsertedsData> = post_request_with_bearer_token(
+            &self.url,
+            "",
+            self.bearer_token.clone(),
+            Some(&request),
+        )
+        .await?;
+
+        let deposit_leaf_inserteds = response
+            .data
+            .deposit_leaf_inserteds
+            .into_iter()
+            .map(|entry| DepositLeafInserted {
+                deposit_index: entry.deposit_index,
+                deposit_hash: entry.deposit_hash,
+                block_number: entry.block_number,
+            })
+            .collect::<Vec<_>>();
+        Ok(deposit_leaf_inserteds)
     }
 
     pub async fn get_latest_deposit_timestamp(
@@ -152,6 +203,23 @@ pub struct DepositedEntry {
     pub transaction_hash: TxHash,
 }
 
+#[derive(Debug, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct DepositLeafInsertedsData {
+    pub deposit_leaf_inserteds: Vec<DepositLeafInsertedEntry>,
+}
+
+#[serde_as]
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DepositLeafInsertedEntry {
+    #[serde_as(as = "DisplayFromStr")]
+    pub deposit_index: u32,
+    pub deposit_hash: Bytes32,
+    #[serde_as(as = "DisplayFromStr")]
+    pub block_number: u64,
+}
+
 #[cfg(test)]
 mod tests {
     use std::env;
@@ -159,21 +227,34 @@ mod tests {
     use super::*;
     use crate::external_api::contracts::utils::get_provider;
 
-    #[tokio::test]
-    async fn test_graph_client() {
+    fn get_client() -> Result<GraphClient, GraphClientError> {
         let graph_url =
             env::var("GRAPH_URL").unwrap_or_else(|_| "http://example.com/graphql".to_string());
         let rpc_url = env::var("RPC_URL").unwrap_or_else(|_| "http://localhost:8545".to_string());
         let provider = get_provider(&rpc_url).unwrap();
 
-        let client = GraphClient::new(provider, &graph_url, None);
+        Ok(GraphClient::new(provider, &graph_url, None))
+    }
 
+    #[tokio::test]
+    async fn test_graph_client_get_deposited_event_by_sender() {
+        let client = get_client().unwrap();
         let result = client
             .get_deposited_event_by_sender(
                 "0x4c5187eea6df32a4a2eadb3459a395c83309f0be"
                     .parse()
                     .unwrap(),
             )
+            .await
+            .unwrap();
+        dbg!(&result);
+    }
+
+    #[tokio::test]
+    async fn test_graph_client_deposit_leaf_inserted_event() {
+        let client = get_client().unwrap();
+        let result = client
+            .get_deposit_leaf_inserted_event_inner(500, 10)
             .await
             .unwrap();
         dbg!(&result);
