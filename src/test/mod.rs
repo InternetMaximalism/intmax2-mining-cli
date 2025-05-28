@@ -32,7 +32,7 @@ pub fn get_dummy_keys() -> Key {
     }
 }
 
-pub async fn get_dummy_state() -> State {
+pub async fn get_dummy_state(rpc_url: &str) -> State {
     let mut eligible_tree = EligibleTreeWithMap::new();
     for i in 0..100 {
         eligible_tree.push(EligibleLeaf {
@@ -41,8 +41,7 @@ pub async fn get_dummy_state() -> State {
         });
     }
     let settings = crate::utils::config::Settings::load().unwrap();
-    // todo: set the rpc url from settings
-    let provider = get_provider("").unwrap();
+    let provider = get_provider(rpc_url).unwrap();
     let int1 = Int1Contract::new(
         provider.clone(),
         settings.blockchain.int1_address.parse().unwrap(),

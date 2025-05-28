@@ -225,10 +225,14 @@ impl AssetsStatus {
 
 #[cfg(test)]
 mod tests {
+    use crate::utils::env_config::EnvConfig;
+
     #[tokio::test]
     #[ignore]
     async fn test_assets_status() {
-        let mut state = crate::test::get_dummy_state().await;
+        dotenv::dotenv().ok();
+        let env_config = EnvConfig::import_from_env().unwrap();
+        let mut state = crate::test::get_dummy_state(&env_config.rpc_url).await;
         state.sync_trees().await.unwrap();
 
         let dummy_key = crate::test::get_dummy_keys();

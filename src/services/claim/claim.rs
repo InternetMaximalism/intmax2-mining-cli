@@ -160,26 +160,27 @@ async fn from_step5(state: &State, key: &Key) -> anyhow::Result<()> {
     Ok(())
 }
 
-// #[cfg(test)]
-// mod tests {
-//     use crate::test::{get_dummy_keys, get_dummy_state};
+#[cfg(test)]
+mod tests {
+    use crate::{test::get_dummy_keys, utils::env_config::EnvConfig};
 
-//     use super::*;
+    use super::*;
 
-//     #[tokio::test]
-//     #[ignore]
-//     async fn test_claim_task() {
-//         let dummy_key = get_dummy_keys();
+    #[tokio::test]
+    #[ignore]
+    async fn test_claim_task() {
+        dotenv::dotenv().ok();
+        let env_config = EnvConfig::import_from_env().unwrap();
+        let mut state = crate::test::get_dummy_state(&env_config.rpc_url).await;
+        let dummy_key = get_dummy_keys();
+        let assets_status = state.sync_and_fetch_assets(&dummy_key).await.unwrap();
 
-//         let mut state = get_dummy_state().await;
-//         let assets_status = state.sync_and_fetch_assets(&dummy_key).await.unwrap();
+        let is_short_term = true;
+        let not_claimed_events = assets_status.get_not_claimed_events(is_short_term);
+        assert!(not_claimed_events.len() > 0);
 
-//         let is_short_term = true;
-//         let not_claimed_events = assets_status.get_not_claimed_events(is_short_term);
-//         assert!(not_claimed_events.len() > 0);
-
-//         single_claim_task(&mut state, &dummy_key, is_short_term, &not_claimed_events)
-//             .await
-//             .unwrap();
-//     }
-// }
+        single_claim_task(&mut state, &dummy_key, is_short_term, &not_claimed_events)
+            .await
+            .unwrap();
+    }
+}

@@ -179,8 +179,6 @@ async fn sync_to_latest_deposit_tree(
     from_block: u64,
 ) -> anyhow::Result<u64> {
     log::info!("Syncing deposit tree from block {}", from_block);
-
-    // todo!
     let next_deposit_index = deposit_hash_tree.tree.len();
     let events = graph_client
         .get_deposit_leaf_inserted_event(next_deposit_index as u32)
@@ -226,30 +224,36 @@ async fn sync_to_latest_deposit_tree(
     Ok(to_block_number)
 }
 
-// #[cfg(test)]
-// mod tests {
-//     use crate::utils::{
-//         deposit_hash_tree::DepositHashTree, eligible_tree_with_map::EligibleTreeWithMap,
-//     };
+#[cfg(test)]
+mod tests {
+    use crate::utils::env_config::EnvConfig;
 
-//     #[tokio::test]
-//     #[ignore]
-//     async fn sync_to_latest_deposit_tree() {
-//         let mut deposit_hash_tree = DepositHashTree::new();
-//         let mut short_term_eligible_tree = EligibleTreeWithMap::new();
-//         let mut long_term_eligible_tree = EligibleTreeWithMap::new();
-//         let mut last_deposit_block_number = 0;
-//         let mut last_update = chrono::NaiveDateTime::default();
-//         super::sync_trees(
-//             &mut last_deposit_block_number,
-//             &mut last_update,
-//             &mut deposit_hash_tree,
-//             &mut short_term_eligible_tree,
-//             &mut long_term_eligible_tree,
-//         )
-//         .await
-//         .unwrap();
+    #[tokio::test]
+    #[ignore]
+    async fn sync_to_latest_deposit_tree() {
+        dotenv::dotenv().ok();
+        let _ = env_logger::builder()
+            .filter_level(log::LevelFilter::Info)
+            .try_init();
 
-//         dbg!(deposit_hash_tree.tree.len());
-//     }
-// }
+        let env_config = EnvConfig::import_from_env().unwrap();
+        let mut state = crate::test::get_dummy_state(&env_config.rpc_url).await;
+
+        let mut last_deposit_block_number = 0;
+        let mut last_update = chrono::NaiveDateTime::default();
+        super::sync_trees(
+            &state.graph_client,
+            &state.int1,
+            &state.minter,
+            &mut last_deposit_block_number,
+            &mut last_update,
+            &mut state.deposit_hash_tree,
+            &mut state.short_term_eligible_tree,
+            &mut state.long_term_eligible_tree,
+        )
+        .await
+        .unwrap();
+
+        dbg!(state.deposit_hash_tree.tree.len());
+    }
+}

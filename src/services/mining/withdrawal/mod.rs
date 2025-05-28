@@ -142,27 +142,31 @@ async fn from_step5(state: &State, _key: &Key) -> anyhow::Result<()> {
 
 #[cfg(test)]
 mod tests {
-    use crate::test::{get_dummy_keys, get_dummy_state};
+    use crate::{test::get_dummy_keys, utils::env_config::EnvConfig};
 
-    // #[tokio::test]
-    // #[ignore]
-    // async fn test_withdrawal() {
-    //     let mut state = get_dummy_state().await;
+    #[tokio::test]
+    #[ignore]
+    async fn test_withdrawal() {
+        dotenv::dotenv().ok();
+        let env_config = EnvConfig::import_from_env().unwrap();
+        let mut state = crate::test::get_dummy_state(&env_config.rpc_url).await;
 
-    //     let dummy_key = get_dummy_keys();
-    //     let assets_status = state.sync_and_fetch_assets(&dummy_key).await.unwrap();
-    //     let events = assets_status.get_not_withdrawn_events();
-    //     assert!(events.len() > 0);
+        let dummy_key = get_dummy_keys();
+        let assets_status = state.sync_and_fetch_assets(&dummy_key).await.unwrap();
+        let events = assets_status.get_not_withdrawn_events();
+        assert!(events.len() > 0);
 
-    //     super::withdrawal_task(&mut state, &dummy_key, events[0].clone())
-    //         .await
-    //         .unwrap();
-    // }
+        super::withdrawal_task(&mut state, &dummy_key, events[0].clone())
+            .await
+            .unwrap();
+    }
 
     #[tokio::test]
     #[ignore]
     async fn test_resume_withdrawal() {
-        let mut state = get_dummy_state().await;
+        dotenv::dotenv().ok();
+        let env_config = EnvConfig::import_from_env().unwrap();
+        let mut state = crate::test::get_dummy_state(&env_config.rpc_url).await;
         state.sync_trees().await.unwrap();
         let dummy_key = get_dummy_keys();
         super::resume_withdrawal_task(&state, &dummy_key)
