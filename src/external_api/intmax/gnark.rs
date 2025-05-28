@@ -1,4 +1,4 @@
-use ethers::types::Address;
+use alloy::primitives::Address;
 use intmax2_zkp::wrapper_config::plonky2_config::PoseidonBN128GoldilocksConfig;
 
 use log::info;
@@ -43,13 +43,13 @@ impl GnarkStartProofInput {
 #[derive(Serialize, Deserialize)]
 #[serde(untagged)]
 enum GnarkStartProofResponse {
-    Success(GnarkStartProofSucessResponse),
+    Success(GnarkStartProofSuccessResponse),
     Error(IntmaxErrorResponse),
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 #[serde(rename_all = "camelCase")]
-pub struct GnarkStartProofSucessResponse {
+pub struct GnarkStartProofSuccessResponse {
     pub job_id: String,
     pub status: String,
     pub estimated_time: Option<u64>, // in milliseconds
@@ -81,7 +81,7 @@ pub async fn gnark_start_prove(
     base_url: &str,
     address: Address,
     plonky2_proof: ProofWithPublicInputs<F, C, D>,
-) -> Result<GnarkStartProofSucessResponse, IntmaxError> {
+) -> Result<GnarkStartProofSuccessResponse, IntmaxError> {
     info!(
         "gnark_start_prove with args address: {}, pis: {:?}",
         address, plonky2_proof.public_inputs

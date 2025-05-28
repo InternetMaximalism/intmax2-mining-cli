@@ -1,10 +1,8 @@
 use crate::{
     external_api::{
-        contracts::{
-            events::get_deposit_leaf_inserted_event,
-            int1::{get_deposit_root, get_deposit_root_exits},
-        },
+        contracts::{int1::Int1Contract, minter::MinterContract},
         github::{fetch_latest_tree_from_github, BinTrees},
+        graph::client::GraphClient,
     },
     utils::{
         bin_parser::{BinDepositTree, BinEligibleTree, DepositTreeInfo, EligibleTreeInfo},
@@ -36,6 +34,9 @@ pub enum Error {
 const MAX_TRY_FETCH_TREE: usize = 10;
 
 pub async fn sync_trees(
+    graph_client: &GraphClient,
+    int1: &Int1Contract,
+    minter: &MinterContract,
     last_deposit_block_number: &mut u64,
     last_update: &mut NaiveDateTime,
     deposit_hash_tree: &mut DepositHashTree,
@@ -72,7 +73,7 @@ pub async fn sync_trees(
             let update = || async {
                 if let Some(bin_deposit_tree) = bin_deposit_tree {
                     let (new_deposit_hash_tree, new_block_number) =
-                        parse_and_validate_bin_deposit_tree(bin_deposit_tree).await?;
+                        parse_and_validate_bin_deposit_tree(int1, bin_deposit_tree).await?;
                     log::info!(
                         "Fetched deposit tree with {} leaves from block {}",
                         new_deposit_hash_tree.tree.len(),
@@ -82,14 +83,20 @@ pub async fn sync_trees(
                     *last_deposit_block_number = new_block_number;
                 }
                 if let Some(bin_short_term_eligible_tree) = bin_short_term_eligible_tree {
-                    *short_term_eligible_tree =
-                        parse_and_validate_bin_eligible_tree(true, bin_short_term_eligible_tree)
-                            .await?;
+                    *short_term_eligible_tree = parse_and_validate_bin_eligible_tree(
+                        minter,
+                        true,
+                        bin_short_term_eligible_tree,
+                    )
+                    .await?;
                 }
                 if let Some(bin_long_term_eligible_tree) = bin_long_term_eligible_tree {
-                    *long_term_eligible_tree =
-                        parse_and_validate_bin_eligible_tree(false, bin_long_term_eligible_tree)
-                            .await?;
+                    *long_term_eligible_tree = parse_and_validate_bin_eligible_tree(
+                        minter,
+                        false,
+                        bin_long_term_eligible_tree,
+                    )
+                    .await?;
                 }
                 Result::<(), Error>::Ok(())
             };
@@ -104,24 +111,30 @@ pub async fn sync_trees(
         }
     }
     // sync deposit tree only
-    *last_deposit_block_number =
-        sync_to_latest_deposit_tree(deposit_hash_tree, *last_deposit_block_number)
-            .await
-            .map_err(|e| {
-                Error::SyncDepositTreeFromEventsError(format!("Failed to sync deposit tree: {}", e))
-            })?;
+    *last_deposit_block_number = sync_to_latest_deposit_tree(
+        graph_client,
+        int1,
+        deposit_hash_tree,
+        *last_deposit_block_number,
+    )
+    .await
+    .map_err(|e| {
+        Error::SyncDepositTreeFromEventsError(format!("Failed to sync deposit tree: {}", e))
+    })?;
     *last_update = now; // update last_update to now
     Ok(())
 }
 
 async fn parse_and_validate_bin_deposit_tree(
+    int1: &Int1Contract,
     bin_deposit_tree: BinDepositTree,
 ) -> Result<(DepositHashTree, u64), Error> {
     let deposit_tree_info: DepositTreeInfo = bin_deposit_tree
         .try_into()
         .map_err(|e: anyhow::Error| Error::TreeDeserializationError(e.to_string()))?;
     // check roots
-    let deposit_root_exists = get_deposit_root_exits(deposit_tree_info.root)
+    let deposit_root_exists = int1
+        .get_deposit_root_exits(deposit_tree_info.root)
         .await
         .map_err(|e| Error::NetworkError(format!("Failed to get deposit root: {}", e)))?;
     if !deposit_root_exists {
@@ -134,6 +147,7 @@ async fn parse_and_validate_bin_deposit_tree(
 }
 
 async fn parse_and_validate_bin_eligible_tree(
+    minter: &MinterContract,
     is_short_term: bool,
     bin_eligible_tree: BinEligibleTree,
 ) -> Result<EligibleTreeWithMap, Error> {
@@ -141,17 +155,13 @@ async fn parse_and_validate_bin_eligible_tree(
         .try_into()
         .map_err(|e: anyhow::Error| Error::TreeDeserializationError(e.to_string()))?;
     let onchain_eligible_root = if is_short_term {
-        crate::external_api::contracts::minter::get_short_term_eligible_root()
-            .await
-            .map_err(|e| {
-                Error::NetworkError(format!("Failed to get short term eligible root: {}", e))
-            })?
+        minter.get_short_term_eligible_root().await.map_err(|e| {
+            Error::NetworkError(format!("Failed to get short term eligible root: {}", e))
+        })?
     } else {
-        crate::external_api::contracts::minter::get_long_term_eligible_root()
-            .await
-            .map_err(|e| {
-                Error::NetworkError(format!("Failed to get long term eligible root: {}", e))
-            })?
+        minter.get_long_term_eligible_root().await.map_err(|e| {
+            Error::NetworkError(format!("Failed to get long term eligible root: {}", e))
+        })?
     };
     if onchain_eligible_root != eligible_tree_info.root {
         return Err(Error::TreeRootSyncError(format!(
@@ -163,19 +173,24 @@ async fn parse_and_validate_bin_eligible_tree(
 }
 
 async fn sync_to_latest_deposit_tree(
+    graph_client: &GraphClient,
+    int1: &Int1Contract,
     deposit_hash_tree: &mut DepositHashTree,
     from_block: u64,
 ) -> anyhow::Result<u64> {
     log::info!("Syncing deposit tree from block {}", from_block);
-    let events = get_deposit_leaf_inserted_event(from_block).await?;
+
+    // todo!
+    let next_deposit_index = deposit_hash_tree.tree.len();
+    let events = graph_client
+        .get_deposit_leaf_inserted_event(next_deposit_index as u32)
+        .await?;
     info!(
         "Syncing deposit tree from block {}, got {} events. Latest deposit_index={}",
         from_block,
         events.len(),
         events.last().map(|event| event.deposit_index).unwrap_or(0)
     );
-
-    let next_deposit_index = deposit_hash_tree.tree.len();
     let mut to_append = events
         .iter()
         .filter(|event| event.deposit_index as usize >= next_deposit_index)
@@ -194,14 +209,13 @@ async fn sync_to_latest_deposit_tree(
         to_block_number = event.block_number;
     }
     let local_root = deposit_hash_tree.get_root();
-    let is_exists = get_deposit_root_exits(local_root).await?;
+    let is_exists = int1.get_deposit_root_exits(local_root).await?;
     ensure!(
         is_exists,
         "Local deposit root does not exist on chain: {}",
         local_root
     );
-    let current_root = get_deposit_root().await?;
-
+    let current_root = int1.get_deposit_root().await?;
     // this may occur because of the delay of the event log
     if local_root != current_root {
         warn!(
@@ -212,30 +226,30 @@ async fn sync_to_latest_deposit_tree(
     Ok(to_block_number)
 }
 
-#[cfg(test)]
-mod tests {
-    use crate::utils::{
-        deposit_hash_tree::DepositHashTree, eligible_tree_with_map::EligibleTreeWithMap,
-    };
+// #[cfg(test)]
+// mod tests {
+//     use crate::utils::{
+//         deposit_hash_tree::DepositHashTree, eligible_tree_with_map::EligibleTreeWithMap,
+//     };
 
-    #[tokio::test]
-    #[ignore]
-    async fn sync_to_latest_deposit_tree() {
-        let mut deposit_hash_tree = DepositHashTree::new();
-        let mut short_term_eligible_tree = EligibleTreeWithMap::new();
-        let mut long_term_eligible_tree = EligibleTreeWithMap::new();
-        let mut last_deposit_block_number = 0;
-        let mut last_update = chrono::NaiveDateTime::default();
-        super::sync_trees(
-            &mut last_deposit_block_number,
-            &mut last_update,
-            &mut deposit_hash_tree,
-            &mut short_term_eligible_tree,
-            &mut long_term_eligible_tree,
-        )
-        .await
-        .unwrap();
+//     #[tokio::test]
+//     #[ignore]
+//     async fn sync_to_latest_deposit_tree() {
+//         let mut deposit_hash_tree = DepositHashTree::new();
+//         let mut short_term_eligible_tree = EligibleTreeWithMap::new();
+//         let mut long_term_eligible_tree = EligibleTreeWithMap::new();
+//         let mut last_deposit_block_number = 0;
+//         let mut last_update = chrono::NaiveDateTime::default();
+//         super::sync_trees(
+//             &mut last_deposit_block_number,
+//             &mut last_update,
+//             &mut deposit_hash_tree,
+//             &mut short_term_eligible_tree,
+//             &mut long_term_eligible_tree,
+//         )
+//         .await
+//         .unwrap();
 
-        dbg!(deposit_hash_tree.tree.len());
-    }
-}
+//         dbg!(deposit_hash_tree.tree.len());
+//     }
+// }

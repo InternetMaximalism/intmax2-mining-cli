@@ -1,106 +1,21 @@
-use anyhow::ensure;
-use ethers::{
-    core::k256::ecdsa::SigningKey,
-    middleware::SignerMiddleware,
-    providers::{Http, Middleware, Provider},
-    signers::Wallet,
-    types::{Address, H256, U256},
+use alloy::{
+    primitives::{utils::format_units, Address, U256},
+    providers::Provider as _,
 };
 
 use crate::{
     cli::console::{print_status, print_warning},
-    external_api::{
-        contracts::utils::{get_account_nonce, get_balance, get_client, get_gas_price},
-        intmax::gas_estimation::get_gas_estimation,
-    },
-    utils::{config::Settings, env_config::EnvConfig, network::is_legacy, time::sleep_for},
+    external_api::contracts::utils::NormalProvider,
+    utils::{config::Settings, env_config::EnvConfig, time::sleep_for},
 };
 
-pub async fn set_gas_price(
-    tx: &mut ethers::contract::builders::ContractCall<
-        SignerMiddleware<Provider<Http>, Wallet<SigningKey>>,
-        (),
-    >,
-) -> anyhow::Result<()> {
-    if is_legacy() {
-        return Ok(()); // gas server does not support legacy environment.
-    }
-    let result = get_gas_estimation().await?;
-    let inner_tx = tx
-        .tx
-        .as_eip1559_mut()
-        .ok_or(anyhow::anyhow!("EIP-1559 tx expected"))?;
-    *inner_tx = inner_tx
-        .clone()
-        .max_priority_fee_per_gas(result.max_priority_fee_per_gas)
-        .max_fee_per_gas(result.max_fee_per_gas);
-    Ok(())
-}
-
-pub async fn handle_contract_call<S: ToString>(
-    tx: ethers::contract::builders::ContractCall<
-        SignerMiddleware<Provider<Http>, Wallet<SigningKey>>,
-        (),
-    >,
-    from_address: Address,
-    from_name: S,
-    tx_name: S,
-) -> anyhow::Result<H256> {
-    loop {
-        let result = tx.send().await;
-        match result {
-            Ok(tx) => {
-                let pending_tx = tx;
-                print_status(format!(
-                    "{} tx hash: {:?}",
-                    tx_name.to_string(),
-                    pending_tx.tx_hash()
-                ));
-                match pending_tx.await? {
-                    Some(tx_receipt) => {
-                        ensure!(
-                            tx_receipt.status.unwrap() == 1.into(),
-                            "{} tx failed",
-                            from_name.to_string()
-                        );
-                        return Ok(tx_receipt.transaction_hash);
-                    }
-                    None => {
-                        return Err(anyhow::anyhow!(
-                            "Transaction receipt is None. The transaction may not have been mined."
-                        ));
-                    }
-                }
-            }
-            Err(e) => {
-                let error_message = e.to_string();
-                // insufficient balance
-                if error_message.contains("-32000") {
-                    let estimate_gas = tx.estimate_gas().await?;
-                    let gas_price = get_client().await?.get_gas_price().await?;
-                    let value = tx.tx.value().cloned().unwrap_or_default();
-                    let necessary_balance = estimate_gas * gas_price + value;
-                    insuffient_balance_instruction(
-                        from_address,
-                        necessary_balance,
-                        &from_name.to_string(),
-                    )
-                    .await?;
-                    print_status(format!("Retrying {} transaction...", tx_name.to_string()));
-                } else {
-                    return Err(anyhow::anyhow!("Error sending transaction: {:?}", e));
-                }
-            }
-        }
-    }
-}
-
-pub async fn insuffient_balance_instruction(
+pub async fn insufficient_balance_instruction(
+    provider: &NormalProvider,
     address: Address,
     required_balance: U256,
     name: &str,
 ) -> anyhow::Result<()> {
-    let balance = get_balance(address).await?;
+    let balance = provider.get_balance(address).await?;
     if required_balance <= balance {
         return Ok(());
     }
@@ -112,7 +27,7 @@ pub async fn insuffient_balance_instruction(
         pretty_format_u256(required_balance)
     ));
     loop {
-        let new_balance = get_balance(address).await?;
+        let new_balance = provider.get_balance(address).await?;
         if new_balance > required_balance {
             print_status("Balance updated");
             sleep_for(10);
@@ -123,51 +38,58 @@ pub async fn insuffient_balance_instruction(
     Ok(())
 }
 
-pub async fn await_until_low_gas_price() -> anyhow::Result<()> {
+pub async fn await_until_low_gas_price(provider: &NormalProvider) -> anyhow::Result<()> {
     let max_gas_price = EnvConfig::import_from_env()?.max_gas_price;
     let settings = Settings::load()?;
-    let high_gas_retry_inverval_in_sec = settings.service.high_gas_retry_inverval_in_sec;
+    let high_gas_retry_interval_in_sec = settings.service.high_gas_retry_interval_in_sec;
     let _url = settings.service.repository_url;
     loop {
-        let current_gas_price = get_gas_price().await?;
+        let current_gas_price = U256::from(provider.get_gas_price().await?);
         if current_gas_price <= max_gas_price {
             log::info!(
                 "Current gas price: {} GWei is lower than max gas price: {} GWei",
-                ethers::utils::format_units(current_gas_price.clone(), "gwei").unwrap(),
-                ethers::utils::format_units(max_gas_price.clone(), "gwei").unwrap(),
+                format_units(current_gas_price.clone(), "gwei").unwrap(),
+                format_units(max_gas_price.clone(), "gwei").unwrap(),
             );
             break;
         }
         print_warning(format!(
             "Current gas price: {} Gwei > max gas price: {} Gwei. Waiting for gas price to drop...",
-            ethers::utils::format_units(current_gas_price.clone(), "gwei").unwrap(),
-            ethers::utils::format_units(max_gas_price.clone(), "gwei").unwrap(),
+            format_units(current_gas_price.clone(), "gwei").unwrap(),
+            format_units(max_gas_price.clone(), "gwei").unwrap(),
         ));
-        sleep_for(high_gas_retry_inverval_in_sec);
+        sleep_for(high_gas_retry_interval_in_sec);
     }
     Ok(())
 }
 
-pub async fn is_address_used(deposit_address: Address) -> bool {
-    get_account_nonce(deposit_address).await.unwrap() > 0
-        || get_balance(deposit_address).await.unwrap() > 0.into()
+pub async fn is_address_used(
+    provider: &NormalProvider,
+    deposit_address: Address,
+) -> anyhow::Result<bool> {
+    let account = provider.get_account(deposit_address).await?;
+    let nonce = account.nonce;
+    let balance = account.balance;
+    Ok(nonce > 0 || balance > U256::default())
 }
 
 pub fn pretty_format_u256(value: U256) -> String {
-    let s = ethers::utils::format_units(value, "ether").unwrap();
+    let s = format_units(value, "ether").unwrap();
     let s = s.trim_end_matches('0').trim_end_matches('.');
     s.to_string()
 }
 
 #[cfg(test)]
 mod tests {
+    use alloy::primitives::utils::parse_ether;
+
     #[test]
     fn test_pretty_format() {
-        let value = ethers::utils::parse_ether("1.01000000000000000").unwrap();
+        let value = parse_ether("1.01000000000000000").unwrap();
         let pretty = super::pretty_format_u256(value);
         assert_eq!(pretty, "1.01");
 
-        let value = ethers::utils::parse_ether("1.00000000000000000").unwrap();
+        let value = parse_ether("1.00000000000000000").unwrap();
         let pretty = super::pretty_format_u256(value);
         assert_eq!(pretty, "1");
     }

@@ -1,13 +1,19 @@
 use std::{collections::HashMap, str::FromStr};
 
+use alloy::{
+    primitives::{
+        utils::{format_units, parse_ether, parse_units},
+        Address, B256, U256,
+    },
+    providers::Provider as _,
+};
 use anyhow::bail;
 use console::style;
 use dialoguer::{Confirm, Input, Password, Select};
-use ethers::types::{Address, H256, U256};
 use strum::IntoEnumIterator as _;
 
 use crate::{
-    external_api::contracts::utils::{get_address, get_balance_with_rpc},
+    external_api::contracts::utils::{get_address_from_private_key, get_provider},
     utils::{
         config::Settings,
         encryption::{decrypt, encrypt},
@@ -42,10 +48,10 @@ pub async fn new_config(network: Network) -> anyhow::Result<EnvConfig> {
         .interact()?;
     let (max_gas_price, mining_unit, mining_times) = if use_default {
         (
-            ethers::utils::parse_units(default_env.default_max_gas_price, "gwei")
+            parse_units(&default_env.default_max_gas_price, "gwei")
                 .unwrap()
                 .into(),
-            ethers::utils::parse_ether(default_env.default_mining_unit).unwrap(),
+            parse_ether(&default_env.default_mining_unit).unwrap(),
             default_env.default_mining_times,
         )
     } else {
@@ -54,8 +60,8 @@ pub async fn new_config(network: Network) -> anyhow::Result<EnvConfig> {
         let mining_times = input_mining_times()?;
         (max_gas_price, mining_unit, mining_times)
     };
-    let withdrawal_private_key: H256 = input_withdrawal_private_key(&rpc_url).await?;
-    let withdrawal_address = get_address(withdrawal_private_key);
+    let withdrawal_private_key: B256 = input_withdrawal_private_key(&rpc_url).await?;
+    let withdrawal_address = get_address_from_private_key(withdrawal_private_key);
     let (encrypt, keys, encrypted_keys) = input_encryption(withdrawal_private_key)?;
     let config = EnvConfig {
         network,
@@ -85,7 +91,7 @@ pub async fn modify_config(config: &EnvConfig) -> anyhow::Result<EnvConfig> {
     let modify_max_gas_price = Confirm::new()
         .with_prompt(format!(
             "Modify max gas price {} GWei?",
-            ethers::utils::format_units(config.max_gas_price, "gwei").unwrap()
+            format_units(config.max_gas_price, "gwei").unwrap()
         ))
         .default(false)
         .interact()?;
@@ -96,7 +102,10 @@ pub async fn modify_config(config: &EnvConfig) -> anyhow::Result<EnvConfig> {
     };
 
     let modify_withdrawal_address = Confirm::new()
-        .with_prompt(format!("Modify withdrawal account {:?}?", get_address(key)))
+        .with_prompt(format!(
+            "Modify withdrawal account {:?}?",
+            get_address_from_private_key(key)
+        ))
         .default(false)
         .interact()?;
     let withdrawal_private_key = if modify_withdrawal_address {
@@ -105,7 +114,7 @@ pub async fn modify_config(config: &EnvConfig) -> anyhow::Result<EnvConfig> {
         key
     };
     let (encrypt, keys, encrypted_keys) = input_encryption(withdrawal_private_key)?;
-    let withdrawal_address = get_address(withdrawal_private_key);
+    let withdrawal_address = get_address_from_private_key(withdrawal_private_key);
     let config = EnvConfig {
         network: config.network,
         rpc_url,
@@ -221,9 +230,9 @@ fn input_max_gas_price() -> anyhow::Result<U256> {
         .with_prompt("Max gas price for transactions in GWei")
         .default(default_max_gas_price)
         .validate_with(|max_gas_price: &String| {
-            let result = ethers::utils::parse_units(max_gas_price, "gwei");
+            let result = parse_units(max_gas_price, "gwei");
             if let Ok(x) = result {
-                if x > ethers::utils::parse_units("210", "gwei").unwrap() {
+                if x > parse_units("210", "gwei").unwrap() {
                     return Err("Gas price too high (>210 GWei)");
                 }
                 Ok(())
@@ -232,9 +241,7 @@ fn input_max_gas_price() -> anyhow::Result<U256> {
             }
         })
         .interact()?;
-    let max_gas_price = ethers::utils::parse_units(max_gas_price, "gwei")
-        .unwrap()
-        .into();
+    let max_gas_price = parse_units(&max_gas_price, "gwei").unwrap().into();
     Ok(max_gas_price)
 }
 
@@ -246,8 +253,8 @@ fn input_mining_unit() -> anyhow::Result<U256> {
         .default(0)
         .interact()?;
     let mining_unit = match selection {
-        0 => ethers::utils::parse_ether("0.1").unwrap(),
-        1 => ethers::utils::parse_ether("1").unwrap(),
+        0 => parse_ether("0.1").unwrap(),
+        1 => parse_ether("1").unwrap(),
         _ => unreachable!(),
     };
     Ok(mining_unit)
@@ -267,14 +274,14 @@ fn input_mining_times() -> anyhow::Result<u64> {
     Ok(mining_times)
 }
 
-async fn input_withdrawal_private_key(rpc_url: &str) -> anyhow::Result<H256> {
+async fn input_withdrawal_private_key(rpc_url: &str) -> anyhow::Result<B256> {
     loop {
         let withdrawal_private_key: String = Password::new()
             .with_prompt(format!("Withdrawal private key of {}", get_network()))
             .validate_with(|input: &String| validate_private_key_with_duplication_check(&[], input))
             .interact()?;
-        let withdrawal_private_key: H256 = withdrawal_private_key.parse().unwrap();
-        let withdrawal_address = get_address(withdrawal_private_key);
+        let withdrawal_private_key: B256 = withdrawal_private_key.parse().unwrap();
+        let withdrawal_address = get_address_from_private_key(withdrawal_private_key);
         println!("Withdrawal Address: {:?}", withdrawal_address);
 
         // duplication check
@@ -284,8 +291,9 @@ async fn input_withdrawal_private_key(rpc_url: &str) -> anyhow::Result<H256> {
 
         // non-balance check
         {
-            let balance = get_balance_with_rpc(rpc_url, withdrawal_address).await?;
-            if balance != U256::zero() {
+            let provider = get_provider(rpc_url)?;
+            let balance = provider.get_balance(withdrawal_address).await?;
+            if balance != U256::default() {
                 let colored_message = format!(
                 "{} {}",
                 style("WARNING:").yellow().bold(),
@@ -306,7 +314,7 @@ async fn input_withdrawal_private_key(rpc_url: &str) -> anyhow::Result<H256> {
     }
 }
 
-fn is_withdrawal_address_duplicated(withdrawal_addres: Address) -> anyhow::Result<bool> {
+fn is_withdrawal_address_duplicated(withdrawal_address: Address) -> anyhow::Result<bool> {
     let mut address_to_network = HashMap::<Address, (Network, usize)>::new();
     for network in Network::iter() {
         for config_index in EnvConfig::get_existing_indices(network) {
@@ -314,7 +322,8 @@ fn is_withdrawal_address_duplicated(withdrawal_addres: Address) -> anyhow::Resul
             address_to_network.insert(config.withdrawal_address, (network, config_index));
         }
     }
-    if let Some((duplicated_network, duplicated_index)) = address_to_network.get(&withdrawal_addres)
+    if let Some((duplicated_network, duplicated_index)) =
+        address_to_network.get(&withdrawal_address)
     {
         let message = format!(
             "Withdrawal address is duplicated as {} config #{}. Please use a different address.",
@@ -328,8 +337,8 @@ fn is_withdrawal_address_duplicated(withdrawal_addres: Address) -> anyhow::Resul
 }
 
 fn input_encryption(
-    withdrawal_private_key: H256,
-) -> anyhow::Result<(bool, Option<H256>, Option<Vec<u8>>)> {
+    withdrawal_private_key: B256,
+) -> anyhow::Result<(bool, Option<B256>, Option<Vec<u8>>)> {
     let do_encrypt = Confirm::new()
         .with_prompt("Do you set password to encrypt private keys?")
         .default(true)
@@ -353,13 +362,13 @@ fn input_encryption(
 }
 
 fn validate_private_key_with_duplication_check(
-    private_keys: &[H256],
+    private_keys: &[B256],
     input: &str,
 ) -> Result<(), &'static str> {
-    let result: Result<H256, _> = input.parse();
+    let result: Result<B256, _> = input.parse();
     match result {
         Ok(x) => {
-            if x == H256::zero() {
+            if x == B256::default() {
                 return Err("Invalid private key");
             }
             if private_keys.contains(&x) {
@@ -371,7 +380,7 @@ fn validate_private_key_with_duplication_check(
     }
 }
 
-pub fn recover_withdrawal_private_key(config: &EnvConfig) -> anyhow::Result<H256> {
+pub fn recover_withdrawal_private_key(config: &EnvConfig) -> anyhow::Result<B256> {
     let key = if !config.encrypt {
         config.withdrawal_private_key.clone().unwrap()
     } else {

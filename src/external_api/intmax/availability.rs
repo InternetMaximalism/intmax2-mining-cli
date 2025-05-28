@@ -10,19 +10,19 @@ use super::error::{IntmaxError, IntmaxErrorResponse};
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct AvaliabilityServerSuccessResponse {
+pub struct AvailabilityServerSuccessResponse {
     pub is_available: bool,
     pub message: String,
 }
 
 #[derive(Serialize, Deserialize)]
 #[serde(untagged)]
-enum AvaliabilityServerResponse {
-    Success(AvaliabilityServerSuccessResponse),
+enum AvailabilityServerResponse {
+    Success(AvailabilityServerSuccessResponse),
     Error(IntmaxErrorResponse),
 }
 
-pub async fn get_availability() -> Result<AvaliabilityServerSuccessResponse, IntmaxError> {
+pub async fn get_availability() -> Result<AvailabilityServerSuccessResponse, IntmaxError> {
     info!("get_availability");
     let version = env!("CARGO_PKG_VERSION");
     let settings = Settings::load().unwrap();
@@ -38,13 +38,13 @@ pub async fn get_availability() -> Result<AvaliabilityServerSuccessResponse, Int
     })
     .await
     .map_err(|_| IntmaxError::NetworkError("failed to request availability server".to_string()))?;
-    let response_json: AvaliabilityServerResponse = response
+    let response_json: AvailabilityServerResponse = response
         .json()
         .await
         .map_err(|e| IntmaxError::SerializeError(e.to_string()))?;
     match response_json {
-        AvaliabilityServerResponse::Success(success) => Ok(success),
-        AvaliabilityServerResponse::Error(error) => Err(IntmaxError::ServerError(error)),
+        AvailabilityServerResponse::Success(success) => Ok(success),
+        AvailabilityServerResponse::Error(error) => Err(IntmaxError::ServerError(error)),
     }
 }
 

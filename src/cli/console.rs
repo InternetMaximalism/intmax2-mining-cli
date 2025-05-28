@@ -1,7 +1,7 @@
 use console::{style, Term};
 use log::{error, info, warn};
 
-pub fn initialize_console() {
+pub fn clear_console() {
     let term = Term::stdout();
     term.write_line("").unwrap();
 }
@@ -32,7 +32,7 @@ pub fn print_log<S: ToString>(message: S) {
         style(message.to_string()).blue()
     );
     term.write_line(&colored_message).unwrap();
-    initialize_console();
+    clear_console();
     info!("{}", message.to_string());
 }
 
@@ -49,8 +49,6 @@ pub fn print_warning<S: ToString>(message: S) {
         .unwrap();
     warn!("{}", message.to_string());
 }
-
-
 
 pub fn print_assets_status(assets_status: &crate::services::assets_status::AssetsStatus) {
     print_status(format!(

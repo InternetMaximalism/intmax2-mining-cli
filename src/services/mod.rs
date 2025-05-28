@@ -1,6 +1,6 @@
 use crate::{
     cli::{
-        availability::check_avaliability,
+        availability::check_availability,
         balance_validation::{
             validate_deposit_address_balance, validate_withdrawal_address_balance,
         },
@@ -10,8 +10,8 @@ use crate::{
     state::{key::Key, state::State},
     utils::{config::Settings, time::sleep_for},
 };
+use alloy::primitives::{B256, U256};
 use claim::claim_task;
-use ethers::types::{H256, U256};
 use mining::mining_task;
 use utils::is_address_used;
 
@@ -25,7 +25,7 @@ pub mod utils;
 // note: in legacy environment, there is no mining loop
 pub async fn mining_loop(
     state: &mut State,
-    withdrawal_private_key: H256,
+    withdrawal_private_key: B256,
     mining_unit: U256,
     mining_times: u64,
 ) -> anyhow::Result<()> {
@@ -36,6 +36,7 @@ pub async fn mining_loop(
     ));
     let assets_status = state.sync_and_fetch_assets(&key).await?;
     validate_deposit_address_balance(
+        &state.provider,
         &assets_status,
         key.deposit_address,
         mining_unit,
@@ -43,7 +44,7 @@ pub async fn mining_loop(
     )
     .await?;
     loop {
-        check_avaliability().await?;
+        check_availability().await?;
         let assets_status = state.sync_and_fetch_assets(&key).await?;
         let is_qualified = !get_circulation(key.deposit_address).await?.is_excluded;
         let will_deposit = assets_status.effective_deposit_times() < mining_times as usize
@@ -89,11 +90,11 @@ pub async fn mining_loop(
     Ok(())
 }
 
-pub async fn exit_loop(state: &mut State, withdrawal_private_key: H256) -> anyhow::Result<()> {
+pub async fn exit_loop(state: &mut State, withdrawal_private_key: B256) -> anyhow::Result<()> {
     let key = Key::new(withdrawal_private_key, 0);
     print_log(format!("Exit for deposit address{:?}", key.deposit_address));
     loop {
-        check_avaliability().await?;
+        check_availability().await?;
         let assets_status = state.sync_and_fetch_assets(&key).await?;
         if assets_status.pending_indices.is_empty()
             && assets_status.rejected_indices.is_empty()
@@ -101,7 +102,7 @@ pub async fn exit_loop(state: &mut State, withdrawal_private_key: H256) -> anyho
         {
             break;
         }
-        mining_task(state, &key, &assets_status, false, true, 0.into()).await?;
+        mining_task(state, &key, &assets_status, false, true, U256::default()).await?;
         common_loop_cool_down();
     }
     print_status(format!(
@@ -113,13 +114,13 @@ pub async fn exit_loop(state: &mut State, withdrawal_private_key: H256) -> anyho
 
 pub async fn legacy_exit_loop(
     state: &mut State,
-    withdrawal_private_key: H256,
+    withdrawal_private_key: B256,
 ) -> anyhow::Result<()> {
     let mut key_number = 0;
     loop {
-        check_avaliability().await?;
+        check_availability().await?;
         let key = Key::new(withdrawal_private_key, key_number);
-        if !is_address_used(key.deposit_address).await {
+        if !is_address_used(&state.provider, key.deposit_address).await? {
             print_status("exit loop finished".to_string());
             return Ok(());
         }
@@ -140,18 +141,18 @@ pub async fn legacy_exit_loop(
                 key_number += 1;
                 break;
             }
-            mining_task(state, &key, &assets_status, false, true, 0.into()).await?;
+            mining_task(state, &key, &assets_status, false, true, U256::default()).await?;
 
             common_loop_cool_down();
         }
     }
 }
 
-pub async fn claim_loop(state: &mut State, withdrawal_private_key: H256) -> anyhow::Result<()> {
+pub async fn claim_loop(state: &mut State, withdrawal_private_key: B256) -> anyhow::Result<()> {
     let key = Key::new(withdrawal_private_key, 0);
     for is_short_term in [true, false] {
-        check_avaliability().await?;
-        if !is_address_used(key.deposit_address).await {
+        check_availability().await?;
+        if !is_address_used(&state.provider, key.deposit_address).await? {
             print_status("claim loop finished".to_string());
             return Ok(());
         }
@@ -160,7 +161,12 @@ pub async fn claim_loop(state: &mut State, withdrawal_private_key: H256) -> anyh
             if is_short_term { "short" } else { "long" }
         ));
         let assets_status = state.sync_and_fetch_assets(&key).await?;
-        validate_withdrawal_address_balance(&assets_status, key.withdrawal_address).await?;
+        validate_withdrawal_address_balance(
+            &state.provider,
+            &assets_status,
+            key.withdrawal_address,
+        )
+        .await?;
         claim_task(state, &key, is_short_term, &assets_status).await?;
         common_loop_cool_down();
     }
@@ -173,14 +179,14 @@ pub async fn claim_loop(state: &mut State, withdrawal_private_key: H256) -> anyh
 
 pub async fn legacy_claim_loop(
     state: &mut State,
-    withdrawal_private_key: H256,
+    withdrawal_private_key: B256,
 ) -> anyhow::Result<()> {
     let mut key_number = 0;
     loop {
         for is_short_term in [true, false] {
-            check_avaliability().await?;
+            check_availability().await?;
             let key = Key::new(withdrawal_private_key, key_number);
-            if !is_address_used(key.deposit_address).await {
+            if !is_address_used(&state.provider, key.deposit_address).await? {
                 print_status("claim loop finished".to_string());
                 return Ok(());
             }
@@ -191,7 +197,12 @@ pub async fn legacy_claim_loop(
                 if is_short_term { "short" } else { "long" }
             ));
             let assets_status = state.sync_and_fetch_assets(&key).await?;
-            validate_withdrawal_address_balance(&assets_status, key.withdrawal_address).await?;
+            validate_withdrawal_address_balance(
+                &state.provider,
+                &assets_status,
+                key.withdrawal_address,
+            )
+            .await?;
             let assets_status = state.sync_and_fetch_assets(&key).await?;
             claim_task(state, &key, is_short_term, &assets_status).await?;
             common_loop_cool_down();

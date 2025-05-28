@@ -1,14 +1,14 @@
 use std::io::{self, Read as _};
 
 use ::console::{style, Term};
+use alloy::primitives::B256;
 use configure::recover_withdrawal_private_key;
-use console::initialize_console;
-use ethers::types::H256;
+use console::clear_console;
 use mode_selection::{legacy_select_mode, select_mode};
 use term_of_use::make_agreement;
 
 use crate::{
-    external_api::contracts::utils::get_address,
+    external_api::contracts::utils::get_address_from_private_key,
     services::{claim_loop, exit_loop, legacy_claim_loop, mining_loop},
     state::{mode::RunMode, state::State},
     utils::{
@@ -40,7 +40,7 @@ pub async fn run(mode: Option<RunMode>) -> anyhow::Result<()> {
 
     let config = EnvConfig::import_from_env()?;
     let withdrawal_private_key = recover_withdrawal_private_key(&config)?;
-    if config.withdrawal_address != get_address(withdrawal_private_key) {
+    if config.withdrawal_address != get_address_from_private_key(withdrawal_private_key) {
         anyhow::bail!("Withdrawal address does not match the address derived from the private key");
     }
     validate_env_config(&config).await?;
@@ -61,14 +61,14 @@ pub async fn run(mode: Option<RunMode>) -> anyhow::Result<()> {
         mode.unwrap()
     };
 
-    let mut state = State::new();
+    let mut state = State::new(&config.rpc_url);
 
     // prints the status of the accounts if mutable mode
     if mode == RunMode::Mining || mode == RunMode::Claim || mode == RunMode::Exit {
         accounts_status::accounts_status(&mut state, config.mining_times, withdrawal_private_key)
             .await?;
     }
-    initialize_console();
+    clear_console();
     mode_loop(
         &mut mode,
         &mut state,
@@ -84,7 +84,7 @@ async fn mode_loop(
     mode: &mut RunMode,
     state: &mut State,
     config: &EnvConfig,
-    withdrawal_private_key: H256,
+    withdrawal_private_key: B256,
     is_interactive: bool,
 ) -> anyhow::Result<()> {
     loop {
@@ -113,11 +113,17 @@ async fn mode_loop(
             }
             RunMode::Export => {
                 if is_legacy() {
-                    export_deposit_accounts::legacy_export_deposit_accounts(withdrawal_private_key)
-                        .await?;
+                    export_deposit_accounts::legacy_export_deposit_accounts(
+                        &state.provider,
+                        withdrawal_private_key,
+                    )
+                    .await?;
                 } else {
-                    export_deposit_accounts::export_deposit_accounts(withdrawal_private_key)
-                        .await?;
+                    export_deposit_accounts::export_deposit_accounts(
+                        &state.provider,
+                        withdrawal_private_key,
+                    )
+                    .await?;
                 }
                 press_enter_to_continue();
             }

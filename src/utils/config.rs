@@ -43,6 +43,7 @@ pub struct Api {
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Blockchain {
     pub chain_id: u64,
+    pub graph_url: String,
     pub int1_address: String,
     pub minter_address: String,
     pub token_address: String,
@@ -64,7 +65,7 @@ pub struct Service {
     pub mining_min_cooldown_in_sec: u64,
     pub mining_max_cooldown_in_sec: u64,
     pub loop_cooldown_in_sec: u64,
-    pub high_gas_retry_inverval_in_sec: u64,
+    pub high_gas_retry_interval_in_sec: u64,
 }
 
 impl Settings {

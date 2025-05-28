@@ -13,6 +13,7 @@ gnark_get_proof_cooldown_in_sec = 60
 
 [blockchain]
 chain_id = 8453
+graph_url = "http://localhost:8000/subgraphs/name/prod-int1"
 int1_address = "0x195F9b5F42435bB71E9765E66a9bdFE40d44A895"
 minter_address = "0x1f5a5Eb6C3894351425BD51ea2AE1ef3FEC93976"
 token_address = "0xf95117e3a5B7968703CeD3B66A9CbE0Bc9e1D8bf"
@@ -25,7 +26,7 @@ repository_url = "https://github.com/InternetMaximalism/intmax2-mining-cli"
 mining_min_cooldown_in_sec = 3600 # 1 hour
 mining_max_cooldown_in_sec = 21600 # 6 hours
 loop_cooldown_in_sec = 10
-high_gas_retry_inverval_in_sec = 10
+high_gas_retry_interval_in_sec = 10
 
 [env]
 default_max_gas_price ="10"
