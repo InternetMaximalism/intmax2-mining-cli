@@ -180,24 +180,3 @@ pub async fn submit_withdrawal(
         }
     }
 }
-
-// #[cfg(test)]
-// mod tests {
-//     use intmax2_zkp::ethereum_types::{address::Address, bytes32::Bytes32, u256::U256};
-
-//     #[tokio::test]
-//     #[ignore]
-//     async fn test_submit_withdrawal() {
-//         let pis =
-//             mining_circuit_v1::withdrawal::simple_withraw_circuit::SimpleWithdrawalPublicInputs {
-//                 deposit_root: Bytes32::default(),
-//                 nullifier: Bytes32::default(),
-//                 recipient: Address::default(),
-//                 token_index: 0,
-//                 amount: U256::default(),
-//             };
-//         let proof = "0x12345678";
-//         let tx_hash = super::submit_withdrawal(pis, proof).await.unwrap();
-//         println!("tx_hash: {:?}", tx_hash);
-//     }
-// }
