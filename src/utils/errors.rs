@@ -1,28 +1,17 @@
-use std::fmt;
-
-#[derive(Debug)]
+#[derive(Debug, thiserror::Error)]
 pub enum CLIError {
+    #[error("Version error: {0}")]
     VersionError(String),
+    #[error("IO error: {0}")]
     IoError(std::io::Error),
+    #[error("Environment variable error: {0}")]
     EnvError(String),
+    #[error("Internal error: {0}")]
     InternalError(String),
+    #[error("Balance error: {0}")]
     BalanceError(String),
+    #[error("Parse error: {0}")]
     ParseError(String),
+    #[error("Network error: {0}")]
     NetworkError(String),
 }
-
-impl fmt::Display for CLIError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            CLIError::VersionError(msg) => write!(f, "Version error: {}", msg),
-            CLIError::IoError(err) => write!(f, "IO error: {}", err),
-            CLIError::EnvError(msg) => write!(f, "Environment variable error: {}", msg),
-            CLIError::InternalError(msg) => write!(f, "Internal error: {}", msg),
-            CLIError::BalanceError(msg) => write!(f, "Balance error: {}", msg),
-            CLIError::ParseError(msg) => write!(f, "Parse error: {}", msg),
-            CLIError::NetworkError(msg) => write!(f, "Network error: {}", msg),
-        }
-    }
-}
-
-impl std::error::Error for CLIError {}

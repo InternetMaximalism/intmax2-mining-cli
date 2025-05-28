@@ -237,67 +237,70 @@ struct EnvConfigString {
     mining_times: String,
 }
 
-// #[cfg(test)]
-// mod tests {
-//     use ethers::{types::U256, utils::format_units};
+#[cfg(test)]
+mod tests {
+    use alloy::primitives::{
+        utils::{format_units, parse_units},
+        B256, U256,
+    };
 
-//     use crate::{external_api::contracts::utils::get_address, utils::network::Network};
+    use crate::{
+        external_api::contracts::utils::get_address_from_private_key, utils::network::Network,
+    };
 
-//     #[test]
-//     fn load_env_test() {
-//         dotenv::dotenv().ok();
-//         let config = super::EnvConfig::import_from_env().unwrap();
-//         dbg!(config);
-//     }
+    #[test]
+    fn load_env_test() {
+        dotenv::dotenv().ok();
+        let config = super::EnvConfig::import_from_env().unwrap();
+        dbg!(config);
+    }
 
-//     #[test]
-//     fn test_env_config_string_conversion() {
-//         let key = ethers::types::B256::random();
-//         let address = get_address(key);
-//         let env_config = super::EnvConfig {
-//             network: Network::Holesky,
-//             rpc_url: "http://localhost:8545".to_string(),
-//             max_gas_price: 30_000_000_000u64.into(),
-//             encrypt: false,
-//             withdrawal_address: address,
-//             withdrawal_private_key: Some(key),
-//             encrypted_withdrawal_private_key: None,
-//             mining_unit: 100_000_000_000_000_000u128.into(),
-//             mining_times: 10,
-//         };
-//         let env_config_string = env_config.to_string().unwrap();
-//         let env_config_recovered = super::EnvConfig::from_string(&env_config_string).unwrap();
-//         assert_eq!(env_config, env_config_recovered);
-//     }
+    #[test]
+    fn test_env_config_string_conversion() {
+        let key = B256::random();
+        let address = get_address_from_private_key(key);
+        let env_config = super::EnvConfig {
+            network: Network::BaseSepolia,
+            rpc_url: "http://localhost:8545".to_string(),
+            max_gas_price: U256::from(30_000_000_000u64),
+            encrypt: false,
+            withdrawal_address: address,
+            withdrawal_private_key: Some(key),
+            encrypted_withdrawal_private_key: None,
+            mining_unit: U256::from(100_000_000_000_000_000u128),
+            mining_times: 10,
+        };
+        let env_config_string = env_config.to_string().unwrap();
+        let env_config_recovered = super::EnvConfig::from_string(&env_config_string).unwrap();
+        assert_eq!(env_config, env_config_recovered);
+    }
 
-//     #[test]
-//     fn test_export_and_import_config() {
-//         let key = ethers::types::B256::random();
-//         let address = get_address(key);
-//         let env_config = super::EnvConfig {
-//             network: Network::Holesky,
-//             rpc_url: "http://localhost:8545".to_string(),
-//             max_gas_price: 30_000_000_000u64.into(),
-//             withdrawal_address: address,
-//             encrypt: false,
-//             withdrawal_private_key: Some(key),
-//             encrypted_withdrawal_private_key: None,
-//             mining_unit: 100_000_000_000_000_000u128.into(),
-//             mining_times: 10,
-//         };
-//         env_config.export_to_env().unwrap();
+    #[test]
+    fn test_export_and_import_config() {
+        let key = B256::random();
+        let address = get_address_from_private_key(key);
+        let env_config = super::EnvConfig {
+            network: Network::BaseSepolia,
+            rpc_url: "http://localhost:8545".to_string(),
+            max_gas_price: U256::from(30_000_000_000u64),
+            withdrawal_address: address,
+            encrypt: false,
+            withdrawal_private_key: Some(key),
+            encrypted_withdrawal_private_key: None,
+            mining_unit: U256::from(100_000_000_000_000_000u128),
+            mining_times: 10,
+        };
+        env_config.export_to_env().unwrap();
 
-//         let env_config_recovered = super::EnvConfig::import_from_env().unwrap();
-//         assert_eq!(env_config, env_config_recovered);
-//     }
+        let env_config_recovered = super::EnvConfig::import_from_env().unwrap();
+        assert_eq!(env_config, env_config_recovered);
+    }
 
-//     #[test]
-//     fn mini_test() {
-//         let amount = U256::from(100000000000000000u128);
-//         let amount_str: String = format_units(amount, "gwei").unwrap();
-//         let recover: U256 = ethers::utils::parse_units(amount_str, "gwei")
-//             .unwrap()
-//             .into();
-//         assert_eq!(amount, recover);
-//     }
-// }
+    #[test]
+    fn mini_test() {
+        let amount = U256::from(100000000000000000u128);
+        let amount_str: String = format_units(amount, "gwei").unwrap();
+        let recover: U256 = parse_units(&amount_str, "gwei").unwrap().into();
+        assert_eq!(amount, recover);
+    }
+}
