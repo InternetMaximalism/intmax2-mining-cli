@@ -46,7 +46,11 @@ impl GraphClient {
     ) -> Result<Vec<Deposited>, GraphClientError> {
         let query = r#"
         query MyQuery($senderAddress: String!) {
-        depositeds(where: { sender: $senderAddress }) {
+        depositeds(
+            where: { sender: $senderAddress },
+            orderBy: blockTimestamp,
+            orderDirection: asc
+        ) {
             sender
             tokenIndex
             transactionHash
