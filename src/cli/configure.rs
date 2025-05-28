@@ -146,8 +146,7 @@ async fn input_rpc_url() -> anyhow::Result<String> {
         match validate_rpc_url(&rpc_url).await {
             Ok(_) => break Ok(rpc_url),
             Err(e) => {
-                let colored_message =
-                    format!("{}: {}", style("Invalid RPC URL").red(), e);
+                let colored_message = format!("{}: {}", style("Invalid RPC URL").red(), e);
                 println!("{}", colored_message);
             }
         }
@@ -158,14 +157,6 @@ async fn input_alchemy_url() -> anyhow::Result<String> {
     let alchemy_api_key: String = Password::new().with_prompt("Alchemy API Key").interact()?;
     match get_network() {
         Network::Localnet => bail!("Localnet is not supported"),
-        Network::Sepolia => {
-            let alchemy_url = format!("https://eth-sepolia.g.alchemy.com/v2/{}", alchemy_api_key);
-            Ok(alchemy_url)
-        }
-        Network::Holesky => {
-            let alchemy_url = format!("https://eth-holesky.g.alchemy.com/v2/{}", alchemy_api_key);
-            Ok(alchemy_url)
-        }
         Network::BaseSepolia => {
             let alchemy_url = format!("https://base-sepolia.g.alchemy.com/v2/{}", alchemy_api_key);
             Ok(alchemy_url)
@@ -187,14 +178,6 @@ async fn input_infura_url() -> anyhow::Result<String> {
         .interact()?;
     match get_network() {
         Network::Localnet => bail!("Localnet is not supported"),
-        Network::Sepolia => {
-            let infura_url = format!("https://sepolia.infura.io/v3/{}", infura_project_id);
-            Ok(infura_url)
-        }
-        Network::Holesky => {
-            let infura_url = format!("https://holesky.infura.io/v3/{}", infura_project_id);
-            Ok(infura_url)
-        }
         Network::BaseSepolia => {
             let infura_url = format!("https://base-sepolia.infura.io/v3/{}", infura_project_id);
             Ok(infura_url)
