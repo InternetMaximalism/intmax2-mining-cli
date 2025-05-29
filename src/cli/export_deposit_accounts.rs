@@ -18,14 +18,18 @@ pub async fn export_deposit_accounts(
     withdrawal_private_key: B256,
 ) -> anyhow::Result<()> {
     let key = Key::new(withdrawal_private_key, 0);
-    let balance = provider.get_balance(key.deposit_address).await?;
     println!();
-    println!("Withdrawal Address: {:?}", key.withdrawal_address);
+    println!(
+        "Withdrawal Address: {:?} ({} ETH)",
+        key.withdrawal_address,
+        pretty_format_u256(provider.get_balance(key.withdrawal_address).await?)
+    );
     println!("Withdrawal Private Key: {:?}", withdrawal_private_key);
+    println!();
     println!(
         "Deposit Address: {:?} ({} ETH)",
         key.deposit_address,
-        pretty_format_u256(balance),
+        pretty_format_u256(provider.get_balance(key.deposit_address).await?),
     );
     println!("Private Key: {:?}", key.deposit_private_key);
 
