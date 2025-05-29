@@ -3,10 +3,12 @@ use log::info;
 use regex::Regex;
 use reqwest::{self};
 use serde_json::Value;
+use sha3::Digest as _;
 
 use crate::utils::{
     bin_parser::{BinDepositTree, BinEligibleTree},
     config::Settings,
+    file::{create_file_with_content, get_data_path},
 };
 
 #[derive(Debug, thiserror::Error)]
@@ -15,6 +17,8 @@ pub enum Error {
     NetworkError,
     #[error("Failed to deserialize data {}", _0)]
     DeserializeError(String),
+    #[error("Cache error: {}", _0)]
+    CacheError(String),
 }
 
 #[derive(Debug)]
@@ -64,7 +68,13 @@ pub async fn fetch_latest_tree_from_github(last_update: NaiveDate) -> Result<Bin
         filter_file(&long_term_eligible_pattern, &file_list, last_update);
 
     let bin_deposit_tree = if let Some(latest_deposit_file) = latest_deposit_file {
-        let content = fetch_content(&client, &latest_deposit_file).await?;
+        let download_url =
+            latest_deposit_file["download_url"]
+                .as_str()
+                .ok_or(Error::DeserializeError(
+                    "no download_url filed in github files".to_string(),
+                ))?;
+        let content = fetch_content(&client, download_url).await?;
         let bin_deposit_tree: BinDepositTree = bincode::deserialize(&content).map_err(|e| {
             Error::DeserializeError(format!("failed to deserialize deposit tree: {}", e))
         })?;
@@ -76,7 +86,12 @@ pub async fn fetch_latest_tree_from_github(last_update: NaiveDate) -> Result<Bin
     let bin_short_term_eligible_tree = if let Some(latest_short_term_eligible_file) =
         latest_short_term_eligible_file
     {
-        let content = fetch_content(&client, &latest_short_term_eligible_file).await?;
+        let download_url = latest_short_term_eligible_file["download_url"]
+            .as_str()
+            .ok_or(Error::DeserializeError(
+                "no download_url filed in github files".to_string(),
+            ))?;
+        let content = fetch_content(&client, download_url).await?;
         let bin_eligible_tree: BinEligibleTree = bincode::deserialize(&content).map_err(|e| {
             Error::DeserializeError(format!(
                 "failed to deserialize short term eligible tree: {}",
@@ -91,7 +106,12 @@ pub async fn fetch_latest_tree_from_github(last_update: NaiveDate) -> Result<Bin
     let bin_long_term_eligible_tree = if let Some(latest_long_term_eligible_file) =
         latest_long_term_eligible_file
     {
-        let content = fetch_content(&client, &latest_long_term_eligible_file).await?;
+        let download_url = latest_long_term_eligible_file["download_url"]
+            .as_str()
+            .ok_or(Error::DeserializeError(
+                "no download_url filed in github files".to_string(),
+            ))?;
+        let content = fetch_content(&client, &download_url).await?;
         let bin_eligible_tree: BinEligibleTree = bincode::deserialize(&content).map_err(|e| {
             Error::DeserializeError(format!(
                 "failed to deserialize short term eligible tree: {}",
@@ -146,12 +166,14 @@ fn filter_file(
     (latest_date, latest_file)
 }
 
-async fn fetch_content(client: &reqwest::Client, file: &Value) -> Result<Vec<u8>, Error> {
-    let download_url = file["download_url"]
-        .as_str()
-        .ok_or(Error::DeserializeError(
-            "no download_url filed in github files".to_string(),
-        ))?;
+async fn fetch_content(client: &reqwest::Client, download_url: &str) -> Result<Vec<u8>, Error> {
+    if let Some(cached_content) = read_cache(download_url)
+        .await
+        .map_err(|e| Error::CacheError(format!("failed to read cache: {}", e)))?
+    {
+        info!("Using cached content for {}", download_url);
+        return Ok(cached_content);
+    }
     let content = client
         .get(download_url)
         .header("User-Agent", "Rust-GitHub-File-Reader")
@@ -161,7 +183,30 @@ async fn fetch_content(client: &reqwest::Client, file: &Value) -> Result<Vec<u8>
         .bytes()
         .await
         .map_err(|_| Error::DeserializeError("failed to deserialize files as bytes".to_string()))?;
+    write_cache(download_url, &content)
+        .await
+        .map_err(|e| Error::CacheError(format!("failed to write cache: {}", e)))?;
     Ok(content.into())
+}
+
+async fn read_cache(download_url: &str) -> anyhow::Result<Option<Vec<u8>>> {
+    if let Ok(content) = std::fs::read(cache_path(download_url)?) {
+        return Ok(Some(content));
+    } else {
+        return Ok(None);
+    }
+}
+
+async fn write_cache(download_url: &str, content: &[u8]) -> anyhow::Result<()> {
+    create_file_with_content(&cache_path(download_url)?, content)?;
+    Ok(())
+}
+
+fn cache_path(download_url: &str) -> anyhow::Result<std::path::PathBuf> {
+    let hex_str = hex::encode(sha3::Keccak256::digest(download_url.as_bytes()));
+    let data_path = get_data_path()?;
+    let cache_path = data_path.join("github_cache").join(hex_str);
+    Ok(cache_path)
 }
 
 #[cfg(test)]
