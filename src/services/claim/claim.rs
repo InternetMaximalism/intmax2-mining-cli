@@ -145,8 +145,8 @@ async fn from_step5(state: &State, key: &Key) -> anyhow::Result<()> {
         last_claim_hash,
     };
     temp::ClaimStatus::delete()?;
-    await_until_low_gas_price(&state.provider).await?;
     let proof = Bytes::from_str(&status.gnark_proof.unwrap())?;
+    await_until_low_gas_price(&state.provider).await?;
     state
         .minter
         .claim_tokens(

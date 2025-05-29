@@ -1,22 +1,29 @@
-use super::{error::BlockchainError, utils::ProviderWithSigner};
+use crate::{cli::console::print_status, services::utils::insufficient_balance_instruction};
+
+use super::{
+    error::BlockchainError,
+    utils::{NormalProvider, ProviderWithSigner},
+};
 use alloy::{
     consensus::{Transaction as _, TxEip1559},
-    primitives::TxHash,
-    providers::{PendingTransactionError, Provider as _},
+    primitives::{TxHash, U256},
+    providers::{PendingTransactionError, Provider as _, WalletProvider},
     rpc::types::TransactionRequest,
 };
 use std::time::Duration;
 
-const TIMEOUT: Duration = Duration::from_secs(20);
+const TIMEOUT: Duration = Duration::from_secs(60);
 const MAX_GAS_BUMP_ATTEMPTS: u32 = 3;
 const GAS_BUMP_PERCENTAGE: u64 = 25; // Should be above 10 to avoid replacement transaction underpriced error
 
 pub async fn send_transaction_with_gas_bump(
+    provider: &NormalProvider,
     signer: ProviderWithSigner,
     tx_request: TransactionRequest,
     tx_name: &str,
+    from_name: &str,
 ) -> Result<TxHash, BlockchainError> {
-    let sendable_tx = signer.fill(tx_request).await?;
+    let sendable_tx = signer.fill(tx_request.clone()).await?;
     let tx_envelope = sendable_tx.try_into_envelope().unwrap();
     let tx_hash = *tx_envelope.hash();
     // make tx eip1559 object to get parameters
@@ -49,9 +56,32 @@ pub async fn send_transaction_with_gas_bump(
             // timeout, so we need to bump the gas
             resend_tx_with_gas_bump(signer, tx_hash, &tx_eip1559, tx_name).await
         }
-        Err(e) => Err(BlockchainError::TransactionError(format!(
-            "{tx_name} failed with error: {e:?}"
-        ))),
+        Err(e) => {
+            if e.to_string().contains("insufficient funds") {
+                let estimate_gas = provider.estimate_gas(tx_request.clone()).await?;
+                let gas_price = provider.get_gas_price().await?;
+                let value = tx_request.value.unwrap_or_default();
+                let necessary_balance = U256::from(estimate_gas) * U256::from(gas_price) + value;
+                insufficient_balance_instruction(
+                    provider,
+                    signer.default_signer_address(),
+                    necessary_balance,
+                    from_name,
+                )
+                .await
+                .map_err(|e| {
+                    BlockchainError::TransactionError(format!(
+                        "Failed to check balance for {}: {}",
+                        tx_name, e
+                    ))
+                })?;
+                print_status(format!("Retrying {} transaction...", tx_name.to_string()));
+            }
+            Err(BlockchainError::TransactionError(format!(
+                "{} failed with error: {:?}",
+                tx_name, e
+            )))
+        }
     }
 }
 

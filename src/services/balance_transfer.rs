@@ -33,6 +33,13 @@ pub async fn balance_transfer(
     let tx_request = TransactionRequest::default()
         .to(to_address)
         .value(transfer_amount);
-    send_transaction_with_gas_bump(signer, tx_request, "send balance").await?;
+    send_transaction_with_gas_bump(
+        provider,
+        signer,
+        tx_request,
+        "send balance",
+        "deposit address",
+    )
+    .await?;
     Ok(())
 }

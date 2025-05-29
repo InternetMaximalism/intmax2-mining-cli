@@ -95,7 +95,14 @@ impl Int1Contract {
         let tx_request = contract
             .withdraw(public_inputs, proof.into())
             .into_transaction_request();
-        let tx_hash = send_transaction_with_gas_bump(signer, tx_request, "withdrawal").await?;
+        let tx_hash = send_transaction_with_gas_bump(
+            &self.provider,
+            signer,
+            tx_request,
+            "withdrawal",
+            "withdrawer",
+        )
+        .await?;
         Ok(tx_hash)
     }
 
@@ -117,7 +124,14 @@ impl Int1Contract {
         let tx_request = contract
             .cancelDeposit(U256::from(deposit_id), deposit)
             .into_transaction_request();
-        let tx_hash = send_transaction_with_gas_bump(signer, tx_request, "cancel_deposit").await?;
+        let tx_hash = send_transaction_with_gas_bump(
+            &self.provider,
+            signer,
+            tx_request,
+            "cancel_deposit",
+            "depositor",
+        )
+        .await?;
         Ok(tx_hash)
     }
 
@@ -133,8 +147,14 @@ impl Int1Contract {
             .depositNativeToken(convert_bytes32_to_b256(recipient_salt_hash))
             .value(value)
             .into_transaction_request();
-        let tx_hash =
-            send_transaction_with_gas_bump(signer, tx_request, "deposit_native_token").await?;
+        let tx_hash = send_transaction_with_gas_bump(
+            &self.provider,
+            signer,
+            tx_request,
+            "deposit_native_token",
+            "depositor",
+        )
+        .await?;
         Ok(tx_hash)
     }
 }

@@ -14,7 +14,7 @@ use crate::{
     },
 };
 
-use super::assets_status::AssetsStatus;
+use super::{assets_status::AssetsStatus, utils::await_until_low_gas_price};
 
 pub mod deterministic_sleep;
 pub mod withdrawal;
@@ -31,6 +31,7 @@ pub async fn mining_task(
     if cancel_pending_deposits {
         for &index in assets_status.pending_indices.iter() {
             let event = assets_status.senders_deposits[index].clone();
+            await_until_low_gas_price(&state.provider).await?;
             state
                 .int1
                 .cancel_deposit(
@@ -52,6 +53,7 @@ pub async fn mining_task(
          key.deposit_address
         ));
         let event = assets_status.senders_deposits[index].clone();
+        await_until_low_gas_price(&state.provider).await?;
         state
             .int1
             .cancel_deposit(
@@ -92,11 +94,17 @@ pub async fn mining_task(
         let pubkey = derive_pubkey_from_private_key(key.deposit_private_key);
         let pubkey_salt_hash = get_pubkey_salt_hash(pubkey, salt);
         // execute deposit task
+        await_until_low_gas_price(&state.provider).await?;
         state
             .int1
             .deposit_native_token(key.deposit_private_key, pubkey_salt_hash, mining_unit)
             .await
-            .context("Failed to deposit native token")?;
+            .with_context(|| {
+                format!(
+                    "Failed to deposit to address {:?} with nonce {}",
+                    key.deposit_address, nonce
+                )
+            })?;
         return Ok(());
     }
 
