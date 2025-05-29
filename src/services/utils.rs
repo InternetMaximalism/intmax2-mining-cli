@@ -15,7 +15,7 @@ pub async fn insufficient_balance_instruction(
     required_balance: U256,
     name: &str,
 ) -> anyhow::Result<()> {
-    let balance = provider.get_balance(address).await?;
+    let mut balance = provider.get_balance(address).await?;
     if required_balance <= balance {
         return Ok(());
     }
@@ -32,6 +32,13 @@ pub async fn insufficient_balance_instruction(
             print_status("Balance updated");
             sleep_for(10);
             break;
+        } else if new_balance != balance {
+            print_warning(format!(
+                "Balance is still insufficient: {} ETH < {} ETH. Waiting for your deposit...",
+                pretty_format_u256(new_balance),
+                pretty_format_u256(required_balance)
+            ));
+            balance = new_balance;
         }
         sleep_for(10);
     }
