@@ -22,7 +22,7 @@ Before you begin, please ensure you have the following:
 
 ### Upgrading CLI Version
 
-1.  **Lauching the CLI** Double-click on the mining-cli shown in this image to launch.
+1.  **Launching the CLI** Double-click on the mining-cli shown in this image to launch.
 
     <div align="center">
       <img src="../assets/instruction/extract.png" width="600" alt="Mining CLI"></div>
@@ -84,14 +84,14 @@ To claim ITX token, select `Claim`. You can check whether an deposit address is 
      <img src="../assets/migrate/m25.png" width="600" alt="Mining CLI"></div>
 
 2. **Claim ITX Token To Withdrawal Address**:
-If `Claim` was selected and your address qualifies for ITX tokens, the CLI automatically transfers your available ITX tokens to your withdrawal wallet immediately or when the token availablity time reaches. To see the tokens in your wallet, ensure to add the ITX mainnet token contract address to your wallet using the Network [guide](./add_token_to_wallet.md).
+If `Claim` was selected and your address qualifies for ITX tokens, the CLI automatically transfers your available ITX tokens to your withdrawal wallet immediately or when the token availability time reaches. To see the tokens in your wallet, ensure to add the ITX mainnet token contract address to your wallet using the Network [guide](./add_token_to_wallet.md).
 
    <div align="center">
      <img src="../assets/migrate/m6.png" width="600" alt="Mining CLI"></div>
 
 Check wallet to see tokens.
 
-After claiming process is done, you can proceed to retreiving available ETH in the INTMAX2 Network back to your withdrawal address. Proceed by pressing any key as instructed by CLI.
+After claiming process is done, you can proceed to retrieving available ETH in the INTMAX2 Network back to your withdrawal address. Proceed by pressing any key as instructed by CLI.
 
 ### Withdraw ETH 
 

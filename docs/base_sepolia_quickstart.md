@@ -211,7 +211,7 @@ To claim ITX token, select `Claim`. You can check whether an deposit address is 
      <br>
 
 2. **Claim ITX Token To Withdrawal Address**:
-If `Claim` was selected and your address qualifies for ITX tokens, the CLI automatically transfers your available ITX tokens to your withdrawal wallet immediately or when the token availablity time reaches. To see the tokens in your wallet, ensure to add the ITX token contract address to your wallet using the Network [guide](./add_token_to_wallet.md).
+If `Claim` was selected and your address qualifies for ITX tokens, the CLI automatically transfers your available ITX tokens to your withdrawal wallet immediately or when the token availability time reaches. To see the tokens in your wallet, ensure to add the ITX token contract address to your wallet using the Network [guide](./add_token_to_wallet.md).
 
    <div align="center">
      <img src="../assets/instruction/m13.png" width="600" alt="Mining CLI"></div>

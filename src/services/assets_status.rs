@@ -213,7 +213,7 @@ impl AssetsStatus {
     /// Returns the times of deposits that are not cancelled
     pub fn effective_deposit_times(&self) -> usize {
         assert!(self.senders_deposits.len() >= self.cancelled_indices.len());
-        self.senders_deposits.len() - self.cancelled_indices.len() // this never underflows
+        self.senders_deposits.len() - self.cancelled_indices.len() // this never undertows
     }
 
     pub fn no_remaining(&self) -> bool {

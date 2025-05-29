@@ -58,13 +58,13 @@ pub struct GnarkStartProofSuccessResponse {
 #[derive(Serialize, Deserialize)]
 #[serde(untagged)]
 enum GnarkGetProofResponse {
-    Success(GnarkGetProofSucessResponse),
+    Success(GnarkGetProofSuccessResponse),
     Error(IntmaxErrorResponse),
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 #[serde(rename_all = "camelCase")]
-pub struct GnarkGetProofSucessResponse {
+pub struct GnarkGetProofSuccessResponse {
     pub job_id: String,
     pub status: String,
     pub result: Option<GnarkProof>,
@@ -109,7 +109,7 @@ pub async fn gnark_start_prove(
 pub async fn gnark_get_proof(
     base_url: &str,
     job_id: &str,
-) -> Result<GnarkGetProofSucessResponse, IntmaxError> {
+) -> Result<GnarkGetProofSuccessResponse, IntmaxError> {
     info!("gnark_get_proof with arg job_id: {}", job_id);
     let response = with_retry(|| async {
         reqwest::Client::new()
