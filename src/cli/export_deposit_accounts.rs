@@ -20,6 +20,8 @@ pub async fn export_deposit_accounts(
     let key = Key::new(withdrawal_private_key, 0);
     let balance = provider.get_balance(key.deposit_address).await?;
     println!();
+    println!("Withdrawal Address: {:?}", key.withdrawal_address);
+    println!("Withdrawal Private Key: {:?}", withdrawal_private_key);
     println!(
         "Deposit Address: {:?} ({} ETH)",
         key.deposit_address,

@@ -50,11 +50,22 @@ pub async fn send_transaction_with_gas_bump(
                 tx_name.to_string(),
                 tx_hash
             );
+            print_status(format!(
+                "{} transaction sent successfully with hash: {:?}",
+                tx_name.to_string(),
+                tx_hash
+            ));
             Ok(tx_hash)
         }
         Err(PendingTransactionError::TxWatcher(_)) => {
             // timeout, so we need to bump the gas
-            resend_tx_with_gas_bump(signer, tx_hash, &tx_eip1559, tx_name).await
+            let tx_hash = resend_tx_with_gas_bump(signer, tx_hash, &tx_eip1559, tx_name).await?;
+            print_status(format!(
+                "{} transaction sent successfully with hash: {:?}",
+                tx_name.to_string(),
+                tx_hash
+            ));
+            Ok(tx_hash)
         }
         Err(e) => {
             if e.to_string().contains("insufficient funds") {
