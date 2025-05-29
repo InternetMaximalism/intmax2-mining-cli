@@ -12,7 +12,7 @@ use alloy::{
 };
 use std::time::Duration;
 
-const TIMEOUT: Duration = Duration::from_secs(60);
+const TIMEOUT: Duration = Duration::from_secs(120);
 const MAX_GAS_BUMP_ATTEMPTS: u32 = 3;
 const GAS_BUMP_PERCENTAGE: u64 = 25; // Should be above 10 to avoid replacement transaction underpriced error
 
