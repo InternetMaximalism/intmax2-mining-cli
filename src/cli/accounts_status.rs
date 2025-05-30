@@ -20,7 +20,11 @@ pub async fn accounts_status(
     let withdrawal_address = get_address_from_private_key(withdrawal_private_key);
 
     let withdrawal_str = withdrawal_address.to_string();
-    let withdrawal_abr_str =withdrawal_str[0..6].to_string() + "..." + &withdrawal_str[withdrawal_str.len()-4..];
+    let withdrawal_abr_str = format!(
+        "{}...{}",
+        &withdrawal_str[0..6],
+        &withdrawal_str[withdrawal_str.len() - 4..]
+    );
     let withdrawal_balance = state.provider.get_balance(withdrawal_address).await?;
     let withdrawal_token_balance = state.token.get_token_balance(withdrawal_address).await?;
     println!(
