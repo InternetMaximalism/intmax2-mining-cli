@@ -43,6 +43,7 @@ pub struct Api {
 pub struct Blockchain {
     pub chain_id: u64,
     pub graph_url: String,
+    pub graph_health_check_timeout_in_sec: u64,
     pub int1_address: String,
     pub minter_address: String,
     pub token_address: String,

@@ -13,7 +13,7 @@ use crate::{
 use alloy::primitives::{B256, U256};
 use claim::claim_task;
 use mining::mining_task;
-use utils::is_address_used;
+use utils::{await_until_graph_syncs, is_address_used};
 
 pub mod assets_status;
 pub mod balance_transfer;
@@ -45,6 +45,7 @@ pub async fn mining_loop(
     .await?;
     loop {
         check_availability().await?;
+        await_until_graph_syncs(&state.graph_client).await?;
         let assets_status = state.sync_and_fetch_assets(&key).await?;
         let is_qualified = !get_circulation(key.deposit_address).await?.is_excluded;
         let will_deposit = assets_status.effective_deposit_times() < mining_times as usize
@@ -95,6 +96,7 @@ pub async fn exit_loop(state: &mut State, withdrawal_private_key: B256) -> anyho
     print_log(format!("Exit for deposit address{:?}", key.deposit_address));
     loop {
         check_availability().await?;
+        await_until_graph_syncs(&state.graph_client).await?;
         let assets_status = state.sync_and_fetch_assets(&key).await?;
         if assets_status.pending_indices.is_empty()
             && assets_status.rejected_indices.is_empty()
@@ -119,6 +121,7 @@ pub async fn legacy_exit_loop(
     let mut key_number = 0;
     loop {
         check_availability().await?;
+        await_until_graph_syncs(&state.graph_client).await?;
         let key = Key::new(withdrawal_private_key, key_number);
         if !is_address_used(&state.provider, key.deposit_address).await? {
             print_status("exit loop finished".to_string());
@@ -152,6 +155,7 @@ pub async fn claim_loop(state: &mut State, withdrawal_private_key: B256) -> anyh
     let key = Key::new(withdrawal_private_key, 0);
     for is_short_term in [true, false] {
         check_availability().await?;
+        await_until_graph_syncs(&state.graph_client).await?;
         if !is_address_used(&state.provider, key.deposit_address).await? {
             print_status("claim loop finished".to_string());
             return Ok(());
@@ -185,6 +189,7 @@ pub async fn legacy_claim_loop(
     loop {
         for is_short_term in [true, false] {
             check_availability().await?;
+            await_until_graph_syncs(&state.graph_client).await?;
             let key = Key::new(withdrawal_private_key, key_number);
             if !is_address_used(&state.provider, key.deposit_address).await? {
                 print_status("claim loop finished".to_string());

@@ -7,4 +7,7 @@ pub enum GraphClientError {
 
     #[error("Request error: {0}")]
     RequestError(#[from] RequestError),
+
+    #[error("Health check error: {0}")]
+    HealthCheckError(String),
 }

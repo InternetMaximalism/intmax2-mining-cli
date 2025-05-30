@@ -54,9 +54,13 @@ pub async fn get_dummy_state(rpc_url: &str) -> State {
         provider.clone(),
         settings.blockchain.token_address.parse().unwrap(),
     );
-    let graph_client = GraphClient::new(provider.clone(), &settings.blockchain.graph_url, None);
+    let graph_client = GraphClient::new(
+        provider.clone(),
+        &settings.blockchain.graph_url,
+        None,
+        settings.blockchain.graph_health_check_timeout_in_sec,
+    );
 
-    
     State {
         deposit_hash_tree: DepositHashTree::new(),
         short_term_eligible_tree: eligible_tree.clone(),

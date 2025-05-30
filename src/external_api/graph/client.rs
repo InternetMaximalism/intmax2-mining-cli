@@ -26,16 +26,23 @@ pub struct GraphClient {
     pub bearer_token: Option<String>,
     pub client: Client,
     pub provider: NormalProvider,
+    pub health_check_timeout: u64,
 }
 
 impl GraphClient {
-    pub fn new(provider: NormalProvider, url: &str, bearer_token: Option<String>) -> Self {
+    pub fn new(
+        provider: NormalProvider,
+        url: &str,
+        bearer_token: Option<String>,
+        health_check_timeout: u64,
+    ) -> Self {
         let client = Client::new();
         GraphClient {
             client,
             provider,
             url: url.to_string(),
             bearer_token,
+            health_check_timeout,
         }
     }
 
@@ -215,6 +222,44 @@ impl GraphClient {
             .map(|entry| entry.block_timestamp);
         Ok(timestamp)
     }
+
+    pub async fn health_check(&self) -> Result<(), GraphClientError> {
+        let query = r#"
+        query MyQuery {
+        _meta {
+            block {
+            timestamp
+            }
+            hasIndexingErrors
+        }
+        }
+        "#;
+        let request = json!({
+            "query": query,
+        });
+        let response: GraphQLResponse<MetaData> = post_request_with_bearer_token(
+            &self.url,
+            "",
+            self.bearer_token.clone(),
+            Some(&request),
+        )
+        .await?;
+
+        if response.data.meta.has_indexing_errors {
+            return Err(GraphClientError::HealthCheckError(
+                "Graph has indexing errors".to_string(),
+            ));
+        }
+        let timestamp = response.data.meta.block.timestamp;
+        let current_timestamp = chrono::Utc::now().timestamp() as u64;
+        if current_timestamp.saturating_sub(timestamp) > self.health_check_timeout {
+            return Err(GraphClientError::HealthCheckError(format!(
+                "Graph is not up to date. Last update was at {} seconds ago",
+                current_timestamp.saturating_sub(timestamp)
+            )));
+        }
+        Ok(())
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -276,6 +321,25 @@ pub struct WithdrawnEntry {
     pub block_timestamp: u64,
 }
 
+#[derive(Debug, Deserialize, Serialize)]
+struct MetaData {
+    #[serde(rename = "_meta")]
+    meta: MetaEntry,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct MetaEntry {
+    block: Block,
+    has_indexing_errors: bool,
+}
+
+#[serde_as]
+#[derive(Debug, Deserialize, Serialize)]
+struct Block {
+    timestamp: u64,
+}
+
 #[cfg(test)]
 mod tests {
     use std::env;
@@ -289,7 +353,7 @@ mod tests {
         let rpc_url = env::var("RPC_URL").unwrap_or_else(|_| "http://localhost:8545".to_string());
         let provider = get_provider(&rpc_url).unwrap();
 
-        Ok(GraphClient::new(provider, &graph_url, None))
+        Ok(GraphClient::new(provider, &graph_url, None, 60))
     }
 
     #[tokio::test]
@@ -339,5 +403,12 @@ mod tests {
             .await
             .unwrap();
         dbg!(&result);
+    }
+
+    #[tokio::test]
+    async fn test_graph_client_health_check() {
+        let client = get_client().unwrap();
+        let result = client.health_check().await;
+        assert!(result.is_ok(), "Health check failed: {:?}", result);
     }
 }
