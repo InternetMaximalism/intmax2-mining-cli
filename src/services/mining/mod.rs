@@ -47,10 +47,10 @@ pub async fn mining_task(
     }
 
     // cancel rejected deposits
-    if let Some(&index) = assets_status.rejected_indices.first() {
+    for &index in assets_status.rejected_indices.iter() {
         print_warning(format!(
             "Deposit address {:?} is rejected because of AML check. For more information, please refer to the documentation.",
-         key.deposit_address
+            key.deposit_address
         ));
         let event = assets_status.senders_deposits[index].clone();
         await_until_low_gas_price(&state.provider).await?;
@@ -65,6 +65,8 @@ pub async fn mining_task(
             )
             .await
             .context("Failed to cancel rejected deposit")?;
+    }
+    if !assets_status.rejected_indices.is_empty() {
         // Halt the CLI if a deposit is rejected to prevent further deposits
         return Err(CLIError::InternalError("Deposit is rejected".to_string()).into());
     }
