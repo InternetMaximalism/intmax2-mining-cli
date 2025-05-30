@@ -263,7 +263,7 @@ async fn input_withdrawal_private_key(rpc_url: &str) -> anyhow::Result<B256> {
             .with_prompt(format!("Withdrawal private key of {}", get_network()))
             .validate_with(|input: &String| validate_private_key_with_duplication_check(&[], input))
             .interact()?;
-        let withdrawal_private_key: B256 = withdrawal_private_key.parse().unwrap();
+        let withdrawal_private_key: B256 = withdrawal_private_key.parse()?;
         let withdrawal_address = get_address_from_private_key(withdrawal_private_key);
         println!("Withdrawal Address: {:?}", withdrawal_address);
 
