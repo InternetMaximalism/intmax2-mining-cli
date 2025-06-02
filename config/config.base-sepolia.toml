@@ -12,7 +12,7 @@ gnark_get_proof_cooldown_in_sec = 60
 
 [blockchain]
 chain_id = 84532
-graph_url = "http://localhost:8000/subgraphs/name/stage-int1"
+graph_url = "https://base-sepolia.graph.intmax.xyz/subgraphs/name/stage-int1"
 graph_health_check_timeout_in_sec = 60
 int1_address = "0x5dfa05aAdbE75a92f6153508950533fC1bed98BE"
 minter_address = "0xeF9CBc6F2f602AF19b0fEc2cc4F217177730858E"
