@@ -1,18 +1,18 @@
 use std::time::UNIX_EPOCH;
 
+use alloy::providers::Provider as _;
 use anyhow::ensure;
 use mining_circuit_v1::withdrawal::simple_withraw_circuit::SimpleWithdrawalPublicInputs;
 
 use crate::{
     cli::console::print_status,
     external_api::{
-        contracts::{events::Deposited, utils::get_tx_receipt},
+        contracts::events::Deposited,
         intmax::{
             gnark::{fetch_gnark_proof, gnark_start_prove},
             withdrawal::submit_withdrawal,
         },
     },
-    services::utils::await_until_low_gas_price,
     state::{key::Key, state::State},
     utils::config::Settings,
 };
@@ -43,7 +43,7 @@ pub async fn resume_withdrawal_task(state: &State, key: &Key) -> anyhow::Result<
 // Generate witness
 async fn from_step1(state: &State, key: &Key, event: Deposited) -> anyhow::Result<()> {
     print_status("Withdrawal: generating withdrawal witness");
-    let witness = witness_generation::generate_withdrawa_witness(state, key, event)?;
+    let witness = witness_generation::generate_withdrawal_witness(state, key, event)?;
     let status = temp::WithdrawalStatus {
         next_step: temp::WithdrawalStep::Plonky2Prove,
         witness: witness.clone(),
@@ -116,7 +116,7 @@ async fn from_step4(state: &State, key: &Key) -> anyhow::Result<()> {
 }
 
 // Call contract
-async fn from_step5(_state: &State, _key: &Key) -> anyhow::Result<()> {
+async fn from_step5(state: &State, _key: &Key) -> anyhow::Result<()> {
     print_status("Withdrawal: calling contract");
     let status = temp::WithdrawalStatus::new()?;
     ensure!(status.next_step == temp::WithdrawalStep::ContractCall);
@@ -127,34 +127,32 @@ async fn from_step5(_state: &State, _key: &Key) -> anyhow::Result<()> {
         token_index: status.witness.deposit_leaf.token_index,
         amount: status.witness.deposit_leaf.amount,
     };
-    await_until_low_gas_price().await?;
-    let tx_hash = submit_withdrawal(pis, status.gnark_proof.as_ref().unwrap()).await?;
+    let tx_hash = submit_withdrawal(&state.int1, pis, status.gnark_proof.as_ref().unwrap()).await?;
     // delete here because get_tx_receipt may fail, and we don't want to retry this step
     temp::WithdrawalStatus::delete()?;
-
-    print_status(format!("Withdral tx hash: {:?}", tx_hash));
-    let tx_reciept = get_tx_receipt(tx_hash).await?;
-    ensure!(
-        tx_reciept.status == Some(ethers::types::U64::from(1)),
-        "Withdrawal transaction failed"
-    );
-    print_status(format!("Succsesfully withdrawn"));
+    let receipt = state.provider.get_transaction_receipt(tx_hash).await?;
+    ensure!(receipt.is_some(), "Transaction receipt not found");
+    let receipt = receipt.unwrap();
+    ensure!(receipt.status(), "Transaction failed");
+    print_status("Successfully withdrawn".to_string());
     Ok(())
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::test::{get_dummy_keys, get_dummy_state};
+    use crate::{test::get_dummy_keys, utils::env_config::EnvConfig};
 
     #[tokio::test]
     #[ignore]
     async fn test_withdrawal() {
-        let mut state = get_dummy_state().await;
+        dotenv::dotenv().ok();
+        let env_config = EnvConfig::import_from_env().unwrap();
+        let mut state = crate::test::get_dummy_state(&env_config.rpc_url).await;
 
         let dummy_key = get_dummy_keys();
         let assets_status = state.sync_and_fetch_assets(&dummy_key).await.unwrap();
         let events = assets_status.get_not_withdrawn_events();
-        assert!(events.len() > 0);
+        assert!(!events.is_empty());
 
         super::withdrawal_task(&mut state, &dummy_key, events[0].clone())
             .await
@@ -164,7 +162,9 @@ mod tests {
     #[tokio::test]
     #[ignore]
     async fn test_resume_withdrawal() {
-        let mut state = get_dummy_state().await;
+        dotenv::dotenv().ok();
+        let env_config = EnvConfig::import_from_env().unwrap();
+        let mut state = crate::test::get_dummy_state(&env_config.rpc_url).await;
         state.sync_trees().await.unwrap();
         let dummy_key = get_dummy_keys();
         super::resume_withdrawal_task(&state, &dummy_key)

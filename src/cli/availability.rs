@@ -4,7 +4,7 @@ use crate::external_api::intmax::{availability::get_availability, error::IntmaxE
 
 use super::console::print_error;
 
-pub async fn check_avaliability() -> anyhow::Result<()> {
+pub async fn check_availability() -> anyhow::Result<()> {
     match get_availability().await {
         Ok(output) => {
             if !output.is_available {

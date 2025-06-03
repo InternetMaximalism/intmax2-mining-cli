@@ -1,13 +1,10 @@
 use anyhow::{ensure, Ok};
-use intmax2_zkp::{
-    ethereum_types::{address::Address, bytes32::Bytes32, u32limb_trait::U32LimbTrait},
-    utils::leafable::Leafable,
-};
+use intmax2_zkp::{ethereum_types::bytes32::Bytes32, utils::leafable::Leafable};
 use log::info;
 use mining_circuit_v1::claim::claim_inner_circuit::ClaimInnerValue;
 
 use crate::{
-    external_api::contracts::events::Deposited,
+    external_api::contracts::{convert::convert_address_to_intmax, events::Deposited},
     services::claim::MAX_CLAIMS,
     state::{key::Key, state::State},
     utils::derive_key::{derive_pubkey_from_private_key, derive_salt_from_private_key_nonce},
@@ -23,7 +20,7 @@ pub async fn generate_claim_witness(
         "Generating claim witness for {:?}. is_short_term = {}",
         events, is_short_term
     );
-    ensure!(events.len() > 0, "No event to generate witness");
+    ensure!(!events.is_empty(), "No event to generate witness");
     ensure!(
         events.len() <= MAX_CLAIMS,
         format!("Max {} events to generate witness", MAX_CLAIMS)
@@ -35,9 +32,9 @@ pub async fn generate_claim_witness(
         &state.long_term_eligible_tree
     };
 
-    let eligible_tree_root: Bytes32 = eligible_tree.get_root().into();
+    let eligible_tree_root: Bytes32 = eligible_tree.get_root();
     let pubkey = derive_pubkey_from_private_key(key.deposit_private_key);
-    let recipient = Address::from_bytes_be(&key.withdrawal_address.as_bytes());
+    let recipient = convert_address_to_intmax(key.withdrawal_address);
     let mut witnesses = Vec::new();
     let mut prev_claim_hash = Bytes32::default();
     for event in events {

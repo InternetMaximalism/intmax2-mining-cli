@@ -1,12 +1,8 @@
-use ethers::types::{H256, U256};
+use alloy::{primitives::{B256, U256}, providers::Provider as _};
 
 use crate::{
     external_api::{
-        contracts::{
-            token::get_token_balance,
-            utils::{get_address, get_balance},
-        },
-        intmax::circulation::get_circulation,
+        contracts::utils::get_address_from_private_key, intmax::circulation::get_circulation
     },
     services::utils::{is_address_used, pretty_format_u256},
     state::{key::Key, state::State},
@@ -18,25 +14,32 @@ use crate::{
 pub async fn accounts_status(
     state: &mut State,
     mining_times: u64,
-    withdrawal_private_key: H256,
+    withdrawal_private_key: B256,
 ) -> anyhow::Result<()> {
     println!("Network: {}", get_network());
-    let withdrawal_address = get_address(withdrawal_private_key);
-    let withdrawal_balance = get_balance(withdrawal_address).await?;
-    let withdrawal_token_balance = get_token_balance(withdrawal_address).await?;
+    let withdrawal_address = get_address_from_private_key(withdrawal_private_key);
+
+    let withdrawal_str = withdrawal_address.to_string();
+    let withdrawal_abr_str = format!(
+        "{}...{}",
+        &withdrawal_str[0..6],
+        &withdrawal_str[withdrawal_str.len() - 4..]
+    );
+    let withdrawal_balance = state.provider.get_balance(withdrawal_address).await?;
+    let withdrawal_token_balance = state.token.get_token_balance(withdrawal_address).await?;
     println!(
-        "Withdrawal address(don’t deposit Ether to this): {} {} ETH {} ITX",
-        withdrawal_address,
+        "Withdrawal address (don’t deposit Ether to this): {} {} ETH {} ITX",
+        withdrawal_abr_str,
         pretty_format_u256(withdrawal_balance),
         pretty_format_u256(withdrawal_token_balance),
     );
 
     let mut key_number = 0;
-    let mut total_short_term_claimable_amount = U256::zero();
-    let mut total_long_term_claimable_amount = U256::zero();
+    let mut total_short_term_claimable_amount = U256::default();
+    let mut total_long_term_claimable_amount = U256::default();
     loop {
         let key = Key::new(withdrawal_private_key, key_number);
-        if !is_address_used(key.deposit_address).await {
+        if !is_address_used(&state.provider,key.deposit_address).await? {
             println!(
                 "Total short term claimable amount: {} ITX",
                 pretty_format_u256(total_short_term_claimable_amount)
@@ -49,7 +52,7 @@ pub async fn accounts_status(
         }
         let assets_status = state.sync_and_fetch_assets(&key).await?;
         let is_qualified = !get_circulation(key.deposit_address).await?.is_excluded;
-        let deposit_balance = get_balance(key.deposit_address).await?;
+        let deposit_balance = state.provider.get_balance(key.deposit_address).await?;
         println!(
             "Deposit address #{}: {:?} {} ETH. Qualified: {}. Deposits: {}/{}. Claimable Short: {} ITX, Claimable Long: {} ITX",    
             key_number,

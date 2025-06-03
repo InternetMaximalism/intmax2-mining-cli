@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 
+use alloy::primitives::Address;
 use console::style;
 use dialoguer::Select;
-use ethers::types::Address;
 use strum::IntoEnumIterator;
 
 use crate::utils::{
@@ -27,7 +27,9 @@ fn address_duplication_check() -> anyhow::Result<()> {
     for network in Network::iter() {
         for config_index in EnvConfig::get_existing_indices(network) {
             let config = EnvConfig::load_from_file(network, config_index)?;
-            if address_to_network.get(&config.withdrawal_address).is_some() {
+            if let std::collections::hash_map::Entry::Vacant(e) = address_to_network.entry(config.withdrawal_address) {
+                e.insert((network, config_index));
+            } else {
                 let (duplicated_network, duplicated_index) =
                     address_to_network.get(&config.withdrawal_address).unwrap();
                 anyhow::bail!(
@@ -38,12 +40,9 @@ fn address_duplication_check() -> anyhow::Result<()> {
                     duplicated_network,
                     duplicated_index,
                 );
-            } else {
-                address_to_network.insert(config.withdrawal_address, (network, config_index));
             }
         }
     }
-
     Ok(())
 }
 

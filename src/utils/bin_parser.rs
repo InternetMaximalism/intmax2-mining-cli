@@ -1,3 +1,5 @@
+use std::time::Instant;
+
 use anyhow::ensure;
 use intmax2_zkp::{
     constants::DEPOSIT_TREE_HEIGHT,
@@ -36,16 +38,31 @@ impl TryFrom<BinEligibleTree> for EligibleTreeInfo {
     type Error = anyhow::Error;
 
     fn try_from(bin_tree: BinEligibleTree) -> anyhow::Result<Self> {
+        let instant = Instant::now();
         let mut tree = EligibleTreeWithMap::new();
-        for leaf in bin_tree.leaves {
+        for leaf in &bin_tree.leaves {
             let amount: U256 = BigUint::from_bytes_le(&leaf.amount).try_into()?;
             tree.push(EligibleLeaf {
                 deposit_index: leaf.deposit_index,
                 amount,
             });
         }
+        log::info!(
+            "Inserting {} eligible leaves took {:?}",
+            bin_tree.leaves.len(),
+            instant.elapsed()
+        );
+        ensure!(tree.tree.height() == ELIGIBLE_TREE_HEIGHT);
+
+        ensure!(
+            bin_tree.tree_height == ELIGIBLE_TREE_HEIGHT as u32,
+            "Tree height mismatch: expected {}, got {}",
+            ELIGIBLE_TREE_HEIGHT,
+            bin_tree.tree_height
+        );
+
         let expected_root = Bytes32::from_bytes_be(&bin_tree.root_hash);
-        let actual_root: Bytes32 = tree.get_root().try_into()?;
+        let actual_root = tree.get_root();
         ensure!(
             actual_root == expected_root,
             "Root hash mismatch: expected {}, got {}",
@@ -107,13 +124,21 @@ impl TryFrom<BinDepositTree> for DepositTreeInfo {
     type Error = anyhow::Error;
 
     fn try_from(bin_tree: BinDepositTree) -> anyhow::Result<Self> {
+        let instant = Instant::now();
         let mut tree = DepositHashTree::new();
-        for leaf_hash in bin_tree.leaf_hashes {
-            let leaf_hash: Bytes32 = Bytes32::from_bytes_be(&leaf_hash);
+        for leaf_hash in &bin_tree.leaf_hashes {
+            let leaf_hash: Bytes32 = Bytes32::from_bytes_be(leaf_hash);
             tree.push(leaf_hash);
         }
+        log::info!(
+            "Inserting {} deposit leaves took {:?}",
+            bin_tree.leaf_hashes.len(),
+            instant.elapsed()
+        );
+        ensure!(tree.tree.height() == DEPOSIT_TREE_HEIGHT);
+
         let expected_root = Bytes32::from_bytes_be(&bin_tree.root_hash);
-        let actual_root: Bytes32 = tree.get_root().try_into()?;
+        let actual_root = tree.get_root();
         ensure!(
             actual_root == expected_root,
             "Root hash mismatch: expected {}, got {}",

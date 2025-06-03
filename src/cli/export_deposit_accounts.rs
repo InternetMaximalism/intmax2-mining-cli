@@ -1,8 +1,11 @@
+use alloy::{
+    primitives::{Address, B256},
+    providers::Provider as _,
+};
 use dialoguer::{Confirm, Select};
-use ethers::types::{Address, H256};
 
 use crate::{
-    external_api::contracts::utils::get_balance,
+    external_api::contracts::utils::NormalProvider,
     services::{
         balance_transfer::balance_transfer,
         utils::{is_address_used, pretty_format_u256},
@@ -10,14 +13,23 @@ use crate::{
     state::key::Key,
 };
 
-pub async fn export_deposit_accounts(withdrawal_private_key: H256) -> anyhow::Result<()> {
+pub async fn export_deposit_accounts(
+    provider: &NormalProvider,
+    withdrawal_private_key: B256,
+) -> anyhow::Result<()> {
     let key = Key::new(withdrawal_private_key, 0);
-    let balance = get_balance(key.deposit_address).await?;
+    println!();
+    println!(
+        "Withdrawal Address: {:?} ({} ETH)",
+        key.withdrawal_address,
+        pretty_format_u256(provider.get_balance(key.withdrawal_address).await?)
+    );
+    println!("Withdrawal Private Key: {:?}", withdrawal_private_key);
     println!();
     println!(
         "Deposit Address: {:?} ({} ETH)",
         key.deposit_address,
-        pretty_format_u256(balance),
+        pretty_format_u256(provider.get_balance(key.deposit_address).await?),
     );
     println!("Private Key: {:?}", key.deposit_private_key);
 
@@ -26,12 +38,15 @@ pub async fn export_deposit_accounts(withdrawal_private_key: H256) -> anyhow::Re
         .default(true)
         .interact()?;
     if do_transfer {
-        transfer_instruction(withdrawal_private_key).await?;
+        transfer_instruction(provider, withdrawal_private_key).await?;
     }
     Ok(())
 }
 
-async fn transfer_instruction(withdrawal_private_key: H256) -> anyhow::Result<()> {
+async fn transfer_instruction(
+    provider: &NormalProvider,
+    withdrawal_private_key: B256,
+) -> anyhow::Result<()> {
     let key = Key::new(withdrawal_private_key, 0);
     let to_address: Address = dialoguer::Input::<String>::new()
         .with_prompt("Enter the address to transfer to")
@@ -62,23 +77,26 @@ async fn transfer_instruction(withdrawal_private_key: H256) -> anyhow::Result<()
     if !is_ok {
         return Ok(());
     } else {
-        balance_transfer(key.deposit_private_key, to_address).await?;
+        balance_transfer(provider, key.deposit_private_key, to_address).await?;
     }
     Ok(())
 }
 
-pub async fn legacy_export_deposit_accounts(withdrawal_private_key: H256) -> anyhow::Result<()> {
+pub async fn legacy_export_deposit_accounts(
+    provider: &NormalProvider,
+    withdrawal_private_key: B256,
+) -> anyhow::Result<()> {
     let mut key_number = 0;
     loop {
         let key = Key::new(withdrawal_private_key, key_number);
-        if !is_address_used(key.deposit_address).await {
+        if !is_address_used(provider, key.deposit_address).await? {
             if key_number == 0 {
                 println!("No deposit accounts found.");
                 return Ok(());
             }
             break;
         }
-        let balance = get_balance(key.deposit_address).await?;
+        let balance = provider.get_balance(key.deposit_address).await?;
         println!();
         println!(
             "Deposit Address #{}: {:?} ({} ETH)",
@@ -96,13 +114,14 @@ pub async fn legacy_export_deposit_accounts(withdrawal_private_key: H256) -> any
         .interact()?;
 
     if do_transfer {
-        legacy_transfer_instruction(withdrawal_private_key, key_number).await?;
+        legacy_transfer_instruction(provider, withdrawal_private_key, key_number).await?;
     }
     Ok(())
 }
 
 async fn legacy_transfer_instruction(
-    withdrawal_private_key: H256,
+    provider: &NormalProvider,
+    withdrawal_private_key: B256,
     up_to_key_number: u64,
 ) -> anyhow::Result<()> {
     let deposit_addresses = (0..up_to_key_number)
@@ -153,7 +172,7 @@ async fn legacy_transfer_instruction(
         if !is_ok {
             continue;
         } else {
-            balance_transfer(key.deposit_private_key, to_address).await?;
+            balance_transfer(provider, key.deposit_private_key, to_address).await?;
         }
         let do_more = Confirm::new()
             .with_prompt("Do you want to make more transfers?")

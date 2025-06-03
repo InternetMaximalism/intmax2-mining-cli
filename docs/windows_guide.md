@@ -56,7 +56,7 @@ Double click the mining CLI to run as you normally would after adding the exclus
 <div align="center"><img src="../assets/windows/10.png" width="600" alt="Mining CLI"></div>
 
 
-11. **Runing The Mining CLI**: Windows Defender will proceed to show file name and publisher. Scroll down the screen and select *Run anyway*.
+11. **Running The Mining CLI**: Windows Defender will proceed to show file name and publisher. Scroll down the screen and select *Run anyway*.
 
 <div align="center"><img src="../assets/windows/11.png" width="600" alt="Mining CLI"></div>
 

@@ -2,38 +2,84 @@ use chrono::NaiveDateTime;
 
 use super::{key::Key, prover::Prover};
 use crate::{
+    external_api::{
+        contracts::{
+            int1::Int1Contract,
+            minter::MinterContract,
+            token::TokenContract,
+            utils::{get_provider, NormalProvider},
+        },
+        graph::client::GraphClient,
+    },
     services::{
         assets_status::{fetch_assets_status, AssetsStatus},
         sync::sync_trees,
     },
-    utils::{deposit_hash_tree::DepositHashTree, eligible_tree_with_map::EligibleTreeWithMap},
+    utils::{
+        config::Settings, deposit_hash_tree::DepositHashTree,
+        eligible_tree_with_map::EligibleTreeWithMap,
+    },
 };
 
 pub struct State {
     pub deposit_hash_tree: DepositHashTree,
     pub short_term_eligible_tree: EligibleTreeWithMap,
     pub long_term_eligible_tree: EligibleTreeWithMap,
-    pub last_tree_feched_at: NaiveDateTime,
-    pub last_deposit_synced_block: u64,
+    pub last_tree_fetched_at: NaiveDateTime,
     pub prover: Prover,
+
+    // block chain state
+    pub int1: Int1Contract,
+    pub minter: MinterContract,
+    pub token: TokenContract,
+    pub provider: NormalProvider,
+
+    pub graph_client: GraphClient,
 }
 
 impl State {
-    pub fn new() -> Self {
+    pub fn new(rpc_url: &str) -> Self {
+        let settings = Settings::load().unwrap();
+        let provider = get_provider(rpc_url).unwrap();
+        let int1 = Int1Contract::new(
+            provider.clone(),
+            settings.blockchain.int1_address.parse().unwrap(),
+        );
+        let minter = MinterContract::new(
+            provider.clone(),
+            settings.blockchain.minter_address.parse().unwrap(),
+        );
+        let token = TokenContract::new(
+            provider.clone(),
+            settings.blockchain.token_address.parse().unwrap(),
+        );
+        let graph_client = GraphClient::new(
+            provider.clone(),
+            &settings.blockchain.graph_url,
+            None,
+            settings.blockchain.graph_health_check_timeout_in_sec,
+        );
+
         Self {
             deposit_hash_tree: DepositHashTree::new(),
             short_term_eligible_tree: EligibleTreeWithMap::new(),
             long_term_eligible_tree: EligibleTreeWithMap::new(),
-            last_tree_feched_at: NaiveDateTime::default(),
-            last_deposit_synced_block: 0,
+            last_tree_fetched_at: NaiveDateTime::default(),
             prover: Prover::new(),
+            int1,
+            minter,
+            token,
+            provider,
+            graph_client,
         }
     }
 
     pub async fn sync_trees(&mut self) -> anyhow::Result<()> {
         sync_trees(
-            &mut self.last_deposit_synced_block,
-            &mut self.last_tree_feched_at,
+            &self.graph_client,
+            &self.int1,
+            &self.minter,
+            &mut self.last_tree_fetched_at,
             &mut self.deposit_hash_tree,
             &mut self.short_term_eligible_tree,
             &mut self.long_term_eligible_tree,
@@ -44,6 +90,6 @@ impl State {
 
     pub async fn sync_and_fetch_assets(&mut self, key: &Key) -> anyhow::Result<AssetsStatus> {
         self.sync_trees().await?;
-        fetch_assets_status(&self, key.deposit_address, key.deposit_private_key).await
+        fetch_assets_status(self, key.deposit_address, key.deposit_private_key).await
     }
 }

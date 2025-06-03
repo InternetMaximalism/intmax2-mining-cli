@@ -9,6 +9,12 @@ pub struct EligibleTreeWithMap {
     pub map: HashMap<u32, u32>, // key: deposit_index, value: eligible index
 }
 
+impl Default for EligibleTreeWithMap {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl EligibleTreeWithMap {
     pub fn new() -> Self {
         let tree = EligibleTree::new(ELIGIBLE_TREE_HEIGHT);

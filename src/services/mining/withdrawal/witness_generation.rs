@@ -1,17 +1,14 @@
-use intmax2_zkp::{
-    ethereum_types::{address::Address, u32limb_trait::U32LimbTrait as _},
-    utils::leafable::Leafable as _,
-};
+use intmax2_zkp::utils::leafable::Leafable as _;
 use log::info;
 use mining_circuit_v1::withdrawal::simple_withraw_circuit::SimpleWithdrawalValue;
 
 use crate::{
-    external_api::contracts::events::Deposited,
+    external_api::contracts::{convert::convert_address_to_intmax, events::Deposited},
     state::{key::Key, state::State},
     utils::derive_key::{derive_pubkey_from_private_key, derive_salt_from_private_key_nonce},
 };
 
-pub fn generate_withdrawa_witness(
+pub fn generate_withdrawal_witness(
     state: &State,
     key: &Key,
     event: Deposited,
@@ -23,7 +20,7 @@ pub fn generate_withdrawa_witness(
         .get_index(event.deposit().hash())
         .unwrap();
     let deposit_merkle_proof = state.deposit_hash_tree.prove(deposit_index);
-    let recipient = Address::from_bytes_be(key.withdrawal_address.as_bytes());
+    let recipient = convert_address_to_intmax(key.withdrawal_address);
     let pubkey = derive_pubkey_from_private_key(key.deposit_private_key);
     let salt = derive_salt_from_private_key_nonce(key.deposit_private_key, event.tx_nonce);
     let deposit_leaf = event.deposit();

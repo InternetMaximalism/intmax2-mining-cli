@@ -1,7 +1,7 @@
-use std::time::UNIX_EPOCH;
+use std::{str::FromStr, time::UNIX_EPOCH};
 
+use alloy::primitives::Bytes;
 use anyhow::ensure;
-use contract::claim_tokens;
 use mining_circuit_v1::claim::claim_circuit::ClaimPublicInputs;
 
 use crate::{
@@ -10,6 +10,7 @@ use crate::{
         contracts::events::Deposited,
         intmax::gnark::{fetch_gnark_proof, gnark_start_prove},
     },
+    services::utils::await_until_low_gas_price,
     state::{key::Key, state::State},
     utils::config::Settings,
 };
@@ -129,7 +130,7 @@ async fn from_step4(state: &State, key: &Key) -> anyhow::Result<()> {
 }
 
 // Call contract
-async fn from_step5(_state: &State, key: &Key) -> anyhow::Result<()> {
+async fn from_step5(state: &State, key: &Key) -> anyhow::Result<()> {
     print_status("Claim: calling contract");
     let status = temp::ClaimStatus::new()?;
     ensure!(status.next_step == temp::ClaimStep::ContractCall);
@@ -144,34 +145,39 @@ async fn from_step5(_state: &State, key: &Key) -> anyhow::Result<()> {
         last_claim_hash,
     };
     temp::ClaimStatus::delete()?;
-    claim_tokens(
-        key.withdrawal_private_key,
-        status.is_short_term,
-        &claims,
-        pis,
-        &status.gnark_proof.unwrap(),
-    )
-    .await?;
+    let proof = Bytes::from_str(&status.gnark_proof.unwrap())?;
+    await_until_low_gas_price(&state.provider).await?;
+    state
+        .minter
+        .claim_tokens(
+            key.withdrawal_private_key,
+            status.is_short_term,
+            &claims,
+            &pis,
+            proof,
+        )
+        .await?;
     Ok(())
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::test::{get_dummy_keys, get_dummy_state};
+    use crate::{test::get_dummy_keys, utils::env_config::EnvConfig};
 
     use super::*;
 
     #[tokio::test]
     #[ignore]
     async fn test_claim_task() {
+        dotenv::dotenv().ok();
+        let env_config = EnvConfig::import_from_env().unwrap();
+        let mut state = crate::test::get_dummy_state(&env_config.rpc_url).await;
         let dummy_key = get_dummy_keys();
-
-        let mut state = get_dummy_state().await;
         let assets_status = state.sync_and_fetch_assets(&dummy_key).await.unwrap();
 
         let is_short_term = true;
         let not_claimed_events = assets_status.get_not_claimed_events(is_short_term);
-        assert!(not_claimed_events.len() > 0);
+        assert!(!not_claimed_events.is_empty());
 
         single_claim_task(&mut state, &dummy_key, is_short_term, &not_claimed_events)
             .await

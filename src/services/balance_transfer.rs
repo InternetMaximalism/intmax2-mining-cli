@@ -1,61 +1,45 @@
-use ethers::{
-    providers::Middleware,
-    types::{Address, Eip1559TransactionRequest, H256},
+use alloy::{
+    primitives::{Address, B256, U256},
+    providers::Provider as _,
+    rpc::types::TransactionRequest,
 };
-use log::info;
 
 use crate::{
-    cli::console::{print_status, print_warning},
+    cli::console::print_warning,
     external_api::contracts::{
         error::BlockchainError,
-        utils::{
-            get_address, get_balance, get_client_with_signer, get_eip1559_fees, get_tx_receipt,
-        },
+        handlers::send_transaction_with_gas_bump,
+        utils::{get_address_from_private_key, get_provider_with_signer, NormalProvider},
     },
-    utils::retry::with_retry,
 };
 
 pub async fn balance_transfer(
-    deposit_private_key: H256,
+    provider: &NormalProvider,
+    deposit_private_key: B256,
     to_address: Address,
 ) -> Result<(), BlockchainError> {
-    let deposit_address = get_address(deposit_private_key);
-    let balance = get_balance(deposit_address).await?;
-    let client = get_client_with_signer(deposit_private_key).await?;
-    let gas_limit = {
-        with_retry(|| async {
-            let tx = Eip1559TransactionRequest::new()
-                .to(to_address)
-                .value(balance);
-            client.estimate_gas(&tx.into(), None).await
-        })
-        .await
-        .map_err(|_| BlockchainError::NetworkError("Failed to estimate gas".to_string()))?
-    };
-    info!("Estimated gas limit: {}", gas_limit);
-    let (max_gas_price, max_priority_fee_per_gas) = get_eip1559_fees().await?;
-    let gas_price = max_gas_price + max_priority_fee_per_gas;
+    let signer = get_provider_with_signer(provider, deposit_private_key);
+    let deposit_address = get_address_from_private_key(deposit_private_key);
+    let balance = provider.get_balance(deposit_address).await?;
+    // todo: use estimate gas
+    let gas_limit = U256::from(10000);
+    let gas_price = U256::from(provider.get_gas_price().await?);
 
     if balance < gas_price * gas_limit {
         print_warning("Insufficient balance to transfer");
         return Ok(());
     }
     let transfer_amount = balance - gas_price * gas_limit;
-    let signer = get_client_with_signer(deposit_private_key).await?;
-    let tx = Eip1559TransactionRequest::new()
+    let tx_request = TransactionRequest::default()
         .to(to_address)
-        .value(transfer_amount)
-        .max_fee_per_gas(max_gas_price)
-        .max_priority_fee_per_gas(max_priority_fee_per_gas);
-    let pending_tx = signer
-        .send_transaction(tx, None)
-        .await
-        .map_err(|_| BlockchainError::NetworkError("Failed to send transaction".to_string()))?;
-    print_status(format!("Transfer tx hash: {:?}", pending_tx.tx_hash()));
-    let reciept = get_tx_receipt(pending_tx.tx_hash()).await?;
-    if reciept.status.unwrap() != 1.into() {
-        print_warning("Transfer failed. Please retry.");
-    }
-    print_status("Transfer successful");
+        .value(transfer_amount);
+    send_transaction_with_gas_bump(
+        provider,
+        signer,
+        tx_request,
+        "send balance",
+        "deposit address",
+    )
+    .await?;
     Ok(())
 }

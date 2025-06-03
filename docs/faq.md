@@ -2,11 +2,11 @@
 
 
 ###  1. Why can’t I find my ETH after depositing to the CLI address
-You probably sent ETH in the wrong network, you can retreive ETH back and send to the right network
+You probably sent ETH in the wrong network, you can retrieve ETH back and send to the right network
   
 ### 2. How to recover funds when sent to the wrong network
 
-Export private key first and  import the wallet account in an external wallet(e.g, INTMAX Wallet or Metamask). You cannow transfer the funds and send using the corrrect network.
+Export private key first and  import the wallet account in an external wallet(e.g, INTMAX Wallet or Metamask). You cannow transfer the funds and send using the correct network.
 
 ### 3. Error: Internal error: Failed to claim: Error sending transaction: Revert (bytes(0x)) ERROR: Internal error: Failed to claim: Error sending transaction: MiddlewareError...(JsonRpcError { code: -32003, message: "insufficient funds  for gas * price + value: have 13090885838070 want 2612337489
 

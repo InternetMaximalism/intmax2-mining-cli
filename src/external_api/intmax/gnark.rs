@@ -1,4 +1,4 @@
-use ethers::types::Address;
+use alloy::primitives::Address;
 use intmax2_zkp::wrapper_config::plonky2_config::PoseidonBN128GoldilocksConfig;
 
 use log::info;
@@ -43,13 +43,13 @@ impl GnarkStartProofInput {
 #[derive(Serialize, Deserialize)]
 #[serde(untagged)]
 enum GnarkStartProofResponse {
-    Success(GnarkStartProofSucessResponse),
+    Success(GnarkStartProofSuccessResponse),
     Error(IntmaxErrorResponse),
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 #[serde(rename_all = "camelCase")]
-pub struct GnarkStartProofSucessResponse {
+pub struct GnarkStartProofSuccessResponse {
     pub job_id: String,
     pub status: String,
     pub estimated_time: Option<u64>, // in milliseconds
@@ -58,13 +58,13 @@ pub struct GnarkStartProofSucessResponse {
 #[derive(Serialize, Deserialize)]
 #[serde(untagged)]
 enum GnarkGetProofResponse {
-    Success(GnarkGetProofSucessResponse),
+    Success(GnarkGetProofSuccessResponse),
     Error(IntmaxErrorResponse),
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 #[serde(rename_all = "camelCase")]
-pub struct GnarkGetProofSucessResponse {
+pub struct GnarkGetProofSuccessResponse {
     pub job_id: String,
     pub status: String,
     pub result: Option<GnarkProof>,
@@ -81,7 +81,7 @@ pub async fn gnark_start_prove(
     base_url: &str,
     address: Address,
     plonky2_proof: ProofWithPublicInputs<F, C, D>,
-) -> Result<GnarkStartProofSucessResponse, IntmaxError> {
+) -> Result<GnarkStartProofSuccessResponse, IntmaxError> {
     info!(
         "gnark_start_prove with args address: {}, pis: {:?}",
         address, plonky2_proof.public_inputs
@@ -98,7 +98,7 @@ pub async fn gnark_start_prove(
     .await
     .map_err(|_| IntmaxError::NetworkError("failed to request gnark server".to_string()))?;
     let output: GnarkStartProofResponse = response.json().await.map_err(|e| {
-        IntmaxError::SerializeError(format!("failed to parse response: {}", e.to_string()))
+        IntmaxError::SerializeError(format!("failed to parse response: {}", e))
     })?;
     match output {
         GnarkStartProofResponse::Success(success) => Ok(success),
@@ -109,7 +109,7 @@ pub async fn gnark_start_prove(
 pub async fn gnark_get_proof(
     base_url: &str,
     job_id: &str,
-) -> Result<GnarkGetProofSucessResponse, IntmaxError> {
+) -> Result<GnarkGetProofSuccessResponse, IntmaxError> {
     info!("gnark_get_proof with arg job_id: {}", job_id);
     let response = with_retry(|| async {
         reqwest::Client::new()
@@ -121,7 +121,7 @@ pub async fn gnark_get_proof(
     .await
     .map_err(|_| IntmaxError::NetworkError("failed to request gnark server".to_string()))?;
     let output: GnarkGetProofResponse = response.json().await.map_err(|e| {
-        IntmaxError::SerializeError(format!("failed to parse response: {}", e.to_string()))
+        IntmaxError::SerializeError(format!("failed to parse response: {}", e))
     })?;
     match output {
         GnarkGetProofResponse::Success(success) => Ok(success),

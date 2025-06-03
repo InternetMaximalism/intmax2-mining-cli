@@ -31,7 +31,6 @@ pub struct Api {
     pub withdrawal_gnark_prover_url: String,
     pub claim_gnark_prover_url: String,
     pub circulation_server_url: String,
-    pub gas_server_url: String,
     pub tree_data_repository: String,
     pub tree_data_directory: String,
     pub tree_data_branch: String,
@@ -43,6 +42,8 @@ pub struct Api {
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Blockchain {
     pub chain_id: u64,
+    pub graph_url: String,
+    pub graph_health_check_timeout_in_sec: u64,
     pub int1_address: String,
     pub minter_address: String,
     pub token_address: String,
@@ -64,7 +65,7 @@ pub struct Service {
     pub mining_min_cooldown_in_sec: u64,
     pub mining_max_cooldown_in_sec: u64,
     pub loop_cooldown_in_sec: u64,
-    pub high_gas_retry_inverval_in_sec: u64,
+    pub high_gas_retry_interval_in_sec: u64,
 }
 
 impl Settings {
@@ -79,9 +80,9 @@ impl Settings {
     }
 }
 
-const BASE_SEPOLIA_CONFIG: &'static [u8] = include_bytes!("../../config/config.base-sepolia.toml");
-const BASE_CONFIG: &'static [u8] = include_bytes!("../../config/config.base.toml");
-const MAINNET_CONFIG: &'static [u8] = include_bytes!("../../config/config.mainnet.toml");
+const BASE_SEPOLIA_CONFIG: &[u8] = include_bytes!("../../config/config.base-sepolia.toml");
+const BASE_CONFIG: &[u8] = include_bytes!("../../config/config.base.toml");
+const MAINNET_CONFIG: &[u8] = include_bytes!("../../config/config.mainnet.toml");
 
 pub fn create_config_files() -> anyhow::Result<()> {
     create_file_with_content(&config_path(Network::BaseSepolia), BASE_SEPOLIA_CONFIG)?;
