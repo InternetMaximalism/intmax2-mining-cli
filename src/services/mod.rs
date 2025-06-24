@@ -11,9 +11,12 @@ use crate::{
     utils::{config::Settings, time::sleep_for},
 };
 use alloy::primitives::{B256, U256};
+use chrono::TimeZone as _;
 use claim::claim_task;
 use mining::mining_task;
 use utils::{await_until_graph_syncs, is_address_used};
+
+const DEPOSIT_CLOSE_TIMESTAMP: u64 = 1751068800; // 2025-06-28 00:00:00 UTC
 
 pub mod assets_status;
 pub mod balance_transfer;
@@ -48,9 +51,22 @@ pub async fn mining_loop(
         await_until_graph_syncs(&state.graph_client).await?;
         let assets_status = state.sync_and_fetch_assets(&key).await?;
         let is_qualified = !get_circulation(key.deposit_address).await?.is_excluded;
+        let is_open = (chrono::Utc::now().timestamp() as u64) < DEPOSIT_CLOSE_TIMESTAMP;
+
         let will_deposit = assets_status.effective_deposit_times() < mining_times as usize
             && assets_status.pending_indices.is_empty()
             && is_qualified;
+        if will_deposit && !is_open {
+            print_warning(format!(
+                "Deposit closed on {}. 
+                You can still withdraw your deposits but cannot make new deposits.",
+                chrono::Utc
+                    .timestamp_opt(DEPOSIT_CLOSE_TIMESTAMP as i64, 0)
+                    .unwrap()
+                    .format("%Y-%m-%d %H:%M:%S"),
+            ));
+        }
+        let will_deposit = will_deposit && is_open;
 
         // skip deposit address if no remaining deposits, and will not deposit
         if assets_status.no_remaining() && !will_deposit {
