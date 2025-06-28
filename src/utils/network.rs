@@ -6,7 +6,6 @@ use strum_macros::EnumIter;
 pub enum Network {
     Localnet,
     #[default]
-    BaseSepolia,
     Base,
     Mainnet,
 }
@@ -15,7 +14,6 @@ impl Display for Network {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Network::Localnet => write!(f, "localnet"),
-            Network::BaseSepolia => write!(f, "base-sepolia"),
             Network::Base => write!(f, "base"),
             Network::Mainnet => write!(f, "mainnet"),
         }
@@ -30,7 +28,6 @@ impl FromStr for Network {
             "localnet" => Ok(Network::Localnet),
             "mainnet" => Ok(Network::Mainnet),
             "base" => Ok(Network::Base),
-            "base-sepolia" => Ok(Network::BaseSepolia),
             _ => Err(()),
         }
     }

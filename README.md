@@ -34,8 +34,6 @@ Before you begin, ensure your system meets the following minimum specifications:
 
    - [Quick Start for Base Mainnet](docs/base_mainnet_quickstart.md) (Available since 19th Oct, 2024 00:00 UTC)
 
-   - [Quick Start for Base Testnet](docs/base_sepolia_quickstart.md)
-
 3. Additional Resources:
 
    - [How to Add ITX Token to Your Wallet](docs/add_token_to_wallet.md)

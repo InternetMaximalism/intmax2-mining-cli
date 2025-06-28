@@ -24,7 +24,7 @@ use crate::{
 };
 
 pub fn select_network() -> anyhow::Result<Network> {
-    let items = vec!["base", "base-sepolia (testnet)", "mainnet (legacy)"];
+    let items = vec!["base", "mainnet (legacy)"];
     let selection = Select::new()
         .with_prompt("Choose network")
         .items(&items)
@@ -32,8 +32,7 @@ pub fn select_network() -> anyhow::Result<Network> {
         .interact()?;
     let network = match selection {
         0 => "base",
-        1 => "base-sepolia",
-        2 => "mainnet",
+        1 => "mainnet",
         _ => unreachable!(),
     };
     Network::from_str(network).map_err(|_| anyhow::anyhow!("Invalid network"))
@@ -157,10 +156,6 @@ async fn input_alchemy_url() -> anyhow::Result<String> {
     let alchemy_api_key: String = Password::new().with_prompt("Alchemy API Key").interact()?;
     match get_network() {
         Network::Localnet => bail!("Localnet is not supported"),
-        Network::BaseSepolia => {
-            let alchemy_url = format!("https://base-sepolia.g.alchemy.com/v2/{}", alchemy_api_key);
-            Ok(alchemy_url)
-        }
         Network::Mainnet => {
             let alchemy_url = format!("https://eth-mainnet.g.alchemy.com/v2/{}", alchemy_api_key);
             Ok(alchemy_url)
@@ -178,10 +173,6 @@ async fn input_infura_url() -> anyhow::Result<String> {
         .interact()?;
     match get_network() {
         Network::Localnet => bail!("Localnet is not supported"),
-        Network::BaseSepolia => {
-            let infura_url = format!("https://base-sepolia.infura.io/v3/{}", infura_project_id);
-            Ok(infura_url)
-        }
         Network::Mainnet => {
             let infura_url = format!("https://mainnet.infura.io/v3/{}", infura_project_id);
             Ok(infura_url)

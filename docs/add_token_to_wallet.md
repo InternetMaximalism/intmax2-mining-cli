@@ -22,10 +22,6 @@ Decimals: `18`
 
 - [Import ITX token to Intmax wallet](#import-itx-token-to-intmax-wallet)
 
-- [Add Base Sepolia testnet to MetaMask](#add-base-sepolia-testnet-to-metaMask)
-
-- [Add Base Sepolia testnet to Intmax wallet](#add-base-sepolia-testnet-to-intmax-wallet)
-
 - [Add Base Mainnet to MetaMask](#add-base-mainnet-to-metaMask)
 
 - [Add Base Mainnet to Intmax wallet](#add-base-mainnet-to-intmax-wallet)

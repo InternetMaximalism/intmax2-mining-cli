@@ -164,10 +164,10 @@ pub fn print_legacy_warning() {
     )
     } else {
         format!(
-        "{} {}",
-        style("WARNING:").yellow().bold(),
-        style("Mining Testnet has transitioned from Holesky to Base-Sepolia. Currently, on Holesky, only asset withdrawals and token claims are possible.")
-            .yellow())
+            "{} {}",
+            style("WARNING:").yellow().bold(),
+            style("Mining Testnet has been deprecated.").yellow()
+        )
     };
     term.write_line(&colored_message).unwrap();
 }
