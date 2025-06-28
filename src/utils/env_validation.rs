@@ -12,9 +12,7 @@ use super::{
 
 pub fn get_allowed_mining_times() -> Vec<u64> {
     let network = get_network();
-    if network == Network::BaseSepolia {
-        vec![1, 5, 10]
-    } else if network == Network::Base {
+    if network == Network::Base {
         vec![1, 10]
     } else {
         vec![10]

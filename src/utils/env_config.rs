@@ -260,7 +260,7 @@ mod tests {
         let key = B256::random();
         let address = get_address_from_private_key(key);
         let env_config = super::EnvConfig {
-            network: Network::BaseSepolia,
+            network: Network::Localnet,
             rpc_url: "http://localhost:8545".to_string(),
             max_gas_price: U256::from(30_000_000_000u64),
             encrypt: false,
@@ -280,7 +280,7 @@ mod tests {
         let key = B256::random();
         let address = get_address_from_private_key(key);
         let env_config = super::EnvConfig {
-            network: Network::BaseSepolia,
+            network: Network::Localnet,
             rpc_url: "http://localhost:8545".to_string(),
             max_gas_price: U256::from(30_000_000_000u64),
             withdrawal_address: address,

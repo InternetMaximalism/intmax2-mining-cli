@@ -1,9 +1,7 @@
 use crate::{
     cli::{
         availability::check_availability,
-        balance_validation::{
-            validate_deposit_address_balance, validate_withdrawal_address_balance,
-        },
+        balance_validation::validate_withdrawal_address_balance,
         console::{print_assets_status, print_log, print_status, print_warning},
     },
     external_api::intmax::circulation::get_circulation,
@@ -37,15 +35,6 @@ pub async fn mining_loop(
         "Processing mining for deposit address {:?}",
         key.deposit_address
     ));
-    let assets_status = state.sync_and_fetch_assets(&key).await?;
-    validate_deposit_address_balance(
-        &state.provider,
-        &assets_status,
-        key.deposit_address,
-        mining_unit,
-        mining_times,
-    )
-    .await?;
     loop {
         check_availability().await?;
         await_until_graph_syncs(&state.graph_client).await?;

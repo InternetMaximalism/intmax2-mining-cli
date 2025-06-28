@@ -80,12 +80,10 @@ impl Settings {
     }
 }
 
-const BASE_SEPOLIA_CONFIG: &[u8] = include_bytes!("../../config/config.base-sepolia.toml");
 const BASE_CONFIG: &[u8] = include_bytes!("../../config/config.base.toml");
 const MAINNET_CONFIG: &[u8] = include_bytes!("../../config/config.mainnet.toml");
 
 pub fn create_config_files() -> anyhow::Result<()> {
-    create_file_with_content(&config_path(Network::BaseSepolia), BASE_SEPOLIA_CONFIG)?;
     create_file_with_content(&config_path(Network::Base), BASE_CONFIG)?;
     create_file_with_content(&config_path(Network::Mainnet), MAINNET_CONFIG)?;
     Ok(())

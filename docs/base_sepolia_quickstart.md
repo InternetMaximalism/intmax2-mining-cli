@@ -61,7 +61,7 @@ When you double-click the CLI, you'll see a screen like this:
      <img src="../assets/migrate/m1.png" width="600" alt="Mining CLI"></div>
 
 You can move the cursor with the arrow keys and confirm with `Enter`.
-For this time, select `base-sepolia (testnet)`.
+For this time, select `base`.
 <br>
 
 3. **Select Config File**:
