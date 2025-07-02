@@ -42,7 +42,7 @@ pub async fn get_deposit_events(
     provider: &NormalProvider,
     sender: Address,
 ) -> Result<Vec<Deposited>, IntmaxError> {
-    info!("get_availability");
+    info!("Fetching deposit events");
     let settings = Settings::load().unwrap();
     let response = with_retry(|| async {
         reqwest::Client::new()
