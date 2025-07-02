@@ -56,7 +56,7 @@ pub async fn get_deposit_events(
             .await
     })
     .await
-    .map_err(|_| IntmaxError::NetworkError("failed to request availability server".to_string()))?;
+    .map_err(|_| IntmaxError::NetworkError("failed to request event server".to_string()))?;
     let response_json: EventServerResponse = response
         .json()
         .await
