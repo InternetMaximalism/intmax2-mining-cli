@@ -37,6 +37,7 @@ pub struct Api {
     pub sync_tree_data_interval_in_sec: u64,
     pub gnark_get_proof_cooldown_in_sec: u64,
     pub withdrawal_server_url: String,
+    pub event_server_url: String,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
