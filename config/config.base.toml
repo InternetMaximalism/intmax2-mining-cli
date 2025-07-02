@@ -13,8 +13,6 @@ gnark_get_proof_cooldown_in_sec = 60
 
 [blockchain]
 chain_id = 8453
-graph_url = "https://v1.base-prod.graph.intmax.xyz/subgraphs/name/prod-int1"
-graph_health_check_timeout_in_sec = 60
 int1_address = "0x195F9b5F42435bB71E9765E66a9bdFE40d44A895"
 minter_address = "0x1f5a5Eb6C3894351425BD51ea2AE1ef3FEC93976"
 token_address = "0xf95117e3a5B7968703CeD3B66A9CbE0Bc9e1D8bf"
