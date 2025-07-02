@@ -4,7 +4,7 @@ use ::console::{style, Term};
 use alloy::primitives::B256;
 use configure::recover_withdrawal_private_key;
 use console::clear_console;
-use mode_selection::{legacy_select_mode, select_mode};
+use mode_selection::legacy_select_mode;
 use term_of_use::make_agreement;
 
 use crate::{
@@ -52,11 +52,7 @@ pub async fn run(mode: Option<RunMode>) -> anyhow::Result<()> {
     }
 
     let mut mode = if is_interactive {
-        if is_legacy() {
-            legacy_select_mode()?
-        } else {
-            select_mode()?
-        }
+        legacy_select_mode()?
     } else {
         mode.unwrap()
     };
@@ -136,11 +132,7 @@ async fn mode_loop(
             // if not in interactive mode, we only run once
             break;
         }
-        *mode = if is_legacy() {
-            legacy_select_mode()?
-        } else {
-            select_mode()?
-        };
+        *mode = legacy_select_mode()?;
     }
     Ok(())
 }

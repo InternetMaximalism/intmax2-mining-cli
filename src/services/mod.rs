@@ -3,15 +3,11 @@ use crate::{
         availability::check_availability,
         balance_validation::validate_withdrawal_address_balance,
         console::{print_assets_status, print_log, print_status, print_warning},
-    },
-    external_api::intmax::circulation::get_circulation,
-    state::{key::Key, state::State},
-    utils::{config::Settings, time::sleep_for},
+    }, external_api::intmax::circulation::get_circulation, services::mining::mining_task, state::{key::Key, state::State}, utils::{config::Settings, time::sleep_for}
 };
 use alloy::primitives::{B256, U256};
 use chrono::TimeZone as _;
 use claim::claim_task;
-use mining::mining_task;
 use utils::{await_until_graph_syncs, is_address_used};
 
 const DEPOSIT_CLOSE_TIMESTAMP: u64 = 1751068800; // 2025-06-28 00:00:00 UTC
