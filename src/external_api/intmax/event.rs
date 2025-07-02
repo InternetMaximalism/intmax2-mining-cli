@@ -98,10 +98,10 @@ mod tests {
     #[tokio::test]
     async fn test_get_deposit_events() {
         let rpc_url = env::var("RPC_URL").unwrap_or_else(|_| "http://localhost:8545".to_string());
+        let address = env::var("DEPOSIT_ADDRESS")
+            .map(|s| s.parse().unwrap())
+            .unwrap_or_default();
         let provider = get_provider(&rpc_url).unwrap();
-        let address: Address = "0x5C6Ad5968041d3C31F01f9AaADd5feF31C56050b"
-            .parse()
-            .unwrap();
         let result = get_deposit_events(&provider, address).await;
         assert!(result.is_ok());
     }
