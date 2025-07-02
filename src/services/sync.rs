@@ -2,7 +2,6 @@ use crate::{
     external_api::{
         contracts::{int1::Int1Contract, minter::MinterContract},
         github::{fetch_latest_tree_from_github, BinTrees},
-        graph::client::GraphClient,
     },
     utils::{
         bin_parser::{BinDepositTree, BinEligibleTree, DepositTreeInfo, EligibleTreeInfo},
@@ -14,7 +13,7 @@ use crate::{
 };
 use anyhow::ensure;
 use chrono::{NaiveDateTime, Utc};
-use log::{info, warn};
+use log::warn;
 
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
@@ -33,7 +32,6 @@ pub enum Error {
 const MAX_TRY_FETCH_TREE: usize = 10;
 
 pub async fn sync_trees(
-    graph_client: &GraphClient,
     int1: &Int1Contract,
     minter: &MinterContract,
     last_update: &mut NaiveDateTime,
@@ -108,7 +106,7 @@ pub async fn sync_trees(
         }
     }
     // sync deposit tree only
-    sync_to_latest_deposit_tree(graph_client, int1, deposit_hash_tree)
+    sync_to_latest_deposit_tree(int1, deposit_hash_tree)
         .await
         .map_err(|e| {
             Error::SyncDepositTreeFromEventsError(format!("Failed to sync deposit tree: {}", e))
@@ -164,34 +162,9 @@ async fn parse_and_validate_bin_eligible_tree(
 }
 
 async fn sync_to_latest_deposit_tree(
-    graph_client: &GraphClient,
     int1: &Int1Contract,
     deposit_hash_tree: &mut DepositHashTree,
 ) -> anyhow::Result<()> {
-    let next_deposit_index = deposit_hash_tree.tree.len();
-    let events = graph_client
-        .get_deposit_leaf_inserted_event(next_deposit_index as u32)
-        .await?;
-    info!(
-        "Syncing deposit tree, got {} events. Latest deposit_index={}",
-        events.len(),
-        events.last().map(|event| event.deposit_index).unwrap_or(0)
-    );
-    let mut to_append = events
-        .iter()
-        .filter(|event| event.deposit_index as usize >= next_deposit_index)
-        .collect::<Vec<_>>();
-    to_append.sort_by_key(|event| event.deposit_index);
-
-    for event in to_append {
-        ensure!(
-            event.deposit_index as usize == deposit_hash_tree.tree.len(),
-            "Deposit index mismatch: expected {}, got {}",
-            deposit_hash_tree.tree.len(),
-            event.deposit_index
-        );
-        deposit_hash_tree.push(event.deposit_hash);
-    }
     let local_root = deposit_hash_tree.get_root();
     log::info!(
         "Local deposit root: {}, total leaves: {}",
@@ -234,7 +207,6 @@ mod tests {
 
         let mut last_update = chrono::NaiveDateTime::default();
         super::sync_trees(
-            &state.graph_client,
             &state.int1,
             &state.minter,
             &mut last_update,

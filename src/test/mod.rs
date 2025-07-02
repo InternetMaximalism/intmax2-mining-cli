@@ -5,14 +5,11 @@ use mining_circuit_v1::eligible_tree::EligibleLeaf;
 use num_bigint::BigUint;
 
 use crate::{
-    external_api::{
-        contracts::{
-            int1::Int1Contract,
-            minter::MinterContract,
-            token::TokenContract,
-            utils::{get_address_from_private_key, get_provider},
-        },
-        graph::client::GraphClient,
+    external_api::contracts::{
+        int1::Int1Contract,
+        minter::MinterContract,
+        token::TokenContract,
+        utils::{get_address_from_private_key, get_provider},
     },
     state::{key::Key, prover::Prover, state::State},
     utils::{deposit_hash_tree::DepositHashTree, eligible_tree_with_map::EligibleTreeWithMap},
@@ -54,12 +51,6 @@ pub async fn get_dummy_state(rpc_url: &str) -> State {
         provider.clone(),
         settings.blockchain.token_address.parse().unwrap(),
     );
-    let graph_client = GraphClient::new(
-        provider.clone(),
-        &settings.blockchain.graph_url,
-        None,
-        settings.blockchain.graph_health_check_timeout_in_sec,
-    );
 
     State {
         deposit_hash_tree: DepositHashTree::new(),
@@ -71,6 +62,5 @@ pub async fn get_dummy_state(rpc_url: &str) -> State {
         minter,
         token,
         provider,
-        graph_client,
     }
 }

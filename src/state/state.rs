@@ -2,14 +2,11 @@ use chrono::NaiveDateTime;
 
 use super::{key::Key, prover::Prover};
 use crate::{
-    external_api::{
-        contracts::{
-            int1::Int1Contract,
-            minter::MinterContract,
-            token::TokenContract,
-            utils::{get_provider, NormalProvider},
-        },
-        graph::client::GraphClient,
+    external_api::contracts::{
+        int1::Int1Contract,
+        minter::MinterContract,
+        token::TokenContract,
+        utils::{get_provider, NormalProvider},
     },
     services::{
         assets_status::{fetch_assets_status, AssetsStatus},
@@ -33,8 +30,6 @@ pub struct State {
     pub minter: MinterContract,
     pub token: TokenContract,
     pub provider: NormalProvider,
-
-    pub graph_client: GraphClient,
 }
 
 impl State {
@@ -53,12 +48,6 @@ impl State {
             provider.clone(),
             settings.blockchain.token_address.parse().unwrap(),
         );
-        let graph_client = GraphClient::new(
-            provider.clone(),
-            &settings.blockchain.graph_url,
-            None,
-            settings.blockchain.graph_health_check_timeout_in_sec,
-        );
 
         Self {
             deposit_hash_tree: DepositHashTree::new(),
@@ -70,13 +59,11 @@ impl State {
             minter,
             token,
             provider,
-            graph_client,
         }
     }
 
     pub async fn sync_trees(&mut self) -> anyhow::Result<()> {
         sync_trees(
-            &self.graph_client,
             &self.int1,
             &self.minter,
             &mut self.last_tree_fetched_at,
