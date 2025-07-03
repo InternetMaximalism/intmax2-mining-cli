@@ -1,31 +1,26 @@
-use alloy::{primitives::U256, providers::Provider};
+use alloy::primitives::U256;
 use anyhow::Context;
-use deterministic_sleep::{sleep_before_deposit, sleep_before_withdrawal};
-use intmax2_zkp::common::deposit::get_pubkey_salt_hash;
+
 use withdrawal::withdrawal_task;
 
 use crate::{
     cli::console::print_warning,
     external_api::contracts::convert::convert_u256_to_alloy,
     state::{key::Key, state::State},
-    utils::{
-        derive_key::{derive_pubkey_from_private_key, derive_salt_from_private_key_nonce},
-        errors::CLIError,
-    },
+    utils::errors::CLIError,
 };
 
 use super::{assets_status::AssetsStatus, utils::await_until_low_gas_price};
 
-pub mod deterministic_sleep;
 pub mod withdrawal;
 
 pub async fn mining_task(
     state: &mut State,
     key: &Key,
     assets_status: &AssetsStatus,
-    new_deposit: bool,
+    _new_deposit: bool,
     cancel_pending_deposits: bool,
-    mining_unit: U256,
+    _mining_unit: U256,
 ) -> anyhow::Result<()> {
     // cancel pending deposits
     if cancel_pending_deposits {
@@ -73,7 +68,6 @@ pub async fn mining_task(
 
     // withdrawal
     if !assets_status.not_withdrawn_indices.is_empty() {
-        sleep_before_withdrawal(&state.graph_client, key.deposit_address).await?;
         for &index in assets_status.not_withdrawn_indices.iter() {
             let event = assets_status.senders_deposits[index].clone();
             withdrawal_task(state, key, event)
@@ -81,32 +75,6 @@ pub async fn mining_task(
                 .map_err(|e| CLIError::InternalError(format!("Failed to withdrawal: {:#}", e)))?;
         }
         // return true to cooldown after withdrawal
-        return Ok(());
-    }
-
-    // deposit
-    if new_deposit {
-        sleep_before_deposit(&state.graph_client, key.withdrawal_address).await?;
-        let deposit_address = key.deposit_address;
-        let nonce = state
-            .provider
-            .get_transaction_count(deposit_address)
-            .await?;
-        let salt = derive_salt_from_private_key_nonce(key.deposit_private_key, nonce);
-        let pubkey = derive_pubkey_from_private_key(key.deposit_private_key);
-        let pubkey_salt_hash = get_pubkey_salt_hash(pubkey, salt);
-        // execute deposit task
-        await_until_low_gas_price(&state.provider).await?;
-        state
-            .int1
-            .deposit_native_token(key.deposit_private_key, pubkey_salt_hash, mining_unit)
-            .await
-            .with_context(|| {
-                format!(
-                    "Failed to deposit to address {:?} with nonce {}",
-                    key.deposit_address, nonce
-                )
-            })?;
         return Ok(());
     }
 

@@ -37,13 +37,12 @@ pub struct Api {
     pub sync_tree_data_interval_in_sec: u64,
     pub gnark_get_proof_cooldown_in_sec: u64,
     pub withdrawal_server_url: String,
+    pub event_server_url: String,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Blockchain {
     pub chain_id: u64,
-    pub graph_url: String,
-    pub graph_health_check_timeout_in_sec: u64,
     pub int1_address: String,
     pub minter_address: String,
     pub token_address: String,

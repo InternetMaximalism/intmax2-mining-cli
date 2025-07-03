@@ -5,7 +5,7 @@ use alloy::{
 
 use crate::{
     cli::console::{print_status, print_warning},
-    external_api::{contracts::utils::NormalProvider, graph::client::GraphClient},
+    external_api::contracts::utils::NormalProvider,
     utils::{config::Settings, env_config::EnvConfig, time::sleep_for},
 };
 
@@ -66,27 +66,6 @@ pub async fn await_until_low_gas_price(provider: &NormalProvider) -> anyhow::Res
             format_units(max_gas_price, "gwei").unwrap(),
         ));
         sleep_for(high_gas_retry_interval_in_sec);
-    }
-    Ok(())
-}
-
-pub async fn await_until_graph_syncs(graph: &GraphClient) -> anyhow::Result<()> {
-    let mut retries = 0;
-    loop {
-        match graph.health_check().await {
-            Ok(()) => {
-                log::info!("Graph is synced and healthy");
-                break;
-            }
-            Err(e) => {
-                print_warning(format!("Graph is not synced yet: {}. Retrying...", e));
-                sleep_for(10);
-            }
-        }
-        if retries >= 10 {
-            return Err(anyhow::anyhow!("Graph is not synced after 10 attempts"));
-        }
-        retries += 1;
     }
     Ok(())
 }

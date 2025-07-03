@@ -4,8 +4,9 @@ use log::warn;
 use mining_circuit_v1::claim::claim_inner_circuit::get_deposit_nullifier;
 
 use crate::{
-    external_api::contracts::{
-        convert::convert_u256_to_alloy, events::Deposited, int1::DepositData,
+    external_api::{
+        contracts::{convert::convert_u256_to_alloy, events::Deposited, int1::DepositData},
+        intmax::event::get_deposit_events,
     },
     state::state::State,
     utils::derive_key::derive_salt_from_private_key_nonce,
@@ -35,13 +36,9 @@ pub async fn fetch_assets_status(
     deposit_address: Address,
     deposit_private_key: B256,
 ) -> anyhow::Result<AssetsStatus> {
-    let graph_client = &state.graph_client;
     let int1 = &state.int1;
     let minter = &state.minter;
-
-    let senders_deposits = graph_client
-        .get_deposited_event_by_sender(deposit_address)
-        .await?;
+    let senders_deposits = get_deposit_events(&state.provider, deposit_address).await?;
     let mut contained_indices = Vec::new();
     let mut not_contained_indices = Vec::new();
     for (index, event) in senders_deposits.iter().enumerate() {
