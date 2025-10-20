@@ -73,10 +73,7 @@ async fn start_withdrawal(
     .await
     .map_err(|_| IntmaxError::NetworkError("failed to request withdrawal server".to_string()))?;
     let response: Value = response.json().await.map_err(|e| {
-        IntmaxError::SerializeError(format!(
-            "failed to parse response as json: {}",
-            e
-        ))
+        IntmaxError::SerializeError(format!("failed to parse response as json: {}", e))
     })?;
     let response: SubmitWithdrawalResponse =
         serde_json::from_value(response.clone()).map_err(|_| {
@@ -105,10 +102,7 @@ async fn query_withdrawal(withdrawal_id: &str) -> Result<QueryWithdrawalSuccess,
     .await
     .map_err(|_| IntmaxError::NetworkError("failed to query withdrawal server".to_string()))?;
     let response: Value = response.json().await.map_err(|e| {
-        IntmaxError::SerializeError(format!(
-            "failed to parse response as json: {}",
-            e
-        ))
+        IntmaxError::SerializeError(format!("failed to parse response as json: {}", e))
     })?;
     let response: QueryWithdrawalResponse =
         serde_json::from_value(response.clone()).map_err(|_| {

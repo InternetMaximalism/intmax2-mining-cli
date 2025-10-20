@@ -12,6 +12,7 @@ use crate::{
     services::{claim_loop, exit_loop, legacy_claim_loop, mining_loop},
     state::{mode::RunMode, state::State},
     utils::{
+        cache::clear_github_cache,
         env_config::EnvConfig,
         env_validation::validate_env_config,
         network::{get_network, is_legacy, Network},
@@ -125,6 +126,15 @@ async fn mode_loop(
             }
             RunMode::CheckUpdate => {
                 update::update()?;
+                press_enter_to_continue();
+            }
+            RunMode::ClearCache => {
+                let cache_removed = clear_github_cache()?;
+                if cache_removed {
+                    println!("GitHub cache directory removed.");
+                } else {
+                    println!("GitHub cache directory does not exist.");
+                }
                 press_enter_to_continue();
             }
         };
