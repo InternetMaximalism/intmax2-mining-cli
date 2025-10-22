@@ -27,7 +27,9 @@ fn address_duplication_check() -> anyhow::Result<()> {
     for network in Network::iter() {
         for config_index in EnvConfig::get_existing_indices(network) {
             let config = EnvConfig::load_from_file(network, config_index)?;
-            if let std::collections::hash_map::Entry::Vacant(e) = address_to_network.entry(config.withdrawal_address) {
+            if let std::collections::hash_map::Entry::Vacant(e) =
+                address_to_network.entry(config.withdrawal_address)
+            {
                 e.insert((network, config_index));
             } else {
                 let (duplicated_network, duplicated_index) =

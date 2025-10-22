@@ -9,6 +9,7 @@ pub enum RunMode {
     Exit,        // only withdraw or cancel pending deposits
     Export,      // export the deposit addresses
     CheckUpdate, // check for updates
+    ClearCache,  // clear cached responses
 }
 
 impl Display for RunMode {
@@ -19,6 +20,7 @@ impl Display for RunMode {
             RunMode::Exit => write!(f, "Exit"),
             RunMode::Export => write!(f, "Export"),
             RunMode::CheckUpdate => write!(f, "CheckUpdate"),
+            RunMode::ClearCache => write!(f, "ClearCache"),
         }
     }
 }

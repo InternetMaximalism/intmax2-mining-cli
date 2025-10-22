@@ -25,6 +25,11 @@ pub fn legacy_select_mode() -> anyhow::Result<RunMode> {
             style("Check Update:").bold(),
             style("check for updates of this CLI").dim()
         ),
+        format!(
+            "{} {}",
+            style("Clear Cache:").bold(),
+            style("remove cached GitHub responses for tree data").dim()
+        ),
     ];
     let term = Term::stdout();
     term.clear_screen()?;
@@ -38,6 +43,7 @@ pub fn legacy_select_mode() -> anyhow::Result<RunMode> {
         1 => RunMode::Exit,
         2 => RunMode::Export,
         3 => RunMode::CheckUpdate,
+        4 => RunMode::ClearCache,
         _ => unreachable!(),
     };
     Ok(mode)

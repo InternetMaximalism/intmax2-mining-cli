@@ -1,4 +1,5 @@
 pub mod bin_parser;
+pub mod cache;
 pub mod config;
 pub mod deposit_hash_tree;
 pub mod derive_key;
