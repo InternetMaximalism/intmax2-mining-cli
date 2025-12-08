@@ -28,7 +28,7 @@ pub async fn balance_transfer(
     let fee_estimation = signer.estimate_eip1559_fees().await?;
     let gas_limit = U256::from(estimated_gas);
     let max_fee_per_gas = U256::from(fee_estimation.max_fee_per_gas);
-    let gas_budget = gas_limit * max_fee_per_gas * U256::from(125u64) / U256::from(100u64);
+    let gas_budget = gas_limit * max_fee_per_gas * U256::from(2u64);
 
     if balance <= gas_budget {
         print_warning("Insufficient balance to transfer");
